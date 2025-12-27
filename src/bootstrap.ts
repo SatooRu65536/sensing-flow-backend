@@ -25,7 +25,7 @@ export async function bootstrap() {
   await nestApp.init();
 
   if (!process.env.VITE_START) {
-    await nestApp.listen(process.env.PORT || 3000);
+    await nestApp.listen(3000);
   }
 
   return nestApp;

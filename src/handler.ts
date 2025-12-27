@@ -1,5 +1,5 @@
 import serverlessExpress from '@codegenie/serverless-express';
-import { Callback, Context, Handler } from 'aws-lambda';
+import type { Callback, Context, Handler } from 'aws-lambda';
 import { bootstrap } from './bootstrap';
 
 async function bootstrapServer(): Promise<Handler> {
@@ -11,8 +11,18 @@ async function bootstrapServer(): Promise<Handler> {
   return serverlessExpress({ app: expressApp });
 }
 
-const server = bootstrapServer();
+let server: Handler;
 
-export const handler: Handler = async (event: any, context: Context, callback: Callback): Promise<unknown> => {
-  return (await server)(event, context, callback);
+export const handler: Handler = async (
+  event: { source?: string },
+  context: Context,
+  callback: Callback,
+): Promise<unknown> => {
+  if (event.source === 'warmer') {
+    return { statusCode: 200, body: 'Lambda is warm' };
+  }
+
+  if (!server) server = await bootstrapServer();
+
+  return await server(event, context, callback);
 };
