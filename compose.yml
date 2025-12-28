@@ -1,0 +1,17 @@
+services:
+  sensing-flow-db:
+    image: mysql:8.0
+    container_name: sensing-flow-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: sensing-flow-root-pass
+      MYSQL_DATABASE: sensing_flow
+      MYSQL_USER: sensing_flow_user
+      MYSQL_PASSWORD: sensing-flow-pass
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

@@ -2,12 +2,17 @@ import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BasePathMapping, DomainName, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
-import { SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { InstanceClass, InstanceSize, InstanceType, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Stage } from '../bin/cdk';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { Credentials, DatabaseInstance, DatabaseInstanceEngine, MysqlEngineVersion } from 'aws-cdk-lib/aws-rds';
+import { Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 
 interface BackendStackProps extends cdk.StackProps {
   stage: Stage;
@@ -19,40 +24,68 @@ export class BackendStack extends cdk.Stack {
   private readonly securityGroup: SecurityGroup;
   public readonly nestFunction: NodejsFunction;
   public readonly restApi: RestApi;
+  public readonly credentials: Secret;
+  public readonly databaseInstance: DatabaseInstance;
 
   constructor(scope: cdk.App, id: string, { stage, ...props }: BackendStackProps) {
     super(scope, id, props);
 
     this.stage = stage;
-    this.vpc = new Vpc(this, 'BackendVPC', {
-      maxAzs: 2,
-    });
-    this.securityGroup = new SecurityGroup(this, 'BackendSecurityGroup', {
-      vpc: this.vpc,
-    });
+    const vpc = this.createVpc();
+    const securityGroup = this.createSecurityGroup(vpc);
 
-    this.nestFunction = this.createNestFunction();
-    this.restApi = this.createRestApi();
-    this.addCustomDomain();
-    this.warmer();
+    const credentials = this.createRdsCredentials();
+    const databaseInstance = this.createRdsInstance(vpc, securityGroup, credentials);
+    const databaseUrl = this.createDatabaseUrl(credentials, databaseInstance);
+    const nestFunction = this.createNestFunction(vpc, securityGroup, databaseUrl);
+    const restApi = this.createRestApi(nestFunction);
+
+    this.addCustomDomain(restApi);
+    this.warmer(nestFunction);
+    this.createS3Bucket();
+
+    this.credentials = credentials;
+    this.databaseInstance = databaseInstance;
+    this.nestFunction = nestFunction;
+    this.restApi = restApi;
   }
 
-  private createNestFunction() {
+  private createVpc() {
+    return new Vpc(this, 'BackendVPC', {
+      maxAzs: 2,
+      natGateways: 0,
+      subnetConfiguration: [
+        {
+          name: 'IsolatedSubnet',
+          subnetType: SubnetType.PRIVATE_ISOLATED,
+        },
+      ],
+    });
+  }
+
+  private createSecurityGroup(vpc: Vpc) {
+    return new SecurityGroup(this, 'BackendSecurityGroup', {
+      vpc: vpc,
+    });
+  }
+
+  private createNestFunction(vpc: Vpc, securityGroup: SecurityGroup, databaseUrl: string) {
     return new NodejsFunction(this, 'NestFunction', {
       entry: path.join(__dirname, '../../dist/handler.mjs'), // Lambda関数のエントリーポイント
       handler: 'handler',
-      runtime: cdk.aws_lambda.Runtime.NODEJS_22_X,
+      runtime: Runtime.NODEJS_22_X,
       memorySize: 256,
-      timeout: cdk.Duration.seconds(10),
-      vpc: this.vpc,
-      securityGroups: [this.securityGroup],
+      timeout: Duration.seconds(10),
+      vpc: vpc,
+      securityGroups: [securityGroup],
       environment: {
         NO_COLOR: 'true',
+        DATABASE_URL: databaseUrl,
       },
     });
   }
 
-  private createRestApi() {
+  private createRestApi(handler: IFunction) {
     const restApi = new RestApi(this, 'NestApi', {
       restApiName: 'sensing-flow-api',
       description: 'API for Sensing Flow',
@@ -61,26 +94,26 @@ export class BackendStack extends cdk.Stack {
       },
     });
     restApi.root.addProxy({
-      defaultIntegration: new LambdaIntegration(this.nestFunction),
+      defaultIntegration: new LambdaIntegration(handler),
       anyMethod: true,
     });
 
     return restApi;
   }
 
-  private warmer() {
+  private warmer(handler: IFunction) {
     const rule = new Rule(this, 'LambdaWarmerRule', {
       schedule: Schedule.rate(Duration.minutes(5)),
     });
 
     rule.addTarget(
-      new LambdaFunction(this.nestFunction, {
+      new LambdaFunction(handler, {
         event: RuleTargetInput.fromObject({ source: 'warmer' }),
       }),
     );
   }
 
-  private addCustomDomain() {
+  private addCustomDomain(restApi: RestApi) {
     // ACM 証明書
     const certificate = Certificate.fromCertificateArn(
       this,
@@ -97,8 +130,69 @@ export class BackendStack extends cdk.Stack {
     // API とドメインをマッピング
     new BasePathMapping(this, 'BasePathMapping', {
       domainName: domain,
-      restApi: this.restApi,
-      stage: this.restApi.deploymentStage,
+      restApi: restApi,
+      stage: restApi.deploymentStage,
+    });
+  }
+
+  private createRdsCredentials() {
+    return new Secret(this, 'RdsCredential', {
+      secretName: `sensing-flow-rds-credential-${this.stage}`,
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({ username: 'admin' }),
+        excludePunctuation: true,
+        includeSpace: false,
+        generateStringKey: 'password',
+      },
+    });
+  }
+
+  private createRdsInstance(vpc: Vpc, securityGroup: SecurityGroup, credentials: Secret) {
+    return new DatabaseInstance(this, 'SensingFlowDB', {
+      vpc: vpc,
+      vpcSubnets: {
+        subnetType: SubnetType.PRIVATE_ISOLATED,
+      },
+      securityGroups: [securityGroup],
+      instanceType: InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
+      engine: DatabaseInstanceEngine.mysql({
+        version: MysqlEngineVersion.VER_8_0,
+      }),
+      allocatedStorage: 20,
+      multiAz: this.stage === 'prod',
+      removalPolicy: this.stage !== 'prod' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
+      publiclyAccessible: false,
+      credentials: Credentials.fromSecret(credentials),
+      databaseName: `sensing_flow_${this.stage}`,
+    });
+  }
+
+  private createS3Bucket() {
+    new Bucket(this, 'SensingFlowBucket', {
+      bucketName: `sensing-flow-bucket-${this.stage}-${this.account}`,
+      removalPolicy: this.stage !== 'prod' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
+      autoDeleteObjects: this.stage !== 'prod',
+      versioned: this.stage === 'prod',
+      encryption: BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+    });
+  }
+
+  private createDatabaseUrl(credentials: Secret, databaseInstance: DatabaseInstance) {
+    const usename = credentials.secretValueFromJson('username').toString();
+    const password = credentials.secretValueFromJson('password').toString();
+    const host = databaseInstance.dbInstanceEndpointAddress;
+    const port = databaseInstance.dbInstanceEndpointPort;
+    const database_url = `mysql://${usename}:${password}@${host}:${port}/sensing_flow_${this.stage}`;
+    this.exportDatabaseUrl(database_url);
+
+    return database_url;
+  }
+
+  private exportDatabaseUrl(dbUrl: string) {
+    new StringParameter(this, 'DatabaseUrlParameter', {
+      parameterName: `/sensing-flow/${this.stage}/database-url`,
+      stringValue: dbUrl,
     });
   }
 }
