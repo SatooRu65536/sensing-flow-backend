@@ -37,7 +37,7 @@ export async function bootstrap() {
   await nestApp.init();
 
   if (process.env.ENV_DEV === 'true') {
-    await nestApp.listen(3000);
+    await nestApp.listen(5173);
   }
 
   return nestApp;

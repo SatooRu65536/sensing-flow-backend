@@ -13,6 +13,21 @@ import { Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import {
+  OAuthScope,
+  ProviderAttribute,
+  StringAttribute,
+  UserPool,
+  UserPoolClient,
+  UserPoolClientIdentityProvider,
+  UserPoolDomain,
+  UserPoolIdentityProviderGoogle,
+} from 'aws-cdk-lib/aws-cognito';
+
+const callbackUrls = process.env.CALLBACK_URLS ? process.env.CALLBACK_URLS.split(',') : [];
+const logoutUrls = process.env.LOGOUT_URLS ? process.env.LOGOUT_URLS.split(',') : [];
+const googleClientId = process.env.GOOGLE_CLIENT_ID!;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
 interface BackendStackProps extends cdk.StackProps {
   stage: Stage;
@@ -43,7 +58,10 @@ export class BackendStack extends cdk.Stack {
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
     this.createS3Bucket();
+    this.createCognito();
 
+    this.vpc = vpc;
+    this.securityGroup = securityGroup;
     this.credentials = credentials;
     this.databaseInstance = databaseInstance;
     this.nestFunction = nestFunction;
@@ -194,5 +212,63 @@ export class BackendStack extends cdk.Stack {
       parameterName: `/sensing-flow/${this.stage}/database-url`,
       stringValue: dbUrl,
     });
+  }
+
+  private createCognito() {
+    const userPool = new UserPool(this, 'SensingFlowUserPool', {
+      userPoolName: `sensing-flow-user-pool-${this.stage}`,
+      signInAliases: { email: true },
+      selfSignUpEnabled: true,
+      autoVerify: { email: true },
+      standardAttributes: {
+        email: { required: true, mutable: false },
+      },
+      customAttributes: {
+        plan: new StringAttribute({ mutable: true }),
+      },
+      passwordPolicy: {
+        minLength: 8,
+        requireDigits: true,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireSymbols: false,
+      },
+    });
+
+    const userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
+      userPool,
+      generateSecret: false,
+      authFlows: {
+        userSrp: true,
+        userPassword: true,
+      },
+      oAuth: {
+        flows: {
+          authorizationCodeGrant: true,
+        },
+        scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
+        callbackUrls: callbackUrls,
+        logoutUrls: logoutUrls,
+      },
+      supportedIdentityProviders: [UserPoolClientIdentityProvider.COGNITO, UserPoolClientIdentityProvider.GOOGLE],
+    });
+
+    new UserPoolDomain(this, 'UserPoolCognitoDomain', {
+      userPool,
+      cognitoDomain: {
+        domainPrefix: this.stage === 'prod' ? 'sensing-flow' : `sensing-flow-${this.stage}`,
+      },
+    });
+
+    const googleIdp = new UserPoolIdentityProviderGoogle(this, 'GoogleIdP', {
+      userPool,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+      scopes: ['openid', 'email', 'profile'],
+      attributeMapping: {
+        email: ProviderAttribute.GOOGLE_EMAIL,
+      },
+    });
+    userPoolClient.node.addDependency(googleIdp);
   }
 }

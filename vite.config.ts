@@ -23,7 +23,13 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    exclude: ['@nestjs/microservices', '@nestjs/websockets', 'class-transformer', 'class-validator'],
+    exclude: [
+      '@nestjs/microservices',
+      '@nestjs/websockets',
+      'class-transformer',
+      'class-transformer/storage',
+      'class-validator',
+    ],
   },
   test: {
     globals: true,

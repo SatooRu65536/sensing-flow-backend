@@ -5,18 +5,18 @@
     "build": "tsx ./build.ts",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "env:dev": "dotenv -e .env.dev --",
-    "dev": "pnpm env:dev dotenv -e .env.dev -- nest start --watch",
+    "env:dev": "dotenv -e .env.development --",
+    "env:prod": "dotenv -e .env.production --",
+    "dev": "pnpm env:dev dotenv -e .env.development -- nest start --watch",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:cov": "vitest --coverage",
-    "deploy:dev": "pnpm build && cdk deploy --all --profile sensing-flow-dev --region ap-northeast-1 --require-approval never --context env=dev",
+    "deploy:dev": "pnpm build && pnpm env:dev cdk deploy --all --profile sensing-flow-dev --region ap-northeast-1 --require-approval never --context env=dev",
     "destroy:dev": "cdk destroy --all --profile sensing-flow-dev --region ap-northeast-1 --context env=dev",
-    "deploy:stg": "pnpm build && cdk deploy --all --profile sensing-flow-stg --region ap-northeast-1 --require-approval never --context env=stg",
-    "deploy:prod": "pnpm build && cdk deploy --all --profile sensing-flow-prod --region ap-northeast-1 --require-approval never --context env=prod"
+    "deploy:prod": "pnpm build && env:prod cdk deploy --all --profile sensing-flow-prod --region ap-northeast-1 --require-approval never --context env=prod"
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "^3.958.0",
