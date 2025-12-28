@@ -6,7 +6,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "env:dev": "dotenv -e .env.dev --",
-    "dev": "VITE_START=true && pnpm env:dev dotenv -e .env.dev -- nest start --watch",
+    "dev": "pnpm env:dev dotenv -e .env.dev -- nest start --watch",
     "debug": "nest start --debug --watch",
     "prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
