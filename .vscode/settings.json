@@ -1,0 +1,29 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.story.ts,${capture}.test.ts,${capture}.spec.ts,${capture}.js,${capture}.module.scss,${capture}.module.css",
+    "*.tsx": "${capture}.story.ts,${capture}.test.ts,${capture}.spec.ts,${capture}.ts,${capture}.js",
+    "tsconfig.json": "tsconfig.*.json",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, bun.lock",
+    "*.json": "*.schema.json",
+    ".env.example": ".env.*"
+  },
+  "files.exclude": {
+    ".dart_tool": true,
+    ".idea": true,
+    "*.csproj": true,
+    "**/._.DS_Store": true,
+    "**/._*": true,
+    "cdk.out": true,
+    "dist": true
+  },
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "permissions.json"
+      ],
+      "schema": true,
+      "url": "/src/permissions.schema.json"
+    }
+  ]
+}

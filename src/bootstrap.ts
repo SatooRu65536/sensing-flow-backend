@@ -3,6 +3,9 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import bodyParser from 'body-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { PermissionGuard } from './auth/permission.guard';
+import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 export async function bootstrap() {
   const nestApp = await NestFactory.create(AppModule);
@@ -18,6 +21,11 @@ export async function bootstrap() {
       whitelist: true,
       transform: true,
     }),
+  );
+
+  nestApp.useGlobalGuards(
+    new (class extends AuthGuard('jwt') {})(), // Passport の AuthGuard をインスタンス化
+    new PermissionGuard(new Reflector()),
   );
 
   nestApp.enableShutdownHooks();

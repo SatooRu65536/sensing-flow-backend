@@ -1,0 +1,23 @@
+{
+  "plans": {
+    "trial": [],
+    "guest": [
+      "profile:view"
+    ],
+    "basic": [
+      "profile:view",
+      "profile:edit",
+      "premium:access"
+    ],
+    "pro": [
+      "profile:view",
+      "profile:edit",
+      "premium:access"
+    ]
+  },
+  "permissions": {
+    "profile:view": "View user profile",
+    "profile:edit": "Edit user profile",
+    "premium:access": "Access premium features"
+  }
+}
