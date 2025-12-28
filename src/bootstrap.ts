@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PermissionGuard } from './auth/permission.guard';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { PathItemObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { generatePermissionEnumSchema } from './plans-config/plans-config.schema';
 
 export async function bootstrap() {
   const nestApp = await NestFactory.create(AppModule);
@@ -36,10 +38,32 @@ export async function bootstrap() {
       .setTitle('Sensing Flow API')
       .setDescription('API documentation for Sensing Flow')
       .setVersion('1.0')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'jwt',
+          description: 'Enter your JWT',
+          in: 'header',
+        },
+        'jwt',
+      )
       .build();
 
     const document = SwaggerModule.createDocument(nestApp, config);
+    Object.values(document.paths).forEach((pathItem: PathItemObject) => {
+      Object.values(pathItem).forEach((operation: PathItemObject[keyof PathItemObject]) => {
+        if (typeof operation === 'object' && 'security' in operation) {
+          operation.security = [{ jwt: [] }];
+        }
+      });
+    });
     SwaggerModule.setup('docs', nestApp, document);
+  }
+
+  if (process.env.ENV_DEV === 'true') {
+    generatePermissionEnumSchema();
   }
 
   await nestApp.init();

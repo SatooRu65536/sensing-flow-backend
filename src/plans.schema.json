@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": {
+    "permission": {
+      "type": "string",
+      "enum": [
+        "read:health",
+        "*"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "plans": {
+      "type": "object",
+      "properties": {
+        "trial": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/permission"
+          }
+        },
+        "guest": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/permission"
+          }
+        },
+        "basic": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/permission"
+          }
+        },
+        "pro": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/permission"
+          }
+        },
+        "admin": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/permission"
+          }
+        }
+      },
+      "required": [
+        "trial",
+        "guest",
+        "basic",
+        "pro",
+        "admin"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "plans"
+  ],
+  "additionalProperties": false
+}

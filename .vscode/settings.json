@@ -5,7 +5,7 @@
     "*.tsx": "${capture}.story.ts,${capture}.test.ts,${capture}.spec.ts,${capture}.ts,${capture}.js",
     "tsconfig.json": "tsconfig.*.json",
     "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, bun.lock",
-    "*.json": "*.schema.json",
+    "*.json": "${capture}.schema.json,${capture}.gen.ts",
     ".env.example": ".env.*"
   },
   "files.exclude": {
@@ -22,8 +22,13 @@
       "fileMatch": [
         "permissions.json"
       ],
-      "schema": true,
       "url": "/src/permissions.schema.json"
+    },
+    {
+      "fileMatch": [
+        "plans.json"
+      ],
+      "url": "/src/plans.schema.json"
     }
   ]
 }

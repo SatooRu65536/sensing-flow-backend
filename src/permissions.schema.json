@@ -1,67 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "plan": {
-      "type": "string",
-      "enum": [
-        "guest",
-        "trial",
-        "basic",
-        "pro"
-      ]
-    },
-    "permissionName": {
-      "type": "string",
-      "pattern": ".+:.*"
-    },
-    "permission": {
-      "type": "object",
-      "properties": {
-        "resource": {
-          "type": "string"
-        },
-        "action": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "resource",
-        "action",
-        "description"
-      ],
-      "additionalProperties": false
-    }
-  },
+  "title": "PermissionConfigSchema",
   "type": "object",
   "properties": {
-    "plans": {
-      "type": "object",
-      "propertyNames": {
-        "$ref": "#/definitions/plan"
-      },
-      "additionalProperties": {
-        "type": "array",
-        "items": {
-          "$ref": "#/definitions/permissionName"
-        }
-      }
-    },
     "permissions": {
       "type": "object",
-      "patternProperties": {
-        ".*": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
+      "additionalProperties": { "type": "string" },
+      "propertyNames": {
+        "type": "string",
+        "pattern": ".+:.+"
+      }
     }
   },
-  "required": [
-    "plans",
-    "permissions"
-  ],
+  "required": ["permissions"],
   "additionalProperties": false
 }

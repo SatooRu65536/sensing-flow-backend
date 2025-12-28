@@ -1,0 +1,19 @@
+{
+  "plans": {
+    "guest": [
+      "read:health"
+    ],
+    "trial": [
+      "read:health"
+    ],
+    "basic": [
+      "read:health"
+    ],
+    "pro": [
+      "read:health"
+    ],
+    "admin": [
+      "*"
+    ]
+  }
+}
