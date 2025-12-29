@@ -18,7 +18,7 @@ export class PermissionGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<Request & { user: UserPayload }>();
     const user = request.user;
-    if (!user || !user.plan) return false;
+    if (!user) return false;
 
     const planResponse = await this.usersService.getPlan(user);
 
