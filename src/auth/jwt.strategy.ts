@@ -1,7 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import * as jwksRsa from 'jwks-rsa';
 import { userPayloadSchema } from './jwt.schema';
 
 @Injectable()
@@ -9,13 +8,9 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       ignoreExpiration: false,
+      algorithms: ['RS256'],
+      secretOrKey: process.env.JWT_SECRET!.replace(/\\n/g, '\n'),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKeyProvider: jwksRsa.passportJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: `https://cognito-idp.ap-northeast-1.amazonaws.com/${process.env.AWS_USER_POOL_ID}/.well-known/jwks.json`,
-      }),
     });
   }
 

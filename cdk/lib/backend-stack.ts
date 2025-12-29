@@ -107,6 +107,7 @@ export class BackendStack extends cdk.Stack {
       environment: {
         NO_COLOR: 'true',
         DATABASE_URL: databaseUrl,
+        JWT_SECRET: process.env.JWT_SECRET!,
       },
     });
   }
