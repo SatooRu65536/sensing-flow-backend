@@ -10,7 +10,7 @@ const userZodSchema = createSelectSchema(UserSchema);
 export const planEnumSchema = userZodSchema.shape.plan;
 export type PlanEnum = z.infer<typeof planEnumSchema>;
 
-export const permissionSchema = z.object({
+export const permissionSchema = z.strictObject({
   resource: z.string(),
   action: z.string(),
   description: z.string(),
@@ -19,13 +19,19 @@ export const permissionNameSchema = z.string().refine((val) => val.includes(':')
   message: 'Permission name must be in the format "action:resource"',
 });
 
-export const permissionsConfigSchema = z.object({
+export const permissionsConfigSchema = z.strictObject({
   permissions: z.record(permissionNameSchema, z.string()),
 });
 export type PermissionsConfig = z.infer<typeof permissionsConfigSchema>;
 
-export const plansConfigSchema = z.object({
-  plans: z.record(planEnumSchema, z.array(permissionNameSchema)),
+export const plansConfigSchema = z.strictObject({
+  plans: z.record(
+    planEnumSchema,
+    z.strictObject({
+      selectable: z.boolean().optional().default(true),
+      permissions: z.array(permissionNameSchema),
+    }),
+  ),
 });
 
 export function generatePermissionEnumSchema() {
@@ -44,46 +50,35 @@ export type PermissionEnum = z.infer<typeof permissionEnumSchema>;
 
   const jsonSchemaTemplate = {
     $schema: 'http://json-schema.org/draft-07/schema#',
-    $defs: {
-      permission: {
-        type: 'string',
-        enum: [...permissionNames, '*'],
-      },
-    },
     type: 'object',
     properties: {
       plans: {
         type: 'object',
-        properties: {
-          trial: {
-            type: 'array',
-            items: { $ref: '#/$defs/permission' },
-          },
-          guest: {
-            type: 'array',
-            items: { $ref: '#/$defs/permission' },
-          },
-          basic: {
-            type: 'array',
-            items: { $ref: '#/$defs/permission' },
-          },
-          pro: {
-            type: 'array',
-            items: { $ref: '#/$defs/permission' },
-          },
-          admin: {
-            type: 'array',
-            items: { $ref: '#/$defs/permission' },
-          },
+        propertyNames: {
+          enum: planEnumSchema.options,
         },
-        required: ['trial', 'guest', 'basic', 'pro', 'admin'],
-        additionalProperties: false,
+        additionalProperties: {
+          type: 'object',
+          properties: {
+            permissions: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: [...permissionNames, '*'],
+              },
+            },
+            selectable: {
+              type: 'boolean',
+            },
+          },
+          required: ['selectable', 'permissions'],
+          additionalProperties: false,
+        },
       },
     },
     required: ['plans'],
     additionalProperties: false,
   };
-
   writeFileSync(permissionGenPath, content);
   writeFileSync(plansSchemaPath, JSON.stringify(jsonSchemaTemplate, null, 2));
 }

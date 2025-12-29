@@ -23,7 +23,7 @@ export class PermissionGuard implements CanActivate {
     const planResponse = await this.usersService.getPlan(user);
 
     // JSON から権限を取得
-    const permissions: string[] = plansMap.plans[planResponse.plan] || [];
+    const permissions: string[] = plansMap.plans[planResponse.plan].permissions || [];
 
     // "*" は全権限
     return permissions.includes(requiredPermission) || permissions.includes('*');

@@ -11,13 +11,16 @@ import { CreateUserRequest, CreateUserResponse, GetPlanResponse } from './users.
 import { UserSchema } from '@/_schema';
 import { eq } from 'drizzle-orm';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
+import plansConfig from '@/plans.json';
 
 @Injectable()
 export class UsersService {
   constructor(@Inject('DRIZZLE_DB') private db: DbType) {}
 
   async createUser(user: UserPayload, body: CreateUserRequest): Promise<CreateUserResponse> {
-    if (body.plan === 'admin') {
+    const selectable = plansConfig.plans[body.plan].selectable;
+
+    if (!selectable) {
       throw new BadRequestException('選択できないプランです');
     }
 

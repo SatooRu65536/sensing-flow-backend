@@ -17,6 +17,18 @@
     "cdk.out": true,
     "dist": true
   },
+  "files.watcherExclude": {
+    "**/permissions.gen.ts": true,
+    "**/plans.schema.json": true
+  },
+  "search.exclude": {
+    "**/permissions.gen.ts": true,
+    "**/plans.schema.json": true
+  },
+  "files.readonlyInclude": {
+    "**/permissions.gen.ts": true,
+    "**/plans.schema.json": true
+  },
   "json.schemas": [
     {
       "fileMatch": [

@@ -1,19 +1,34 @@
 {
   "plans": {
-    "guest": [
-      "read:health"
-    ],
-    "trial": [
-      "read:health"
-    ],
-    "basic": [
-      "read:health"
-    ],
-    "pro": [
-      "read:health"
-    ],
-    "admin": [
-      "*"
-    ]
+    "guest": {
+      "selectable": true,
+      "permissions": [
+        "read:health"
+      ]
+    },
+    "trial": {
+      "selectable": true,
+      "permissions": [
+        "read:health"
+      ]
+    },
+    "basic": {
+      "selectable": true,
+      "permissions": [
+        "read:health"
+      ]
+    },
+    "pro": {
+      "selectable": true,
+      "permissions": [
+        "read:health"
+      ]
+    },
+    "admin": {
+      "selectable": false,
+      "permissions": [
+        "*"
+      ]
+    }
   }
 }
