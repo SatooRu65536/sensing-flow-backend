@@ -196,12 +196,17 @@ export class BackendStack extends cdk.Stack {
 
   private createS3Bucket() {
     new Bucket(this, 'SensingFlowBucket', {
-      bucketName: `sensing-flow-bucket-${this.stage}-${this.account}`,
+      bucketName: `sensing-flow-${this.stage}-${this.account}`,
       removalPolicy: this.stage !== 'prod' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
       autoDeleteObjects: this.stage !== 'prod',
       versioned: this.stage === 'prod',
       encryption: BucketEncryption.S3_MANAGED,
       enforceSSL: true,
+      lifecycleRules: [
+        {
+          abortIncompleteMultipartUploadAfter: Duration.days(1),
+        },
+      ],
     });
   }
 

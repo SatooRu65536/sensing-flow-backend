@@ -23,6 +23,7 @@
               "enum": [
                 "read:health",
                 "upload:sensor_data",
+                "abort:sensor_data",
                 "*"
               ]
             }

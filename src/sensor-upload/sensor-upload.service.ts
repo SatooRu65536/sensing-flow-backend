@@ -6,7 +6,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { StartUploadSensorDataRequest, StartUploadSensorDataResponse } from './sensor-upload.dto';
+import {
+  AbortUploadSensorDataResponse,
+  StartUploadSensorDataRequest,
+  StartUploadSensorDataResponse,
+} from './sensor-upload.dto';
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { eq } from 'drizzle-orm';
@@ -70,5 +74,47 @@ export class SensorUploadService {
           throw new InternalServerErrorException('Failed to create sensor upload record', { cause: error });
       }
     }
+  }
+
+  async abortUploadSensorData(user: UserPayload, uploadId: string): Promise<AbortUploadSensorDataResponse> {
+    const records = await this.db
+      .select()
+      .from(SensorUploadSchema)
+      .where(eq(SensorUploadSchema.id, uploadId))
+      .innerJoin(UserSchema, eq(SensorUploadSchema.userId, UserSchema.id));
+
+    if (records.length === 0) {
+      throw new NotFoundException('Sensor upload not found');
+    }
+
+    const record = records[0];
+
+    if (record.users.sub !== user.sub) {
+      throw new BadRequestException('You do not have permission to abort this upload');
+    }
+
+    if (record.sensor_uploads.status !== SensorUploadStatusEnum.IN_PROGRESS) {
+      throw new BadRequestException('Cannot abort a completed or aborted upload');
+    }
+
+    try {
+      await this.s3Service.abortMultipartUpload(
+        this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id),
+        record.sensor_uploads.s3uploadId,
+      );
+    } catch (e) {
+      throw new InternalServerErrorException('Failed to abort multipart upload', { cause: e });
+    }
+
+    await this.db
+      .update(SensorUploadSchema)
+      .set({ status: SensorUploadStatusEnum.ABORTED })
+      .where(eq(SensorUploadSchema.id, uploadId));
+
+    return {
+      uploadId: record.sensor_uploads.id,
+      dataName: record.sensor_uploads.dataName,
+      createdAt: record.sensor_uploads.createdAt,
+    };
   }
 }

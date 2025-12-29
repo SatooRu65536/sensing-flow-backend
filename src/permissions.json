@@ -1,6 +1,7 @@
 {
   "permissions": {
     "read:health": "Read health status",
-    "upload:sensor_data": "Upload sensor data"
+    "upload:sensor_data": "Upload sensor data",
+    "abort:sensor_data": "Abort sensor data upload"
   }
 }
