@@ -21,13 +21,14 @@ export const UserSchema = mysqlTable('users', {
   id: uuid('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   sub: varchar('sub', { length: 255 }).notNull().unique(),
+  plan: varchar('plan', { enum: ['guest', 'trial', 'basic', 'pro', 'admin'], length: 16 }).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
 
 export const SensorUploadSchema = mysqlTable('sensor_uploads', {
   id: uuid('id').primaryKey(),
-  uploadId: varchar('upload_id', { length: 255 }).notNull().unique(),
+  s3uploadId: varchar('s3_upload_id', { length: 255 }).notNull().unique(),
   userId: uuid('user_id')
     .notNull()
     .references(() => UserSchema.id),

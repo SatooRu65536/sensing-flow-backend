@@ -1,5 +1,11 @@
 import { UserPayload } from '@/auth/jwt.schema';
-import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { StartUploadSensorDataRequest, StartUploadSensorDataResponse } from './sensor-upload.dto';
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
@@ -7,6 +13,7 @@ import { eq } from 'drizzle-orm';
 import { SensorUploadSchema, UserSchema } from '@/_schema';
 import { v4 } from 'uuid';
 import { SensorUploadStatusEnum } from './sensor-upload.model';
+import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
 
 @Injectable()
 export class SensorUploadService {
@@ -39,7 +46,7 @@ export class SensorUploadService {
         .insert(SensorUploadSchema)
         .values({
           id: uploadId,
-          uploadId: uploadResponse.UploadId,
+          s3uploadId: uploadResponse.UploadId,
           userId: userRecord.id,
           dataName: body.dataName,
           parts: [],
@@ -54,9 +61,14 @@ export class SensorUploadService {
       const sensorUploadRecord = sensorUploadRecords[0];
 
       return { dataName: body.dataName, uploadId: sensorUploadRecord.id };
-    } catch (error) {
-      console.error('Error creating sensor upload record:', error);
-      throw new InternalServerErrorException('Failed to create sensor upload record');
+    } catch (e) {
+      const error = handleDrizzleError(e);
+      switch (error.code) {
+        case ErrorCodeEnum.DUPLICATE_ENTRY:
+          throw new BadRequestException('既に存在するアップロードIDです', { cause: error });
+        default:
+          throw new InternalServerErrorException('Failed to create sensor upload record', { cause: error });
+      }
     }
   }
 }

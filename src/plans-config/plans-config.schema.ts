@@ -2,8 +2,12 @@ import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 import z from 'zod';
 import permissionsConfig from '../permissions.json';
+import { createSelectSchema } from 'drizzle-zod';
+import { UserSchema } from '@/_schema';
 
-export const planEnumSchema = z.enum(['guest', 'trial', 'basic', 'pro', 'admin']);
+const userZodSchema = createSelectSchema(UserSchema);
+
+export const planEnumSchema = userZodSchema.shape.plan;
 export type PlanEnum = z.infer<typeof planEnumSchema>;
 
 export const permissionSchema = z.object({

@@ -1,7 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { GetPlanResponse } from './users.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { CreateUserRequest, CreateUserResponse, GetPlanResponse } from './users.dto';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import type { UserPayload } from '@/auth/jwt.schema';
 import { Authed } from '@/auth/auth.decorator';
 import { AuthorizationApi } from '@/auth/permission.decorator';
@@ -10,10 +10,18 @@ import { AuthorizationApi } from '@/auth/permission.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Post()
+  @ApiBody({ type: CreateUserRequest })
+  @ApiResponse({ type: CreateUserResponse })
+  @AuthorizationApi()
+  async createUser(@Authed() user: UserPayload, @Body() body: CreateUserRequest): Promise<CreateUserResponse> {
+    return this.usersService.createUser(user, body);
+  }
+
   @Get('/plan')
   @ApiResponse({ type: GetPlanResponse })
   @AuthorizationApi()
-  getPlan(@Authed() user: UserPayload): GetPlanResponse {
+  async getPlan(@Authed() user: UserPayload): Promise<GetPlanResponse> {
     return this.usersService.getPlan(user);
   }
 }

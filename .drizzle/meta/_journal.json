@@ -15,6 +15,20 @@
       "when": 1767031959783,
       "tag": "0001_same_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767034330472,
+      "tag": "0002_freezing_ultron",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1767036965228,
+      "tag": "0003_certain_marvel_zombies",
+      "breakpoints": true
     }
   ]
 }
