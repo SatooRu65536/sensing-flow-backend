@@ -7,13 +7,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  SensorUpload,
   AbortUploadSensorDataResponse,
+  GetUploadSensorDataResponse,
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
 } from './sensor-upload.dto';
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { SensorUploadSchema, UserSchema } from '@/_schema';
 import { v4 } from 'uuid';
 import { SensorUploadStatusEnum } from './sensor-upload.model';
@@ -26,7 +28,27 @@ export class SensorUploadService {
     private readonly s3Service: S3Service,
   ) {}
 
-  async startUploadSensorData(
+  async listSensorUploads(user: UserPayload): Promise<GetUploadSensorDataResponse> {
+    const sensorUploadRecords = await this.db.query.SensorUploadSchema.findMany({
+      where: and(
+        eq(SensorUploadSchema.userId, user.sub),
+        eq(SensorUploadSchema.status, SensorUploadStatusEnum.IN_PROGRESS),
+      ),
+      orderBy: desc(SensorUploadSchema.createdAt),
+    });
+
+    const sensorUploads: SensorUpload[] = sensorUploadRecords.map((record) => ({
+      uploadId: record.id,
+      dataName: record.dataName,
+      status: record.status,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    }));
+
+    return { sensorUploads };
+  }
+
+  async startSensorUpload(
     user: UserPayload,
     body: StartUploadSensorDataRequest,
   ): Promise<StartUploadSensorDataResponse> {
@@ -76,7 +98,7 @@ export class SensorUploadService {
     }
   }
 
-  async abortUploadSensorData(user: UserPayload, uploadId: string): Promise<AbortUploadSensorDataResponse> {
+  async abortSensorUpload(user: UserPayload, uploadId: string): Promise<AbortUploadSensorDataResponse> {
     const records = await this.db
       .select()
       .from(SensorUploadSchema)
@@ -114,7 +136,9 @@ export class SensorUploadService {
     return {
       uploadId: record.sensor_uploads.id,
       dataName: record.sensor_uploads.dataName,
+      status: SensorUploadStatusEnum.ABORTED,
       createdAt: record.sensor_uploads.createdAt,
+      updatedAt: record.sensor_uploads.updatedAt,
     };
   }
 }

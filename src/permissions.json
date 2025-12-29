@@ -1,7 +1,8 @@
 {
   "permissions": {
     "read:health": "Read health status",
-    "upload:sensor_data": "Upload sensor data",
-    "abort:sensor_data": "Abort sensor data upload"
+    "start:sensor_uploads": "Start sensor data upload",
+    "upload:sensor_uploads": "Upload sensor data chunks",
+    "abort:sensor_uploads": "Abort sensor data upload"
   }
 }

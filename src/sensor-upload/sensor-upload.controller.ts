@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { SensorUploadService } from './sensor-upload.service';
 import { Authed } from '@/auth/auth.decorator';
 import type { UserPayload } from '@/auth/jwt.schema';
 import {
   AbortUploadSensorDataResponse,
+  GetUploadSensorDataResponse,
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
 } from './sensor-upload.dto';
@@ -14,24 +15,31 @@ import { Permission } from '@/auth/permission.decorator';
 export class SensorUploadController {
   constructor(private readonly sensorUploadService: SensorUploadService) {}
 
+  @Get()
+  @ApiResponse({ type: GetUploadSensorDataResponse })
+  @Permission('list:sensor_uploads')
+  async listSensorUploads(@Authed() user: UserPayload): Promise<GetUploadSensorDataResponse> {
+    return this.sensorUploadService.listSensorUploads(user);
+  }
+
   @Post()
   @ApiBody({ type: StartUploadSensorDataRequest })
   @ApiResponse({ type: StartUploadSensorDataResponse })
-  @Permission('upload:sensor_data')
-  async startUploadSensorData(
+  @Permission('start:sensor_uploads')
+  async startSensorUpload(
     @Authed() user: UserPayload,
     @Body() body: StartUploadSensorDataRequest,
   ): Promise<StartUploadSensorDataResponse> {
-    return this.sensorUploadService.startUploadSensorData(user, body);
+    return this.sensorUploadService.startSensorUpload(user, body);
   }
 
   @Delete(':uploadId')
   @ApiResponse({ type: AbortUploadSensorDataResponse })
-  @Permission('abort:sensor_data')
-  async abortUploadSensorData(
+  @Permission('abort:sensor_uploads')
+  async abortSensorUpload(
     @Authed() user: UserPayload,
     @Param('uploadId') uploadId: string,
   ): Promise<AbortUploadSensorDataResponse> {
-    return this.sensorUploadService.abortUploadSensorData(user, uploadId);
+    return this.sensorUploadService.abortSensorUpload(user, uploadId);
   }
 }

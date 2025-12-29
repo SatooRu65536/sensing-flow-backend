@@ -22,8 +22,9 @@
               "type": "string",
               "enum": [
                 "read:health",
-                "upload:sensor_data",
-                "abort:sensor_data",
+                "start:sensor_uploads",
+                "upload:sensor_uploads",
+                "abort:sensor_uploads",
                 "*"
               ]
             }
