@@ -18,7 +18,7 @@ async function main() {
       '@nestjs/microservices',
       '@grpc/grpc-js',
       '@grpc/proto-loader',
-      'class-transformer/storage',
+      'class-transformer',
       'mqtt',
       'ioredis',
       'kafkajs',
