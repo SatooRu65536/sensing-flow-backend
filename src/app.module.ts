@@ -8,9 +8,11 @@ import { UsersService } from './users/users.service';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionGuard } from './auth/permission.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { SensorUploadModule } from './sensor-upload/sensor-upload.module';
+import { S3Module } from './s3/s3.module';
 
 @Module({
-  imports: [AuthModule, DatabaseModule, UsersModule],
+  imports: [AuthModule, DatabaseModule, UsersModule, SensorUploadModule, S3Module],
   controllers: [AppController],
   providers: [
     AppService,
