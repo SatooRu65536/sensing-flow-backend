@@ -19,7 +19,10 @@
     "deploy:prod": "pnpm build && env:prod cdk deploy --all --profile sensing-flow-prod --region ap-northeast-1 --require-approval never --context env=prod"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.958.0",
     "@aws-sdk/client-rds-data": "^3.958.0",
+    "@aws-sdk/credential-provider-env": "^3.957.0",
+    "@aws-sdk/credential-provider-ini": "^3.958.0",
     "@codegenie/serverless-express": "^4.17.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",

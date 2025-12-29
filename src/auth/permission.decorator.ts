@@ -9,3 +9,7 @@ export function Permission(permission: PermissionEnum | (string & {})) {
     ApiBearerAuth('jwt'), // swagger に BearerAuth を追加
   );
 }
+
+export function AuthorizationApi() {
+  return ApiBearerAuth('jwt');
+}

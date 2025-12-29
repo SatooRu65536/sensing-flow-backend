@@ -1,11 +1,11 @@
-import { planSchema } from '../plans-config/plans-config.schema';
+import { planEnumSchema } from '../plans-config/plans-config.schema';
 import z from 'zod';
 
 export const userPayloadSchema = z
   .object({
     sub: z.string(),
     email: z.email(),
-    'custom:plan': planSchema.optional(),
+    'custom:plan': planEnumSchema.optional(),
   })
   .transform((data) => ({
     sub: data.sub,

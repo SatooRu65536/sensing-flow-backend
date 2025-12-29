@@ -23,6 +23,7 @@ import {
   UserPoolDomain,
   UserPoolIdentityProviderGoogle,
 } from 'aws-cdk-lib/aws-cognito';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 const callbackUrls = process.env.CALLBACK_URLS ? process.env.CALLBACK_URLS.split(',') : [];
 const logoutUrls = process.env.LOGOUT_URLS ? process.env.LOGOUT_URLS.split(',') : [];
@@ -54,11 +55,18 @@ export class BackendStack extends cdk.Stack {
     const databaseUrl = this.createDatabaseUrl(credentials, databaseInstance);
     const nestFunction = this.createNestFunction(vpc, securityGroup, databaseUrl);
     const restApi = this.createRestApi(nestFunction);
+    const userPool = this.createCognitoUserPool();
 
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
     this.createS3Bucket();
-    this.createCognito();
+
+    nestFunction.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['cognito-idp:AdminGetUser'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
 
     this.vpc = vpc;
     this.securityGroup = securityGroup;
@@ -214,7 +222,7 @@ export class BackendStack extends cdk.Stack {
     });
   }
 
-  private createCognito() {
+  private createCognitoUserPool() {
     const userPool = new UserPool(this, 'SensingFlowUserPool', {
       userPoolName: `sensing-flow-user-pool-${this.stage}`,
       signInAliases: { email: true },
@@ -270,5 +278,7 @@ export class BackendStack extends cdk.Stack {
       },
     });
     userPoolClient.node.addDependency(googleIdp);
+
+    return userPool;
   }
 }

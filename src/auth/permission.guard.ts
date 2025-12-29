@@ -3,12 +3,16 @@ import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from './permission.decorator';
 import plansMap from '../plans.json';
 import { UserPayload } from './jwt.schema';
+import { UsersService } from '@/users/users.service';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly usersService: UsersService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.get<string>(PERMISSION_KEY, context.getHandler());
     if (!requiredPermission) return true;
 
@@ -16,8 +20,10 @@ export class PermissionGuard implements CanActivate {
     const user = request.user;
     if (!user || !user.plan) return false;
 
+    const planResponse = await this.usersService.getPlan(user);
+
     // JSON から権限を取得
-    const permissions: string[] = plansMap.plans[user.plan] || [];
+    const permissions: string[] = plansMap.plans[planResponse.plan] || [];
 
     // "*" は全権限
     return permissions.includes(requiredPermission) || permissions.includes('*');

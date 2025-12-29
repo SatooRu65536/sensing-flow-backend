@@ -3,7 +3,8 @@ import { resolve } from 'path';
 import z from 'zod';
 import permissionsConfig from '../permissions.json';
 
-export const planSchema = z.enum(['guest', 'trial', 'basic', 'pro']);
+export const planEnumSchema = z.enum(['guest', 'trial', 'basic', 'pro', 'admin']);
+export type PlanEnum = z.infer<typeof planEnumSchema>;
 
 export const permissionSchema = z.object({
   resource: z.string(),
@@ -20,7 +21,7 @@ export const permissionsConfigSchema = z.object({
 export type PermissionsConfig = z.infer<typeof permissionsConfigSchema>;
 
 export const plansConfigSchema = z.object({
-  plans: z.record(planSchema, z.array(permissionNameSchema)),
+  plans: z.record(planEnumSchema, z.array(permissionNameSchema)),
 });
 
 export function generatePermissionEnumSchema() {

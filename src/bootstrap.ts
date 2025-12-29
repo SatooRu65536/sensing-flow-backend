@@ -3,9 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import bodyParser from 'body-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { PermissionGuard } from './auth/permission.guard';
-import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
 import { PathItemObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { generatePermissionEnumSchema } from './plans-config/plans-config.schema';
 
@@ -23,11 +20,6 @@ export async function bootstrap() {
       whitelist: true,
       transform: true,
     }),
-  );
-
-  nestApp.useGlobalGuards(
-    new (class extends AuthGuard('jwt') {})(), // Passport の AuthGuard をインスタンス化
-    new PermissionGuard(new Reflector()),
   );
 
   nestApp.enableShutdownHooks();
