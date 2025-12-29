@@ -13,7 +13,7 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermission = this.reflector.get<string>(PERMISSION_KEY, context.getHandler());
+    const requiredPermission = this.reflector.get<string | string[]>(PERMISSION_KEY, context.getHandler());
     if (!requiredPermission) return true;
 
     const request = context.switchToHttp().getRequest<Request & { user: UserPayload }>();
@@ -26,6 +26,11 @@ export class PermissionGuard implements CanActivate {
     const permissions: string[] = plansMap.plans[planResponse.plan].permissions || [];
 
     // "*" は全権限
-    return permissions.includes(requiredPermission) || permissions.includes('*');
+    if (permissions.includes('*')) return true;
+
+    const requiredPermissions = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+
+    // OR 条件: どれか1つでもユーザー権限に含まれていれば true
+    return requiredPermissions.some((p) => permissions.includes(p));
   }
 }

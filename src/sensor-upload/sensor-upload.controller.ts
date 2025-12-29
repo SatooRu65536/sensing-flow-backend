@@ -4,6 +4,7 @@ import { Authed } from '@/auth/auth.decorator';
 import type { UserPayload } from '@/auth/jwt.schema';
 import { StartUploadSensorDataRequest, StartUploadSensorDataResponse } from './sensor-upload.dto';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { Permission } from '@/auth/permission.decorator';
 
 @Controller('sensor-upload')
 export class SensorUploadController {
@@ -12,6 +13,7 @@ export class SensorUploadController {
   @Post()
   @ApiBody({ type: StartUploadSensorDataRequest })
   @ApiResponse({ type: StartUploadSensorDataResponse })
+  @Permission('upload:sensor_data')
   async startUploadSensorData(
     @Authed() user: UserPayload,
     @Body() body: StartUploadSensorDataRequest,

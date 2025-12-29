@@ -1,5 +1,6 @@
 {
   "permissions": {
-    "read:health": "Read health status"
+    "read:health": "Read health status",
+    "upload:sensor_data": "Upload sensor data"
   }
 }
