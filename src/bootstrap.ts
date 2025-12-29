@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import bodyParser from 'body-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { PathItemObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { generatePermissionEnumSchema } from './plans-config/plans-config.schema';
 
 export async function bootstrap() {
@@ -24,6 +23,7 @@ export async function bootstrap() {
 
   nestApp.enableShutdownHooks();
   nestApp.use(bodyParser.json({ limit: '15mb' }));
+  nestApp.use(bodyParser.text({ type: 'text/csv' }));
 
   if (process.env.ENV_DEV === 'true') {
     const config = new DocumentBuilder()
@@ -44,13 +44,6 @@ export async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(nestApp, config);
-    Object.values(document.paths).forEach((pathItem: PathItemObject) => {
-      Object.values(pathItem).forEach((operation: PathItemObject[keyof PathItemObject]) => {
-        if (typeof operation === 'object' && 'security' in operation) {
-          operation.security = [{ jwt: [] }];
-        }
-      });
-    });
     SwaggerModule.setup('docs', nestApp, document);
   }
 

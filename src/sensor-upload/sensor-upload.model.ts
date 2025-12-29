@@ -12,3 +12,5 @@ export const SensorUploadStatusEnum = {
   COMPLETED: 'completed',
   ABORTED: 'aborted',
 } as const satisfies Record<string, SensorUploadStatusEnum>;
+
+export type SensorUploadParts = z.infer<typeof sensorUploadZodSchema.shape.parts>;

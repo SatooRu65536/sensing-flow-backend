@@ -33,7 +33,7 @@ export const SensorUploadSchema = mysqlTable('sensor_uploads', {
     .notNull()
     .references(() => UserSchema.id),
   dataName: varchar('data_name', { length: 255 }).notNull(),
-  parts: json('parts').$type<{ partNumber: number; etag: string }[]>().notNull(),
+  parts: json('parts').$type<{ partNumber: number; etag: string }[]>().notNull().default([]),
   status: varchar('status', { enum: ['in_progress', 'completed', 'aborted'], length: 16 }).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

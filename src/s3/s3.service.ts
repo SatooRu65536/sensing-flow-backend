@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { AbortMultipartUploadCommand, CreateMultipartUploadCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  AbortMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
+  S3Client,
+  UploadPartCommand,
+} from '@aws-sdk/client-s3';
 import { S3Key } from './s3.types';
 import { fromIni } from '@aws-sdk/credential-providers';
+import { SensorUploadParts } from '@/sensor-upload/sensor-upload.model';
 
 @Injectable()
 export class S3Service {
@@ -21,6 +28,29 @@ export class S3Service {
       new CreateMultipartUploadCommand({
         Bucket: this.bucketName,
         Key: key,
+      }),
+    );
+  }
+
+  async postMultipartUpload(key: S3Key, uploadId: string, partNumber: number, chunkBase64: string) {
+    return await this.s3Client.send(
+      new UploadPartCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        UploadId: uploadId,
+        PartNumber: partNumber,
+        Body: Buffer.from(chunkBase64, 'base64'),
+      }),
+    );
+  }
+
+  async completeMultipartUpload(key: S3Key, uploadId: string, parts: SensorUploadParts) {
+    return this.s3Client.send(
+      new CompleteMultipartUploadCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        UploadId: uploadId,
+        MultipartUpload: { Parts: parts.map(({ etag, partNumber }) => ({ PartNumber: partNumber, ETag: etag })) },
       }),
     );
   }

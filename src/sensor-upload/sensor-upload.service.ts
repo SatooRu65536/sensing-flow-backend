@@ -12,6 +12,7 @@ import {
   GetUploadSensorDataResponse,
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
+  PostUploadSensorDataResponse,
 } from './sensor-upload.dto';
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
@@ -75,7 +76,6 @@ export class SensorUploadService {
           s3uploadId: uploadResponse.UploadId,
           userId: userRecord.id,
           dataName: body.dataName,
-          parts: [],
           status: SensorUploadStatusEnum.IN_PROGRESS,
         })
         .$returningId();
@@ -96,6 +96,90 @@ export class SensorUploadService {
           throw new InternalServerErrorException('Failed to create sensor upload record', { cause: error });
       }
     }
+  }
+
+  async postUploadSensorData(user: UserPayload, uploadId: string, body: string): Promise<PostUploadSensorDataResponse> {
+    const records = await this.db
+      .select()
+      .from(SensorUploadSchema)
+      .where(eq(SensorUploadSchema.id, uploadId))
+      .innerJoin(UserSchema, eq(SensorUploadSchema.userId, UserSchema.id));
+
+    if (records.length === 0) {
+      throw new NotFoundException('Sensor upload not found');
+    }
+
+    const record = records[0];
+
+    if (record.users.sub !== user.sub) {
+      throw new BadRequestException('You do not have permission to abort this upload');
+    }
+
+    if (record.sensor_uploads.status !== SensorUploadStatusEnum.IN_PROGRESS) {
+      throw new BadRequestException('Cannot abort a completed or aborted upload');
+    }
+
+    const lastNumber = record.sensor_uploads.parts.reduce(
+      (prev, curr) => (curr.partNumber > prev ? curr.partNumber : prev),
+      0,
+    );
+    const partNumber = lastNumber + 1;
+
+    const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
+
+    try {
+      await this.s3Service.postMultipartUpload(sensorUploadKey, record.sensor_uploads.s3uploadId, partNumber, body);
+    } catch (e) {
+      throw new InternalServerErrorException('Failed to upload part', { cause: e });
+    }
+
+    return {
+      uploadId: record.sensor_uploads.id,
+      dataName: record.sensor_uploads.dataName,
+    };
+  }
+
+  async completeSensorUpload(user: UserPayload, uploadId: string): Promise<PostUploadSensorDataResponse> {
+    const records = await this.db
+      .select()
+      .from(SensorUploadSchema)
+      .where(eq(SensorUploadSchema.id, uploadId))
+      .innerJoin(UserSchema, eq(SensorUploadSchema.userId, UserSchema.id));
+
+    if (records.length === 0) {
+      throw new NotFoundException('Sensor upload not found');
+    }
+
+    const record = records[0];
+
+    if (record.users.sub !== user.sub) {
+      throw new BadRequestException('You do not have permission to complete this upload');
+    }
+
+    if (record.sensor_uploads.status !== SensorUploadStatusEnum.IN_PROGRESS) {
+      throw new BadRequestException('Cannot complete a completed or aborted upload');
+    }
+
+    const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
+    try {
+      await this.s3Service.completeMultipartUpload(
+        sensorUploadKey,
+        record.sensor_uploads.s3uploadId,
+        record.sensor_uploads.parts,
+      );
+    } catch (e) {
+      throw new InternalServerErrorException('Failed to complete multipart upload', { cause: e });
+    }
+
+    await this.db
+      .update(SensorUploadSchema)
+      .set({ status: SensorUploadStatusEnum.COMPLETED })
+      .where(eq(SensorUploadSchema.id, uploadId));
+
+    return {
+      uploadId: record.sensor_uploads.id,
+      dataName: record.sensor_uploads.dataName,
+    };
   }
 
   async abortSensorUpload(user: UserPayload, uploadId: string): Promise<AbortUploadSensorDataResponse> {
@@ -120,10 +204,8 @@ export class SensorUploadService {
     }
 
     try {
-      await this.s3Service.abortMultipartUpload(
-        this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id),
-        record.sensor_uploads.s3uploadId,
-      );
+      const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
+      await this.s3Service.abortMultipartUpload(sensorUploadKey, record.sensor_uploads.s3uploadId);
     } catch (e) {
       throw new InternalServerErrorException('Failed to abort multipart upload', { cause: e });
     }

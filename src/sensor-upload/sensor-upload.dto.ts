@@ -49,4 +49,14 @@ export class StartUploadSensorDataResponse {
   dataName: string;
 }
 
+export class PostUploadSensorDataResponse {
+  @ApiProperty({ description: 'センサデータのアップロードID' })
+  @IsString()
+  uploadId: string;
+
+  @ApiProperty({ description: 'センサデータ名' })
+  @IsString()
+  dataName: string;
+}
+
 export class AbortUploadSensorDataResponse extends SensorUpload {}
