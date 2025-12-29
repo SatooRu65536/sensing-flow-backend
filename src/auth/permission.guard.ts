@@ -12,7 +12,7 @@ export class PermissionGuard implements CanActivate {
     private readonly usersService: UsersService,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const requiredPermission = this.reflector.get<string>(PERMISSION_KEY, context.getHandler());
     if (!requiredPermission) return true;
 
@@ -20,7 +20,7 @@ export class PermissionGuard implements CanActivate {
     const user = request.user;
     if (!user) return false;
 
-    const planResponse = await this.usersService.getPlan(user);
+    const planResponse = this.usersService.getPlan(user);
 
     // JSON から権限を取得
     const permissions: string[] = plansMap.plans[planResponse.plan] || [];

@@ -13,7 +13,7 @@ export class UsersController {
   @Get('/plan')
   @ApiResponse({ type: GetPlanResponse })
   @AuthorizationApi()
-  async getPlan(@Authed() user: UserPayload): Promise<GetPlanResponse> {
+  getPlan(@Authed() user: UserPayload): GetPlanResponse {
     return this.usersService.getPlan(user);
   }
 }
