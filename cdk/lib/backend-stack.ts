@@ -26,7 +26,6 @@ import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import {
   OAuthScope,
   ProviderAttribute,
-  StringAttribute,
   UserPool,
   UserPoolClient,
   UserPoolClientIdentityProvider,
@@ -280,9 +279,6 @@ export class BackendStack extends cdk.Stack {
       autoVerify: { email: true },
       standardAttributes: {
         email: { required: true, mutable: false },
-      },
-      customAttributes: {
-        plan: new StringAttribute({ mutable: true }),
       },
       passwordPolicy: {
         minLength: 8,
