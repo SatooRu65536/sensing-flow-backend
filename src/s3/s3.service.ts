@@ -3,12 +3,14 @@ import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
+  GetObjectCommand,
   S3Client,
   UploadPartCommand,
 } from '@aws-sdk/client-s3';
 import { S3Key } from './s3.types';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { SensorUploadParts } from '@/sensor-upload/sensor-upload.model';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class S3Service {
@@ -28,6 +30,7 @@ export class S3Service {
       new CreateMultipartUploadCommand({
         Bucket: this.bucketName,
         Key: key,
+        ContentType: 'text/csv',
       }),
     );
   }
@@ -62,6 +65,19 @@ export class S3Service {
         Key: key,
         UploadId: uploadId,
       }),
+    );
+  }
+
+  async getPresignedUrl(key: string, filename: string): Promise<string> {
+    return getSignedUrl(
+      this.s3Client,
+      new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        ResponseContentType: 'text/csv',
+        ResponseContentDisposition: `attachment; filename="${encodeURIComponent(filename)}"`,
+      }),
+      { expiresIn: 60 * 60 }, // 1 hour
     );
   }
 

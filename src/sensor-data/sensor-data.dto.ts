@@ -27,3 +27,9 @@ export class ListSensorDataResponse {
   @Type(() => SensorData)
   sensorData: SensorData[];
 }
+
+export class GetSensorDataPresignedUrlResponse extends SensorData {
+  @ApiProperty({ description: 'presigned URL' })
+  @IsString()
+  presignedUrl: string;
+}

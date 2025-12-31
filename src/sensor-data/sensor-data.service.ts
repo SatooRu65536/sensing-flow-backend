@@ -1,16 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ListSensorDataResponse, SensorData } from './sensor-data.dto';
+import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse, SensorData } from './sensor-data.dto';
 import { UsersService } from '@/users/users.service';
 import type { DbType } from '@/database/database.module';
 import { UserPayload } from '@/auth/jwt.schema';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema } from '@/_schema';
+import { S3Service } from '@/s3/s3.service';
 
 @Injectable()
 export class SensorDataService {
   constructor(
     @Inject('DRIZZLE_DB') private db: DbType,
     private readonly usersService: UsersService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async listSensorData(user: UserPayload, page: number, perPage: number): Promise<ListSensorDataResponse> {
@@ -31,5 +33,30 @@ export class SensorDataService {
     }));
 
     return { sensorData };
+  }
+
+  async getSensorDataPresignedUrl(user: UserPayload, id: string): Promise<GetSensorDataPresignedUrlResponse> {
+    const userRecord = await this.usersService.getUserBySub(user.sub);
+
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, userRecord.id)),
+    });
+
+    if (sensorDataRecord == null) {
+      throw new Error('Sensor data not found');
+    }
+
+    const presignedUrl = await this.s3Service.getPresignedUrl(
+      sensorDataRecord.s3key,
+      `${sensorDataRecord.dataName}.csv`,
+    );
+
+    return {
+      id: sensorDataRecord.id,
+      dataName: sensorDataRecord.dataName,
+      createdAt: sensorDataRecord.createdAt,
+      updatedAt: sensorDataRecord.updatedAt,
+      presignedUrl,
+    };
   }
 }

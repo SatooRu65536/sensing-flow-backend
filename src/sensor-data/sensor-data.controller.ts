@@ -1,7 +1,7 @@
 import { Authed } from '@/auth/auth.decorator';
 import type { UserPayload } from '@/auth/jwt.schema';
-import { Controller, Get, Query } from '@nestjs/common';
-import { ListSensorDataResponse } from './sensor-data.dto';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse } from './sensor-data.dto';
 import { SensorDataService } from './sensor-data.service';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/auth/permission.decorator';
@@ -21,5 +21,15 @@ export class SensorDataController {
     @Query('perPage') perPage: number = 10,
   ): Promise<ListSensorDataResponse> {
     return this.sensorDataService.listSensorData(user, page, perPage);
+  }
+
+  @Get(':id')
+  @ApiResponse({ type: GetSensorDataPresignedUrlResponse })
+  @Permission('read:sensor_data')
+  async getSensorDataPresignedUrl(
+    @Authed() user: UserPayload,
+    @Param('id') id: string,
+  ): Promise<GetSensorDataPresignedUrlResponse> {
+    return this.sensorDataService.getSensorDataPresignedUrl(user, id);
   }
 }
