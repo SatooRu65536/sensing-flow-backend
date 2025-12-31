@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import {
   SensorUpload,
-  AbortUploadSensorDataResponse,
   ListUploadSensorDataResponse,
+  AbortUploadSensorDataResponse,
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
   PostUploadSensorDataResponse,
@@ -17,24 +17,22 @@ import {
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { and, desc, eq } from 'drizzle-orm';
-import { SensorUploadSchema, UserSchema } from '@/_schema';
+import { SensorDataSchema, SensorUploadSchema, UserSchema } from '@/_schema';
 import { v4 } from 'uuid';
 import { SensorUploadStatusEnum } from './sensor-upload.model';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
+import { UsersService } from '@/users/users.service';
 
 @Injectable()
 export class SensorUploadService {
   constructor(
     @Inject('DRIZZLE_DB') private readonly db: DbType,
     private readonly s3Service: S3Service,
+    private readonly usersService: UsersService,
   ) {}
 
   async listSensorUploads(user: UserPayload): Promise<ListUploadSensorDataResponse> {
-    const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, user.sub) });
-
-    if (userRecord == null) {
-      throw new NotFoundException('User not found');
-    }
+    const userRecord = await this.usersService.getUserBySub(user.sub);
 
     const sensorUploadRecords = await this.db.query.SensorUploadSchema.findMany({
       where: and(
@@ -59,11 +57,7 @@ export class SensorUploadService {
     user: UserPayload,
     body: StartUploadSensorDataRequest,
   ): Promise<StartUploadSensorDataResponse> {
-    const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, user.sub) });
-
-    if (userRecord == null) {
-      throw new NotFoundException('User not found');
-    }
+    const userRecord = await this.usersService.getUserBySub(user.sub);
 
     const uploadId = v4();
 
@@ -207,10 +201,20 @@ export class SensorUploadService {
       throw new InternalServerErrorException('Failed to complete multipart upload', { cause: e });
     }
 
-    await this.db
-      .update(SensorUploadSchema)
-      .set({ status: SensorUploadStatusEnum.COMPLETED })
-      .where(eq(SensorUploadSchema.id, uploadId));
+    await this.db.transaction(
+      async (tx) =>
+        await Promise.all([
+          tx
+            .update(SensorUploadSchema)
+            .set({ status: SensorUploadStatusEnum.COMPLETED })
+            .where(eq(SensorUploadSchema.id, uploadId)),
+          tx.insert(SensorDataSchema).values({
+            s3key: sensorUploadKey,
+            userId: record.users.id,
+            dataName: record.sensor_uploads.dataName,
+          }),
+        ]),
+    );
 
     return {
       uploadId: record.sensor_uploads.id,

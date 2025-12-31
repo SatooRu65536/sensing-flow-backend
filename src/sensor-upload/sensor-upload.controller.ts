@@ -18,7 +18,7 @@ export class SensorUploadController {
 
   @Get()
   @ApiResponse({ type: ListUploadSensorDataResponse })
-  @Permission('list:sensor_uploads')
+  @Permission('list:sensor_upload')
   async listSensorUploads(@Authed() user: UserPayload): Promise<ListUploadSensorDataResponse> {
     return this.sensorUploadService.listSensorUploads(user);
   }
@@ -26,7 +26,7 @@ export class SensorUploadController {
   @Post()
   @ApiBody({ type: StartUploadSensorDataRequest })
   @ApiResponse({ type: StartUploadSensorDataResponse })
-  @Permission('post:sensor_uploads')
+  @Permission('post:sensor_upload')
   async startSensorUpload(
     @Authed() user: UserPayload,
     @Body() body: StartUploadSensorDataRequest,
@@ -38,7 +38,7 @@ export class SensorUploadController {
   @ApiConsumes('text/csv')
   @ApiBody({ description: 'CSVデータ', type: String })
   @ApiResponse({ type: PostUploadSensorDataResponse })
-  @Permission('post:sensor_uploads')
+  @Permission('post:sensor_upload')
   async postUploadSensorData(
     @Body() body: string,
     @Authed() user: UserPayload,
@@ -49,7 +49,7 @@ export class SensorUploadController {
 
   @Patch(':uploadId')
   @ApiResponse({ type: PostUploadSensorDataResponse })
-  @Permission('post:sensor_uploads')
+  @Permission('post:sensor_upload')
   async completeSensorUpload(
     @Authed() user: UserPayload,
     @Param('uploadId') uploadId: string,
@@ -59,7 +59,7 @@ export class SensorUploadController {
 
   @Delete(':uploadId')
   @ApiResponse({ type: AbortUploadSensorDataResponse })
-  @Permission('abort:sensor_uploads')
+  @Permission('abort:sensor_upload')
   async abortSensorUpload(
     @Authed() user: UserPayload,
     @Param('uploadId') uploadId: string,

@@ -38,3 +38,14 @@ export const SensorUploadSchema = mysqlTable('sensor_uploads', {
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
+
+export const SensorDataSchema = mysqlTable('sensor_data', {
+  id: uuid('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => UserSchema.id),
+  dataName: varchar('data_name', { length: 255 }).notNull(),
+  s3key: varchar('s3_key', { length: 255 }).notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});

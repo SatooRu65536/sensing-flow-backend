@@ -58,12 +58,17 @@ export class UsersService {
   }
 
   async getPlan(user: UserPayload): Promise<GetPlanResponse> {
-    const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, user.sub) });
+    const userRecord = await this.getUserBySub(user.sub);
+    return { plan: userRecord.plan };
+  }
+
+  async getUserBySub(sub: string) {
+    const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, sub) });
 
     if (userRecord == null) {
       throw new NotFoundException('User not found');
     }
 
-    return { plan: userRecord.plan };
+    return userRecord;
   }
 }

@@ -36,6 +36,13 @@
       "when": 1767176905960,
       "tag": "0004_past_jubilee",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767182197963,
+      "tag": "0005_daily_proudstar",
+      "breakpoints": true
     }
   ]
 }
