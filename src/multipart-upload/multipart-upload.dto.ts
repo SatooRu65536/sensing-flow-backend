@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsDate, IsEnum, IsString, ValidateNested } from 'class-validator';
-import { SensorUploadStatusEnum, sensorUploadStatusEnumSchema } from './sensor-upload.model';
+import { SensorUploadStatusEnum, sensorUploadStatusEnumSchema } from './multipart-upload.model';
 import { Type } from 'class-transformer';
 
-export class SensorUpload {
+export class MultiPartUpload {
   @ApiProperty({ description: 'センサデータのアップロードID' })
   @IsString()
   uploadId: string;
@@ -25,21 +25,21 @@ export class SensorUpload {
   updatedAt: Date;
 }
 
-export class ListUploadSensorDataResponse {
-  @ApiProperty({ description: 'センサデータアップロード一覧', type: SensorUpload, isArray: true })
+export class ListMultipartUploadResponse {
+  @ApiProperty({ description: 'センサデータアップロード一覧', type: MultiPartUpload, isArray: true })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => SensorUpload)
-  sensorUploads: SensorUpload[];
+  @Type(() => MultiPartUpload)
+  sensorUploads: MultiPartUpload[];
 }
 
-export class StartUploadSensorDataRequest {
+export class StartMultipartUploadRequest {
   @ApiProperty({ description: 'センサデータ名' })
   @IsString()
   dataName: string;
 }
 
-export class StartUploadSensorDataResponse {
+export class StartMultipartUploadResponse {
   @ApiProperty({ description: 'センサデータのアップロードID' })
   @IsString()
   uploadId: string;
@@ -49,7 +49,7 @@ export class StartUploadSensorDataResponse {
   dataName: string;
 }
 
-export class PostUploadSensorDataResponse {
+export class PostMultipartUploadResponse {
   @ApiProperty({ description: 'センサデータのアップロードID' })
   @IsString()
   uploadId: string;
@@ -59,4 +59,4 @@ export class PostUploadSensorDataResponse {
   dataName: string;
 }
 
-export class AbortUploadSensorDataResponse extends SensorUpload {}
+export class AbortMultipartUploadResponse extends MultiPartUpload {}

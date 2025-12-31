@@ -1,9 +1,9 @@
 {
   "permissions": {
     "read:health": "Read health status",
-    "list:sensor_upload": "List sensor data uploads",
-    "post:sensor_upload": "Upload sensor data",
-    "abort:sensor_upload": "Abort sensor data upload",
+    "list:multipart_upload": "List sensor data uploads",
+    "post:multipart_upload": "Upload sensor data",
+    "abort:multipart_upload": "Abort sensor data upload",
     "list:sensor_data": "List sensor data"
   }
 }

@@ -1,69 +1,69 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
-import { SensorUploadService } from './sensor-upload.service';
+import { SensorUploadService } from './multipart-upload.service';
 import { Authed } from '@/auth/auth.decorator';
 import type { UserPayload } from '@/auth/jwt.schema';
 import {
-  AbortUploadSensorDataResponse,
-  ListUploadSensorDataResponse,
-  PostUploadSensorDataResponse,
-  StartUploadSensorDataRequest,
-  StartUploadSensorDataResponse,
-} from './sensor-upload.dto';
+  AbortMultipartUploadResponse,
+  ListMultipartUploadResponse,
+  PostMultipartUploadResponse,
+  StartMultipartUploadRequest,
+  StartMultipartUploadResponse,
+} from './multipart-upload.dto';
 import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/auth/permission.decorator';
 
 @Controller('sensor-upload')
-export class SensorUploadController {
+export class MultipartUploadController {
   constructor(private readonly sensorUploadService: SensorUploadService) {}
 
   @Get()
-  @ApiResponse({ type: ListUploadSensorDataResponse })
-  @Permission('list:sensor_upload')
-  async listSensorUploads(@Authed() user: UserPayload): Promise<ListUploadSensorDataResponse> {
+  @ApiResponse({ type: ListMultipartUploadResponse })
+  @Permission('list:multipart_upload')
+  async listSensorUploads(@Authed() user: UserPayload): Promise<ListMultipartUploadResponse> {
     return this.sensorUploadService.listSensorUploads(user);
   }
 
   @Post()
-  @ApiBody({ type: StartUploadSensorDataRequest })
-  @ApiResponse({ type: StartUploadSensorDataResponse })
-  @Permission('post:sensor_upload')
+  @ApiBody({ type: StartMultipartUploadRequest })
+  @ApiResponse({ type: StartMultipartUploadResponse })
+  @Permission('post:multipart_upload')
   async startSensorUpload(
     @Authed() user: UserPayload,
-    @Body() body: StartUploadSensorDataRequest,
-  ): Promise<StartUploadSensorDataResponse> {
+    @Body() body: StartMultipartUploadRequest,
+  ): Promise<StartMultipartUploadResponse> {
     return this.sensorUploadService.startSensorUpload(user, body);
   }
 
   @Put(':uploadId')
   @ApiConsumes('text/csv')
   @ApiBody({ description: 'CSVデータ', type: String })
-  @ApiResponse({ type: PostUploadSensorDataResponse })
-  @Permission('post:sensor_upload')
-  async postUploadSensorData(
+  @ApiResponse({ type: PostMultipartUploadResponse })
+  @Permission('post:multipart_upload')
+  async postMultipartUpload(
     @Body() body: string,
     @Authed() user: UserPayload,
     @Param('uploadId') uploadId: string,
-  ): Promise<PostUploadSensorDataResponse> {
-    return this.sensorUploadService.postUploadSensorData(user, uploadId, body);
+  ): Promise<PostMultipartUploadResponse> {
+    return this.sensorUploadService.postMultipartUpload(user, uploadId, body);
   }
 
   @Patch(':uploadId')
-  @ApiResponse({ type: PostUploadSensorDataResponse })
-  @Permission('post:sensor_upload')
+  @ApiResponse({ type: PostMultipartUploadResponse })
+  @Permission('post:multipart_upload')
   async completeSensorUpload(
     @Authed() user: UserPayload,
     @Param('uploadId') uploadId: string,
-  ): Promise<PostUploadSensorDataResponse> {
+  ): Promise<PostMultipartUploadResponse> {
     return this.sensorUploadService.completeSensorUpload(user, uploadId);
   }
 
   @Delete(':uploadId')
-  @ApiResponse({ type: AbortUploadSensorDataResponse })
-  @Permission('abort:sensor_upload')
+  @ApiResponse({ type: AbortMultipartUploadResponse })
+  @Permission('abort:multipart_upload')
   async abortSensorUpload(
     @Authed() user: UserPayload,
     @Param('uploadId') uploadId: string,
-  ): Promise<AbortUploadSensorDataResponse> {
+  ): Promise<AbortMultipartUploadResponse> {
     return this.sensorUploadService.abortSensorUpload(user, uploadId);
   }
 }

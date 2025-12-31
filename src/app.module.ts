@@ -8,7 +8,7 @@ import { UsersService } from './users/users.service';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionGuard } from './auth/permission.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { SensorUploadModule } from './sensor-upload/sensor-upload.module';
+import { SensorUploadModule } from './multipart-upload/multipart-upload.module';
 import { S3Module } from './s3/s3.module';
 import { SensorDataController } from './sensor-data/sensor-data.controller';
 import { SensorDataService } from './sensor-data/sensor-data.service';

@@ -9,7 +9,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { S3Key } from './s3.types';
 import { fromIni } from '@aws-sdk/credential-providers';
-import { SensorUploadParts } from '@/sensor-upload/sensor-upload.model';
+import { SensorUploadParts } from '@/multipart-upload/multipart-upload.model';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()

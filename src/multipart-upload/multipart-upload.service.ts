@@ -7,19 +7,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  SensorUpload,
-  ListUploadSensorDataResponse,
-  AbortUploadSensorDataResponse,
-  StartUploadSensorDataRequest,
-  StartUploadSensorDataResponse,
-  PostUploadSensorDataResponse,
-} from './sensor-upload.dto';
+  MultiPartUpload,
+  ListMultipartUploadResponse,
+  AbortMultipartUploadResponse,
+  StartMultipartUploadRequest,
+  StartMultipartUploadResponse,
+  PostMultipartUploadResponse,
+} from './multipart-upload.dto';
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema, SensorUploadSchema, UserSchema } from '@/_schema';
 import { v4 } from 'uuid';
-import { SensorUploadStatusEnum } from './sensor-upload.model';
+import { SensorUploadStatusEnum } from './multipart-upload.model';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
 import { UsersService } from '@/users/users.service';
 
@@ -31,7 +31,7 @@ export class SensorUploadService {
     private readonly usersService: UsersService,
   ) {}
 
-  async listSensorUploads(user: UserPayload): Promise<ListUploadSensorDataResponse> {
+  async listSensorUploads(user: UserPayload): Promise<ListMultipartUploadResponse> {
     const userRecord = await this.usersService.getUserBySub(user.sub);
 
     const sensorUploadRecords = await this.db.query.SensorUploadSchema.findMany({
@@ -42,7 +42,7 @@ export class SensorUploadService {
       orderBy: desc(SensorUploadSchema.createdAt),
     });
 
-    const sensorUploads: SensorUpload[] = sensorUploadRecords.map((record) => ({
+    const sensorUploads: MultiPartUpload[] = sensorUploadRecords.map((record) => ({
       uploadId: record.id,
       dataName: record.dataName,
       status: record.status,
@@ -55,8 +55,8 @@ export class SensorUploadService {
 
   async startSensorUpload(
     user: UserPayload,
-    body: StartUploadSensorDataRequest,
-  ): Promise<StartUploadSensorDataResponse> {
+    body: StartMultipartUploadRequest,
+  ): Promise<StartMultipartUploadResponse> {
     const userRecord = await this.usersService.getUserBySub(user.sub);
 
     const uploadId = v4();
@@ -99,7 +99,7 @@ export class SensorUploadService {
     }
   }
 
-  async postUploadSensorData(user: UserPayload, uploadId: string, body: string): Promise<PostUploadSensorDataResponse> {
+  async postMultipartUpload(user: UserPayload, uploadId: string, body: string): Promise<PostMultipartUploadResponse> {
     const records = await this.db
       .select()
       .from(SensorUploadSchema)
@@ -168,7 +168,7 @@ export class SensorUploadService {
     };
   }
 
-  async completeSensorUpload(user: UserPayload, uploadId: string): Promise<PostUploadSensorDataResponse> {
+  async completeSensorUpload(user: UserPayload, uploadId: string): Promise<PostMultipartUploadResponse> {
     const records = await this.db
       .select()
       .from(SensorUploadSchema)
@@ -222,7 +222,7 @@ export class SensorUploadService {
     };
   }
 
-  async abortSensorUpload(user: UserPayload, uploadId: string): Promise<AbortUploadSensorDataResponse> {
+  async abortSensorUpload(user: UserPayload, uploadId: string): Promise<AbortMultipartUploadResponse> {
     const records = await this.db
       .select()
       .from(SensorUploadSchema)
