@@ -2,7 +2,15 @@ import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BasePathMapping, DomainName, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
-import { InstanceClass, InstanceSize, InstanceType, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import {
+  InstanceClass,
+  InstanceSize,
+  InstanceType,
+  InterfaceVpcEndpointAwsService,
+  SecurityGroup,
+  SubnetType,
+  Vpc,
+} from 'aws-cdk-lib/aws-ec2';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -36,24 +44,38 @@ interface BackendStackProps extends cdk.StackProps {
 
 export class BackendStack extends cdk.Stack {
   private readonly stage: Stage;
-  private readonly vpc: Vpc;
-  private readonly securityGroup: SecurityGroup;
-  public readonly nestFunction: NodejsFunction;
-  public readonly restApi: RestApi;
-  public readonly credentials: Secret;
-  public readonly databaseInstance: DatabaseInstance;
 
   constructor(scope: cdk.App, id: string, { stage, ...props }: BackendStackProps) {
     super(scope, id, props);
 
     this.stage = stage;
     const vpc = this.createVpc();
-    const securityGroup = this.createSecurityGroup(vpc);
+
+    vpc.addInterfaceEndpoint('SsmEndpoint', {
+      service: InterfaceVpcEndpointAwsService.SSM,
+    });
+
+    vpc.addInterfaceEndpoint('Ec2MessagesEndpoint', {
+      service: InterfaceVpcEndpointAwsService.EC2_MESSAGES,
+    });
+
+    vpc.addInterfaceEndpoint('SsmMessagesEndpoint', {
+      service: InterfaceVpcEndpointAwsService.SSM_MESSAGES,
+    });
+
+    const lambdaSecurityGroup = this.createSecurityGroup(vpc, 'lambda');
+    const rdsSecurityGroup = this.createSecurityGroup(vpc, 'rds');
+
+    rdsSecurityGroup.addIngressRule(
+      lambdaSecurityGroup,
+      cdk.aws_ec2.Port.tcp(3306),
+      'Allow Lambda functions to access RDS instance on port 3306',
+    );
 
     const credentials = this.createRdsCredentials();
-    const databaseInstance = this.createRdsInstance(vpc, securityGroup, credentials);
+    const databaseInstance = this.createRdsInstance(vpc, rdsSecurityGroup, credentials);
     const databaseUrl = this.createDatabaseUrl(credentials, databaseInstance);
-    const nestFunction = this.createNestFunction(vpc, securityGroup, databaseUrl);
+    const nestFunction = this.createNestFunction(vpc, lambdaSecurityGroup, databaseUrl);
     const restApi = this.createRestApi(nestFunction);
     const userPool = this.createCognitoUserPool();
 
@@ -67,13 +89,6 @@ export class BackendStack extends cdk.Stack {
         resources: [userPool.userPoolArn],
       }),
     );
-
-    this.vpc = vpc;
-    this.securityGroup = securityGroup;
-    this.credentials = credentials;
-    this.databaseInstance = databaseInstance;
-    this.nestFunction = nestFunction;
-    this.restApi = restApi;
   }
 
   private createVpc() {
@@ -89,8 +104,8 @@ export class BackendStack extends cdk.Stack {
     });
   }
 
-  private createSecurityGroup(vpc: Vpc) {
-    return new SecurityGroup(this, 'BackendSecurityGroup', {
+  private createSecurityGroup(vpc: Vpc, name: string) {
+    return new SecurityGroup(this, `SecurityGroup-${name}`, {
       vpc: vpc,
     });
   }
@@ -101,13 +116,14 @@ export class BackendStack extends cdk.Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_22_X,
       memorySize: 256,
-      timeout: Duration.seconds(10),
+      timeout: Duration.seconds(30),
       vpc: vpc,
       securityGroups: [securityGroup],
       environment: {
         NO_COLOR: 'true',
         DATABASE_URL: databaseUrl,
         JWT_SECRET: process.env.JWT_SECRET!,
+        S3_BUCKET_NAME: process.env.S3_BUCKET_NAME!,
       },
     });
   }
