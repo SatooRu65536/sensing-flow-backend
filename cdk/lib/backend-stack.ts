@@ -165,6 +165,8 @@ export class BackendStack extends cdk.Stack {
         subnetGroupName: 'PrivateSubnetWithEgress',
       },
     });
+
+    bastion.instance.addUserData('yum update -y', 'yum install -y mysql');
     bastion.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2ReadOnlyAccess'));
     bastion.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'));
 
