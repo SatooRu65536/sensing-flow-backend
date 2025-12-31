@@ -9,7 +9,7 @@ import {
 import {
   SensorUpload,
   AbortUploadSensorDataResponse,
-  GetUploadSensorDataResponse,
+  ListUploadSensorDataResponse,
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
   PostUploadSensorDataResponse,
@@ -29,7 +29,7 @@ export class SensorUploadService {
     private readonly s3Service: S3Service,
   ) {}
 
-  async listSensorUploads(user: UserPayload): Promise<GetUploadSensorDataResponse> {
+  async listSensorUploads(user: UserPayload): Promise<ListUploadSensorDataResponse> {
     const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, user.sub) });
 
     if (userRecord == null) {

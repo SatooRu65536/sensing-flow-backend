@@ -4,7 +4,7 @@ import { Authed } from '@/auth/auth.decorator';
 import type { UserPayload } from '@/auth/jwt.schema';
 import {
   AbortUploadSensorDataResponse,
-  GetUploadSensorDataResponse,
+  ListUploadSensorDataResponse,
   PostUploadSensorDataResponse,
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
@@ -17,9 +17,9 @@ export class SensorUploadController {
   constructor(private readonly sensorUploadService: SensorUploadService) {}
 
   @Get()
-  @ApiResponse({ type: GetUploadSensorDataResponse })
+  @ApiResponse({ type: ListUploadSensorDataResponse })
   @Permission('list:sensor_uploads')
-  async listSensorUploads(@Authed() user: UserPayload): Promise<GetUploadSensorDataResponse> {
+  async listSensorUploads(@Authed() user: UserPayload): Promise<ListUploadSensorDataResponse> {
     return this.sensorUploadService.listSensorUploads(user);
   }
 

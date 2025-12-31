@@ -25,7 +25,7 @@ export class SensorUpload {
   updatedAt: Date;
 }
 
-export class GetUploadSensorDataResponse {
+export class ListUploadSensorDataResponse {
   @ApiProperty({ description: 'センサデータアップロード一覧', type: SensorUpload, isArray: true })
   @IsArray()
   @ValidateNested({ each: true })
