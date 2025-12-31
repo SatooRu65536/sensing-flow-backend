@@ -3,10 +3,12 @@ import * as cdk from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BasePathMapping, DomainName, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import {
+  BastionHostLinux,
   InstanceClass,
   InstanceSize,
   InstanceType,
   InterfaceVpcEndpointAwsService,
+  Port,
   SecurityGroup,
   SubnetType,
   Vpc,
@@ -31,7 +33,7 @@ import {
   UserPoolDomain,
   UserPoolIdentityProviderGoogle,
 } from 'aws-cdk-lib/aws-cognito';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 const callbackUrls = process.env.CALLBACK_URLS ? process.env.CALLBACK_URLS.split(',') : [];
 const logoutUrls = process.env.LOGOUT_URLS ? process.env.LOGOUT_URLS.split(',') : [];
@@ -65,11 +67,17 @@ export class BackendStack extends cdk.Stack {
 
     const lambdaSecurityGroup = this.createSecurityGroup(vpc, 'lambda');
     const rdsSecurityGroup = this.createSecurityGroup(vpc, 'rds');
+    const bastionSecurityGroup = this.createSecurityGroup(vpc, 'bastion');
 
     rdsSecurityGroup.addIngressRule(
       lambdaSecurityGroup,
-      cdk.aws_ec2.Port.tcp(3306),
+      Port.tcp(3306),
       'Allow Lambda functions to access RDS instance on port 3306',
+    );
+    bastionSecurityGroup.addIngressRule(
+      bastionSecurityGroup,
+      Port.tcp(3306),
+      'Allow Bastion host to access RDS instance on port 3306',
     );
 
     const credentials = this.createRdsCredentials();
@@ -79,6 +87,7 @@ export class BackendStack extends cdk.Stack {
     const restApi = this.createRestApi(nestFunction);
     const userPool = this.createCognitoUserPool();
 
+    this.createBastionHost(vpc, bastionSecurityGroup);
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
     this.createS3Bucket();
@@ -99,6 +108,10 @@ export class BackendStack extends cdk.Stack {
         {
           name: 'IsolatedSubnet',
           subnetType: SubnetType.PRIVATE_ISOLATED,
+        },
+        {
+          name: 'PrivateSubnetWithEgress',
+          subnetType: SubnetType.PRIVATE_WITH_EGRESS,
         },
       ],
     });
@@ -142,6 +155,21 @@ export class BackendStack extends cdk.Stack {
     });
 
     return restApi;
+  }
+
+  private createBastionHost(vpc: Vpc, securityGroup: SecurityGroup) {
+    const bastion = new BastionHostLinux(this, 'BastionHost', {
+      vpc: vpc,
+      securityGroup: securityGroup,
+      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
+      subnetSelection: {
+        subnetGroupName: 'PrivateSubnetWithEgress',
+      },
+    });
+    bastion.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2ReadOnlyAccess'));
+    bastion.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'));
+
+    return bastion;
   }
 
   private warmer(handler: IFunction) {
