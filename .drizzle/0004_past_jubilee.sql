@@ -1,0 +1,1 @@
+ALTER TABLE `sensor_uploads` MODIFY COLUMN `parts` json NOT NULL DEFAULT ('[]');

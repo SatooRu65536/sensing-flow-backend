@@ -23,7 +23,7 @@ export async function bootstrap() {
 
   nestApp.enableShutdownHooks();
   nestApp.use(bodyParser.json({ limit: '15mb' }));
-  nestApp.use(bodyParser.text({ type: 'text/csv' }));
+  nestApp.use(bodyParser.text({ type: 'text/csv', limit: '100mb' }));
 
   if (process.env.ENV_DEV === 'true') {
     const config = new DocumentBuilder()

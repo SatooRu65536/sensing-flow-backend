@@ -51,6 +51,7 @@ export class UsersService {
         case ErrorCodeEnum.DUPLICATE_ENTRY:
           throw new BadRequestException('登録済みのユーザーです', { cause: error });
         default:
+          console.error(error.cause);
           throw new InternalServerErrorException('Failed to create user', { cause: error });
       }
     }

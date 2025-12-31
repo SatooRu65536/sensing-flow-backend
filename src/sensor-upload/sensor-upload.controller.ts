@@ -9,7 +9,7 @@ import {
   StartUploadSensorDataRequest,
   StartUploadSensorDataResponse,
 } from './sensor-upload.dto';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/auth/permission.decorator';
 
 @Controller('sensor-upload')
@@ -35,6 +35,7 @@ export class SensorUploadController {
   }
 
   @Put(':uploadId')
+  @ApiConsumes('text/csv')
   @ApiBody({ description: 'CSVデータ', type: String })
   @ApiResponse({ type: PostUploadSensorDataResponse })
   @Permission('post:sensor_uploads')

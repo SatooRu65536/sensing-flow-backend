@@ -30,9 +30,15 @@ export class SensorUploadService {
   ) {}
 
   async listSensorUploads(user: UserPayload): Promise<GetUploadSensorDataResponse> {
+    const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, user.sub) });
+
+    if (userRecord == null) {
+      throw new NotFoundException('User not found');
+    }
+
     const sensorUploadRecords = await this.db.query.SensorUploadSchema.findMany({
       where: and(
-        eq(SensorUploadSchema.userId, user.sub),
+        eq(SensorUploadSchema.userId, userRecord.id),
         eq(SensorUploadSchema.status, SensorUploadStatusEnum.IN_PROGRESS),
       ),
       orderBy: desc(SensorUploadSchema.createdAt),
@@ -93,6 +99,7 @@ export class SensorUploadService {
         case ErrorCodeEnum.DUPLICATE_ENTRY:
           throw new BadRequestException('既に存在するアップロードIDです', { cause: error });
         default:
+          console.error(error.cause);
           throw new InternalServerErrorException('Failed to create sensor upload record', { cause: error });
       }
     }
@@ -128,8 +135,36 @@ export class SensorUploadService {
     const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
 
     try {
-      await this.s3Service.postMultipartUpload(sensorUploadKey, record.sensor_uploads.s3uploadId, partNumber, body);
+      const multupartUploadRes = await this.s3Service.postMultipartUpload(
+        sensorUploadKey,
+        record.sensor_uploads.s3uploadId,
+        partNumber,
+        body,
+      );
+
+      const etag = multupartUploadRes.ETag;
+      if (etag == null) {
+        throw new InternalServerErrorException('Failed to upload part: ETag is null');
+      }
+
+      await this.db.transaction(async (tx) => {
+        const sensorUploadRecord = await tx.query.SensorUploadSchema.findFirst({
+          where: eq(SensorUploadSchema.id, record.sensor_uploads.id),
+        });
+
+        if (sensorUploadRecord == null) {
+          throw new NotFoundException('Sensor upload not found in transaction');
+        }
+
+        await tx
+          .update(SensorUploadSchema)
+          .set({
+            parts: [...sensorUploadRecord.parts, { partNumber, etag }],
+          })
+          .where(eq(SensorUploadSchema.id, sensorUploadRecord.id));
+      });
     } catch (e) {
+      console.error(e);
       throw new InternalServerErrorException('Failed to upload part', { cause: e });
     }
 
@@ -168,6 +203,7 @@ export class SensorUploadService {
         record.sensor_uploads.parts,
       );
     } catch (e) {
+      console.error(e);
       throw new InternalServerErrorException('Failed to complete multipart upload', { cause: e });
     }
 
@@ -207,6 +243,7 @@ export class SensorUploadService {
       const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
       await this.s3Service.abortMultipartUpload(sensorUploadKey, record.sensor_uploads.s3uploadId);
     } catch (e) {
+      console.error(e);
       throw new InternalServerErrorException('Failed to abort multipart upload', { cause: e });
     }
 
