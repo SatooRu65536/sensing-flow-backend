@@ -2,17 +2,7 @@ import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BasePathMapping, DomainName, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
-import {
-  BastionHostLinux,
-  InstanceClass,
-  InstanceSize,
-  InstanceType,
-  InterfaceVpcEndpointAwsService,
-  Port,
-  SecurityGroup,
-  SubnetType,
-  Vpc,
-} from 'aws-cdk-lib/aws-ec2';
+import { InstanceClass, InstanceSize, InstanceType, Port, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Rule, RuleTargetInput, Schedule } from 'aws-cdk-lib/aws-events';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -32,7 +22,7 @@ import {
   UserPoolDomain,
   UserPoolIdentityProviderGoogle,
 } from 'aws-cdk-lib/aws-cognito';
-import { ManagedPolicy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 const callbackUrls = process.env.CALLBACK_URLS ? process.env.CALLBACK_URLS.split(',') : [];
 const logoutUrls = process.env.LOGOUT_URLS ? process.env.LOGOUT_URLS.split(',') : [];
@@ -52,31 +42,13 @@ export class BackendStack extends cdk.Stack {
     this.stage = stage;
     const vpc = this.createVpc();
 
-    vpc.addInterfaceEndpoint('SsmEndpoint', {
-      service: InterfaceVpcEndpointAwsService.SSM,
-    });
-
-    vpc.addInterfaceEndpoint('Ec2MessagesEndpoint', {
-      service: InterfaceVpcEndpointAwsService.EC2_MESSAGES,
-    });
-
-    vpc.addInterfaceEndpoint('SsmMessagesEndpoint', {
-      service: InterfaceVpcEndpointAwsService.SSM_MESSAGES,
-    });
-
     const lambdaSecurityGroup = this.createSecurityGroup(vpc, 'lambda');
     const rdsSecurityGroup = this.createSecurityGroup(vpc, 'rds');
-    const bastionSecurityGroup = this.createSecurityGroup(vpc, 'bastion');
 
     rdsSecurityGroup.addIngressRule(
       lambdaSecurityGroup,
       Port.tcp(3306),
       'Allow Lambda functions to access RDS instance on port 3306',
-    );
-    bastionSecurityGroup.addIngressRule(
-      bastionSecurityGroup,
-      Port.tcp(3306),
-      'Allow Bastion host to access RDS instance on port 3306',
     );
 
     const credentials = this.createRdsCredentials();
@@ -86,7 +58,6 @@ export class BackendStack extends cdk.Stack {
     const restApi = this.createRestApi(nestFunction);
     const userPool = this.createCognitoUserPool();
 
-    this.createBastionHost(vpc, bastionSecurityGroup);
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
     this.createS3Bucket();
@@ -154,23 +125,6 @@ export class BackendStack extends cdk.Stack {
     });
 
     return restApi;
-  }
-
-  private createBastionHost(vpc: Vpc, securityGroup: SecurityGroup) {
-    const bastion = new BastionHostLinux(this, 'BastionHost', {
-      vpc: vpc,
-      securityGroup: securityGroup,
-      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
-      subnetSelection: {
-        subnetGroupName: 'PrivateSubnetWithEgress',
-      },
-    });
-
-    bastion.instance.addUserData('yum update -y', 'yum install -y mysql');
-    bastion.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2ReadOnlyAccess'));
-    bastion.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'));
-
-    return bastion;
   }
 
   private warmer(handler: IFunction) {
