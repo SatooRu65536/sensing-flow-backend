@@ -19,7 +19,8 @@
     "deploy:prod": "pnpm build && env:prod cdk deploy --all --profile sensing-flow-prod --region ap-northeast-1 --require-approval never --context env=prod",
     "generate": "drizzle-kit generate",
     "migrate:dev": "pnpm env:dev drizzle-kit migrate",
-    "studio:dev": "pnpm env:dev drizzle-kit studio"
+    "studio:dev": "pnpm env:dev drizzle-kit studio",
+    "basti:connect": "basti connect --aws-profile sensing-flow-dev --aws-region ap-northeast-1"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",
@@ -31,6 +32,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.10",
     "@nestjs/swagger": "^11.2.3",
+    "basti-cdk": "^1.1.1",
     "body-parser": "^2.2.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",

@@ -35,6 +35,9 @@ importers:
       '@nestjs/swagger':
         specifier: ^11.2.3
         version: 11.2.3(@nestjs/common@11.1.10(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.10)(class-transformer@0.5.1)(class-validator@0.14.3)(reflect-metadata@0.2.2)
+      basti-cdk:
+        specifier: ^1.1.1
+        version: 1.1.1(aws-cdk-lib@2.233.0(constructs@10.4.4))(constructs@10.4.4)
       body-parser:
         specifier: ^2.2.1
         version: 2.2.1
@@ -2159,6 +2162,12 @@ packages:
   baseline-browser-mapping@2.9.11:
     resolution: {integrity: sha512-Sg0xJUNDU1sJNGdfGWhVHX0kkZ+HWcvmVymJbj6NSgZZmW/8S9Y2HQ5euytnIgakgxN6papOAWiwDo1ctFDcoQ==}
     hasBin: true
+
+  basti-cdk@1.1.1:
+    resolution: {integrity: sha512-hmV0tPzZYv5McIM18Dkkz3BgSCQ7BebsHga3V23arcFwsJqUyU11eMOPhFFtZXdsm3hFviAet29SIH7UgB6wrw==}
+    peerDependencies:
+      aws-cdk-lib: ^2.86.0
+      constructs: ^10.0.5
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
@@ -6689,6 +6698,11 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.9.11: {}
+
+  basti-cdk@1.1.1(aws-cdk-lib@2.233.0(constructs@10.4.4))(constructs@10.4.4):
+    dependencies:
+      aws-cdk-lib: 2.233.0(constructs@10.4.4)
+      constructs: 10.4.4
 
   bl@4.1.0:
     dependencies:

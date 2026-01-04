@@ -23,6 +23,7 @@ import {
   UserPoolIdentityProviderGoogle,
 } from 'aws-cdk-lib/aws-cognito';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { BastiAccessSecurityGroup, BastiInstance } from 'basti-cdk';
 
 const callbackUrls = process.env.CALLBACK_URLS ? process.env.CALLBACK_URLS.split(',') : [];
 const logoutUrls = process.env.LOGOUT_URLS ? process.env.LOGOUT_URLS.split(',') : [];
@@ -44,15 +45,9 @@ export class BackendStack extends cdk.Stack {
 
     const lambdaSecurityGroup = this.createSecurityGroup(vpc, 'lambda');
     const rdsSecurityGroup = this.createSecurityGroup(vpc, 'rds');
-
-    rdsSecurityGroup.addIngressRule(
-      lambdaSecurityGroup,
-      Port.tcp(3306),
-      'Allow Lambda functions to access RDS instance on port 3306',
-    );
-
     const credentials = this.createRdsCredentials();
-    const databaseInstance = this.createRdsInstance(vpc, rdsSecurityGroup, credentials);
+    const { bastiInstance, bastiAccessSecurityGroup } = this.createBastionInstance(vpc);
+    const databaseInstance = this.createRdsInstance(vpc, [rdsSecurityGroup, bastiAccessSecurityGroup], credentials);
     const databaseUrl = this.createDatabaseUrl(credentials, databaseInstance);
     const nestFunction = this.createNestFunction(vpc, lambdaSecurityGroup, databaseUrl);
     const restApi = this.createRestApi(nestFunction);
@@ -61,6 +56,14 @@ export class BackendStack extends cdk.Stack {
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
     this.createS3Bucket();
+
+    rdsSecurityGroup.addIngressRule(
+      lambdaSecurityGroup,
+      Port.tcp(3306),
+      'Allow Lambda functions to access RDS instance on port 3306',
+    );
+
+    bastiAccessSecurityGroup.allowBastiInstanceConnection(bastiInstance, Port.tcp(3306));
 
     nestFunction.addToRolePolicy(
       new PolicyStatement({
@@ -76,12 +79,14 @@ export class BackendStack extends cdk.Stack {
       natGateways: 0,
       subnetConfiguration: [
         {
+          cidrMask: 24,
           name: 'IsolatedSubnet',
           subnetType: SubnetType.PRIVATE_ISOLATED,
         },
         {
-          name: 'PrivateSubnetWithEgress',
-          subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+          cidrMask: 24,
+          name: 'PublicSubnet',
+          subnetType: SubnetType.PUBLIC,
         },
       ],
     });
@@ -140,12 +145,10 @@ export class BackendStack extends cdk.Stack {
   }
 
   private addCustomDomain(restApi: RestApi) {
+    const certArn = StringParameter.valueForStringParameter(this, `/api-cert-arn/${this.stage}`);
+
     // ACM 証明書
-    const certificate = Certificate.fromCertificateArn(
-      this,
-      'ApiCert',
-      `arn:aws:acm:${this.region}:${this.account}:certificate/9f1620c1-fe95-4e9a-b358-94eaa8f88e91`,
-    );
+    const certificate = Certificate.fromCertificateArn(this, 'ApiCert', certArn);
 
     // カスタムドメイン
     const domain = new DomainName(this, 'CustomDomain', {
@@ -173,13 +176,13 @@ export class BackendStack extends cdk.Stack {
     });
   }
 
-  private createRdsInstance(vpc: Vpc, securityGroup: SecurityGroup, credentials: Secret) {
+  private createRdsInstance(vpc: Vpc, securityGroups: SecurityGroup[], credentials: Secret) {
     return new DatabaseInstance(this, 'SensingFlowDB', {
       vpc: vpc,
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_ISOLATED,
       },
-      securityGroups: [securityGroup],
+      securityGroups: securityGroups,
       instanceType: InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MICRO),
       engine: DatabaseInstanceEngine.mysql({
         version: MysqlEngineVersion.VER_8_0,
@@ -282,5 +285,20 @@ export class BackendStack extends cdk.Stack {
     userPoolClient.node.addDependency(googleIdp);
 
     return userPool;
+  }
+
+  private createBastionInstance(vpc: Vpc) {
+    const bastiInstance = new BastiInstance(this, 'BastionInstance', {
+      vpc,
+      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MICRO),
+      bastiId: `sensing-flow-bastion-${this.stage}`,
+    });
+
+    const bastiAccessSecurityGroup = new BastiAccessSecurityGroup(this, 'BastiAccessSecurityGroup', {
+      vpc,
+      bastiId: `sensing-flow-bastion-${this.stage}`,
+    });
+
+    return { bastiInstance, bastiAccessSecurityGroup };
   }
 }
