@@ -2,25 +2,31 @@
   "plans": {
     "guest": {
       "selectable": true,
-      "permissions": []
+      "permissions": {}
     },
     "trial": {
       "selectable": true,
-      "permissions": []
+      "permissions": {}
     },
     "basic": {
       "selectable": true,
-      "permissions": []
+      "permissions": {}
     },
     "pro": {
       "selectable": true,
-      "permissions": []
+      "permissions": {}
     },
     "admin": {
       "selectable": false,
-      "permissions": [
-        "*"
-      ]
+      "permissions": {
+        "*": "*"
+      }
+    },
+    "developer": {
+      "selectable": false,
+      "permissions": {
+        "test:rate_limit": "1/30secs"
+      }
     }
   }
 }

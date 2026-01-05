@@ -10,27 +10,37 @@
           "trial",
           "basic",
           "pro",
-          "admin"
+          "admin",
+          "developer"
         ]
       },
       "additionalProperties": {
         "type": "object",
         "properties": {
+          "selectable": {
+            "type": "boolean"
+          },
           "permissions": {
-            "type": "array",
-            "items": {
+            "type": "object",
+            "propertyNames": {
               "type": "string",
               "enum": [
                 "list:multipart_upload",
                 "post:multipart_upload",
                 "abort:multipart_upload",
                 "list:sensor_data",
+                "test:rate_limit",
                 "*"
               ]
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(\\*|\\d+/(1?(sec|min|hour|day)|[2-9]\\d*(secs|mins|hours|days)))$"
+                }
+              ]
             }
-          },
-          "selectable": {
-            "type": "boolean"
           }
         },
         "required": [

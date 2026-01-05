@@ -21,7 +21,7 @@ export const UserSchema = mysqlTable('users', {
   id: uuid('id').primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   sub: varchar('sub', { length: 255 }).notNull().unique(),
-  plan: varchar('plan', { enum: ['guest', 'trial', 'basic', 'pro', 'admin'], length: 16 }).notNull(),
+  plan: varchar('plan', { enum: ['guest', 'trial', 'basic', 'pro', 'admin', 'developer'], length: 16 }).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -48,4 +48,13 @@ export const SensorDataSchema = mysqlTable('sensor_data', {
   s3key: varchar('s3_key', { length: 255 }).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+});
+
+export const RateLimitLogSchema = mysqlTable('rate_limit_logs', {
+  id: uuid('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => UserSchema.id),
+  permission: varchar('permission', { length: 255 }).notNull(),
+  timestamp: datetime('timestamp', { mode: 'date' }).notNull(),
 });

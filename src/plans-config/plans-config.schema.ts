@@ -24,12 +24,58 @@ export const permissionsConfigSchema = z.strictObject({
 });
 export type PermissionsConfig = z.infer<typeof permissionsConfigSchema>;
 
+export const rateLimitStringSchema = z
+  .string()
+  .regex(
+    /^(\*|\d+\/(1?(sec|min|hour|day)|[2-9]\d*(secs|mins|hours|days)))$/,
+    'Rate limit must be in the format "1/1sec", "*/1min", or "1/2hours"',
+  )
+  .transform((val) => {
+    if (val === '*') return undefined;
+
+    const [countStr, unitStr] = val.split('/'); // "5/2hours" → ["5","2hours"]
+    const count = Number(countStr);
+
+    // 数字部分と単位部分を分離
+    const match = unitStr.match(/^(\d*)(sec|min|hour|day)s?$/);
+    if (!match) throw new Error('Invalid unit');
+
+    const [, numStr, unit] = match;
+    const unitNum = numStr ? Number(numStr) : 1; // 1sec の場合 numStr は空
+
+    switch (unit) {
+      case 'sec':
+        return {
+          count,
+          limitSec: unitNum,
+        };
+      case 'min':
+        return {
+          count,
+          limitSec: unitNum * 60,
+        };
+      case 'hour':
+        return {
+          count,
+          limitSec: unitNum * 60 * 60,
+        };
+      case 'day':
+        return {
+          count,
+          limitSec: unitNum * 60 * 60 * 24,
+        };
+      default:
+        throw new Error('Unknown unit');
+    }
+  });
+export type RateLimit = z.infer<typeof rateLimitStringSchema>;
+
 export const plansConfigSchema = z.strictObject({
   plans: z.record(
     planEnumSchema,
     z.strictObject({
       selectable: z.boolean().optional().default(true),
-      permissions: z.array(permissionNameSchema),
+      permissions: z.record(permissionNameSchema, rateLimitStringSchema),
     }),
   ),
 });
@@ -60,15 +106,23 @@ export type PermissionEnum = z.infer<typeof permissionEnumSchema>;
         additionalProperties: {
           type: 'object',
           properties: {
+            selectable: {
+              type: 'boolean',
+            },
             permissions: {
-              type: 'array',
-              items: {
+              type: 'object',
+              propertyNames: {
                 type: 'string',
                 enum: [...permissionNames, '*'],
               },
-            },
-            selectable: {
-              type: 'boolean',
+              additionalProperties: {
+                anyOf: [
+                  {
+                    type: 'string',
+                    pattern: '^(\\*|\\d+/(1?(sec|min|hour|day)|[2-9]\\d*(secs|mins|hours|days)))$',
+                  },
+                ],
+              },
             },
           },
           required: ['selectable', 'permissions'],

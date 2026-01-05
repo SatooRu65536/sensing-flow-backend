@@ -1,0 +1,2 @@
+GET {{baseUrl}}/rate-limit/test
+Authorization: Bearer {{$dotenv TOKEN}}

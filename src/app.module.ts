@@ -13,9 +13,10 @@ import { SensorDataController } from './sensor-data/sensor-data.controller';
 import { SensorDataService } from './sensor-data/sensor-data.service';
 import { SensorDataModule } from './sensor-data/sensor-data.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { RateLimitModule } from './rate-limit/rate-limit.module';
 
 @Module({
-  imports: [AuthModule, DatabaseModule, UsersModule, SensorUploadModule, S3Module, SensorDataModule],
+  imports: [AuthModule, DatabaseModule, UsersModule, SensorUploadModule, S3Module, SensorDataModule, RateLimitModule],
   controllers: [AppController, SensorDataController],
   providers: [
     AppService,

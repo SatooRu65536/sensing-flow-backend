@@ -3,6 +3,7 @@
     "list:multipart_upload": "List sensor data uploads",
     "post:multipart_upload": "Upload sensor data",
     "abort:multipart_upload": "Abort sensor data upload",
-    "list:sensor_data": "List sensor data"
+    "list:sensor_data": "List sensor data",
+    "test:rate_limit": "Test rate limit functionality"
   }
 }

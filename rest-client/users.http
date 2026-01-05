@@ -1,5 +1,11 @@
 POST {{baseUrl}}/users
 Authorization: Bearer {{$dotenv TOKEN}}
+Content-Type: application/json
+
+{
+    "name": "guest user",
+    "plan": "guest"
+}
 
 ###
 

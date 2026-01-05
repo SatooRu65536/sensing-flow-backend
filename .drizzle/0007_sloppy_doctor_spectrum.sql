@@ -1,0 +1,1 @@
+ALTER TABLE `rate_limit_logs` DROP COLUMN `created_at`;
