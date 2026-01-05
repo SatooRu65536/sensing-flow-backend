@@ -1,4 +1,9 @@
 {
+  "exclude": [
+    "node_modules",
+    "cdk.out",
+    "dist",
+  ],
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
