@@ -6,7 +6,8 @@
     "tsconfig.json": "tsconfig.*.json",
     "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, bun.lock",
     "*.json": "${capture}.schema.json,${capture}.gen.ts",
-    ".env.example": ".env.*"
+    ".env.example.rest-client": ".env",
+    ".env.example": ".env.development*,.env.staging*,.env.production*",
   },
   "files.exclude": {
     ".dart_tool": true,
@@ -42,5 +43,22 @@
       ],
       "url": "/src/plans.schema.json"
     }
-  ]
+  ],
+  "rest-client.environmentVariables": {
+    "$shared": {
+      "baseUrl": "http://localhost:5173"
+    },
+    "local": {
+      "baseUrl": "http://localhost:5173"
+    },
+    "dev": {
+      "baseUrl": "https://sensing-flow-api-dev.satooru.dev"
+    },
+    "stg": {
+      "baseUrl": "https://sensing-flow-api-stg.satooru.dev"
+    },
+    "prod": {
+      "baseUrl": "https://sensing-flow-api.satooru.dev"
+    }
+  },
 }

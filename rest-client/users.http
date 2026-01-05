@@ -1,0 +1,7 @@
+POST {{baseUrl}}/users
+Authorization: Bearer {{$dotenv TOKEN}}
+
+###
+
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{$dotenv TOKEN}}
