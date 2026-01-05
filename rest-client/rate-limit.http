@@ -1,2 +1,3 @@
 GET {{baseUrl}}/rate-limit/test
 Authorization: Bearer {{$dotenv TOKEN}}
+Content-Type: application/json
