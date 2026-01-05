@@ -246,11 +246,13 @@ export class BackendStack extends cdk.Stack {
     });
 
     const userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
+      userPoolClientName: `sensing-flow-user-pool-client-${this.stage}`,
       userPool,
       generateSecret: false,
       authFlows: {
         userSrp: true,
         userPassword: true,
+        adminUserPassword: true,
       },
       oAuth: {
         flows: {

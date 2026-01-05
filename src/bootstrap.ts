@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { LogLevel, ValidationPipe } from '@nestjs/common';
 import bodyParser from 'body-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { generatePermissionEnumSchema } from './plans-config/plans-config.schema';
 
 export async function bootstrap() {
-  const nestApp = await NestFactory.create(AppModule);
+  const loggerLevels: LogLevel[] = ['warn', 'error', 'debug'];
+  const nestApp = await NestFactory.create(AppModule, { logger: loggerLevels });
 
   nestApp.enableCors({
     origin: '*',
