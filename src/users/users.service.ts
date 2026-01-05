@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import type { DbType } from '../database/database.module';
 import { UserPayload } from '@/auth/jwt.schema';
-import { CreateUserRequest, CreateUserResponse, GetPlanResponse } from './users.dto';
+import { CreateUserRequest, CreateUserResponse, GetPlanResponse, GetUserResponse } from './users.dto';
 import { UserSchema } from '@/_schema';
 import { eq } from 'drizzle-orm';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
@@ -55,6 +55,17 @@ export class UsersService {
           throw new InternalServerErrorException('Failed to create user', { cause: error });
       }
     }
+  }
+
+  async getMe(user: UserPayload): Promise<GetUserResponse> {
+    const userRecord = await this.getUserBySub(user.sub);
+    return {
+      id: userRecord.id,
+      name: userRecord.name,
+      plan: userRecord.plan,
+      createdAt: userRecord.createdAt,
+      updatedAt: userRecord.updatedAt,
+    };
   }
 
   async getPlan(user: UserPayload): Promise<GetPlanResponse> {

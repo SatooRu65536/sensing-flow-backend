@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserRequest, CreateUserResponse, GetPlanResponse } from './users.dto';
+import { CreateUserRequest, CreateUserResponse, GetPlanResponse, GetUserResponse } from './users.dto';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import type { UserPayload } from '@/auth/jwt.schema';
 import { Authed } from '@/auth/auth.decorator';
@@ -16,6 +16,13 @@ export class UsersController {
   @AuthorizationApi()
   async createUser(@Authed() user: UserPayload, @Body() body: CreateUserRequest): Promise<CreateUserResponse> {
     return this.usersService.createUser(user, body);
+  }
+
+  @Get('/me')
+  @ApiResponse({ type: GetUserResponse })
+  @AuthorizationApi()
+  async getMe(@Authed() user: UserPayload): Promise<GetUserResponse> {
+    return this.usersService.getMe(user);
   }
 
   @Get('/plan')
