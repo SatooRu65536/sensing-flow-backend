@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, InternalServerErrorException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from './permission.decorator';
 import plansMap from '../plans.json';
@@ -35,9 +35,12 @@ export class PermissionGuard implements CanActivate {
     if (Object.keys(permissions).includes('*')) return true;
 
     const rateLimitStr: string | undefined = permissions[requiredPermission];
-    const rateLimit = rateLimitStringSchema.parse(rateLimitStr);
+    if (rateLimitStr == undefined) return false;
 
-    const isWithinLimit = await this.rateLimitService.checkRateLimit(user, requiredPermission, rateLimit);
+    const rateLimit = rateLimitStringSchema.safeParse(rateLimitStr);
+    if (!rateLimit.success) throw new InternalServerErrorException('Invalid rate limit configuration');
+
+    const isWithinLimit = await this.rateLimitService.checkRateLimit(user, requiredPermission, rateLimit.data);
     if (!isWithinLimit) throw new TooManyRequestsException();
 
     await this.rateLimitService.logRateLimit(user, requiredPermission);
