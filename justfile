@@ -68,6 +68,14 @@ setup-users:
     just setup-user $ADMIN_USER_USERNAME $ADMIN_USER_PASSWORD pro # 仮で pro プランで登録
     just setup-user $DEVELOPER_USER_USERNAME $DEVELOPER_USER_PASSWORD pro # 仮で pro プランで登録
 
+register-users:
+    just register-user $GUEST_USER_USERNAME $GUEST_USER_PASSWORD guest
+    just register-user $TRIAL_USER_USERNAME $TRIAL_USER_PASSWORD trial
+    just register-user $BASIC_USER_USERNAME $BASIC_USER_PASSWORD basic
+    just register-user $PRO_USER_USERNAME $PRO_USER_PASSWORD pro
+    just register-user $ADMIN_USER_USERNAME $ADMIN_USER_PASSWORD pro # 仮で pro プランで登録
+    just register-user $DEVELOPER_USER_USERNAME $DEVELOPER_USER_PASSWORD pro # 仮で pro プランで登録
+
 guest:
     just get-token $GUEST_USER_USERNAME $GUEST_USER_PASSWORD | pbcopy
 
