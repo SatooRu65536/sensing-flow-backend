@@ -25,11 +25,6 @@ import {
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { BastiAccessSecurityGroup, BastiInstance } from 'basti-cdk';
 
-const callbackUrls = process.env.CALLBACK_URLS ? process.env.CALLBACK_URLS.split(',') : [];
-const logoutUrls = process.env.LOGOUT_URLS ? process.env.LOGOUT_URLS.split(',') : [];
-const googleClientId = process.env.GOOGLE_CLIENT_ID!;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-
 interface BackendStackProps extends cdk.StackProps {
   stage: Stage;
 }
@@ -110,8 +105,10 @@ export class BackendStack extends cdk.Stack {
       environment: {
         NO_COLOR: 'true',
         DATABASE_URL: databaseUrl,
-        JWT_SECRET: process.env.JWT_SECRET!,
         S3_BUCKET_NAME: process.env.S3_BUCKET_NAME!,
+        JWT_SECRET: process.env.JWT_SECRET!,
+        JWT_ISSUER: process.env.JWT_ISSUER!,
+        JWT_AUDIENCE: process.env.JWT_AUDIENCE!,
       },
     });
   }
@@ -260,8 +257,8 @@ export class BackendStack extends cdk.Stack {
           authorizationCodeGrant: true,
         },
         scopes: [OAuthScope.OPENID, OAuthScope.EMAIL, OAuthScope.PROFILE],
-        callbackUrls: callbackUrls,
-        logoutUrls: logoutUrls,
+        callbackUrls: process.env.CALLBACK_URLS!.split(','),
+        logoutUrls: process.env.LOGOUT_URLS!.split(','),
       },
       supportedIdentityProviders: [UserPoolClientIdentityProvider.COGNITO, UserPoolClientIdentityProvider.GOOGLE],
     });
@@ -275,8 +272,8 @@ export class BackendStack extends cdk.Stack {
 
     const googleIdp = new UserPoolIdentityProviderGoogle(this, 'GoogleIdP', {
       userPool,
-      clientId: googleClientId,
-      clientSecret: googleClientSecret,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       scopes: ['openid', 'email', 'profile'],
       attributeMapping: {
         email: ProviderAttribute.GOOGLE_EMAIL,
