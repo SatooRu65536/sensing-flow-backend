@@ -2,27 +2,19 @@
   "plans": {
     "guest": {
       "selectable": true,
-      "permissions": [
-        "read:health"
-      ]
+      "permissions": []
     },
     "trial": {
       "selectable": true,
-      "permissions": [
-        "read:health"
-      ]
+      "permissions": []
     },
     "basic": {
       "selectable": true,
-      "permissions": [
-        "read:health"
-      ]
+      "permissions": []
     },
     "pro": {
       "selectable": true,
-      "permissions": [
-        "read:health"
-      ]
+      "permissions": []
     },
     "admin": {
       "selectable": false,

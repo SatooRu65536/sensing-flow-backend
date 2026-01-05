@@ -10,6 +10,9 @@ export function Permission(permissions: PermissionEnum | (string & {}) | Array<P
   );
 }
 
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+
 export function AuthorizationApi() {
   return ApiBearerAuth('jwt');
 }
