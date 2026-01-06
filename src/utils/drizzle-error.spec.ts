@@ -3,7 +3,7 @@ import { handleDrizzleError, CustomDrizzleError, ErrorCodeEnum } from './drizzle
 import { DrizzleQueryError } from 'drizzle-orm';
 
 describe('handleDrizzleError', () => {
-  it('should return CustomDrizzleError for duplicate entry error', () => {
+  it('重複エラーの場合は CustomDrizzleError で DUPLICATE_ENTRY を返す', () => {
     class MySQLError extends Error {
       code?: string;
       constructor(code: string) {
@@ -19,7 +19,31 @@ describe('handleDrizzleError', () => {
     expect(result.code).toBe(ErrorCodeEnum.DUPLICATE_ENTRY);
   });
 
-  it('should return CustomDrizzleError for unknown error', () => {
+  it('未知のエラーコードの場合は CustomDrizzleError で UNKNOWN を返す', () => {
+    class MySQLError extends Error {
+      code?: string;
+      constructor(code: string) {
+        super();
+        this.code = code;
+      }
+    }
+
+    const error = new DrizzleQueryError('Some other error', [], new MySQLError('ER_SOME_OTHER_ERROR'));
+    const result = handleDrizzleError(error);
+
+    expect(result).toBeInstanceOf(CustomDrizzleError);
+    expect(result.code).toBe(ErrorCodeEnum.UNKNOWN);
+  });
+
+  it('エラーコードがない場合は CustomDrizzleError で UNKNOWN を返す', () => {
+    const error = new DrizzleQueryError('Some other error', [], new Error());
+    const result = handleDrizzleError(error);
+
+    expect(result).toBeInstanceOf(CustomDrizzleError);
+    expect(result.code).toBe(ErrorCodeEnum.UNKNOWN);
+  });
+
+  it('不明なエラーの場合は CustomDrizzleError で UNKNOWN を返す', () => {
     const result = handleDrizzleError(new Error('Some other error'));
 
     expect(result).toBeInstanceOf(CustomDrizzleError);
