@@ -1,7 +1,9 @@
 import { VitePluginNode } from 'vite-plugin-node';
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
+import swc from 'unplugin-swc';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     host: true,
     port: 3000,
@@ -10,17 +12,22 @@ export default defineConfig({
     alias: [
       {
         find: '@',
-        replacement: './src',
+        replacement: resolve(__dirname, 'src'),
       },
     ],
   },
   plugins: [
-    VitePluginNode({
-      adapter: 'nest',
-      appPath: './src/main.ts',
-      exportName: 'viteNodeApp',
-      tsCompiler: 'swc',
-    }),
+    mode !== 'test' &&
+      VitePluginNode({
+        adapter: 'nest',
+        appPath: './src/main.ts',
+        exportName: 'viteNodeApp',
+        tsCompiler: 'swc',
+      }),
+    mode === 'test' &&
+      swc.vite({
+        module: { type: 'es6' },
+      }),
   ],
   optimizeDeps: {
     exclude: [
@@ -33,5 +40,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    root: './',
+    setupFiles: ['./src/vitest.setup.ts'],
   },
-});
+}));
