@@ -38,7 +38,6 @@ export class UsersService {
       }
 
       const userRecord = userRecords[0];
-
       return {
         id: userRecord.id,
         name: body.name,

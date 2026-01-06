@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CreateUserRequest, CreateUserResponse, GetUserResponse, User } from './users.dto';
-import * as drizzleErrorUtils from '@/utils/drizzle-error';
+import { DrizzleQueryError } from 'drizzle-orm';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -93,15 +93,19 @@ describe('UsersService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const body: CreateUserRequest = { name: 'Taro', plan: 'admin' };
+      const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
 
-      vi.spyOn(drizzleErrorUtils, 'handleDrizzleError').mockReturnValue({
-        name: 'Duplicate entry',
-        message: 'Duplicate entry',
-        code: drizzleErrorUtils.ErrorCodeEnum.DUPLICATE_ENTRY,
-      });
+      class MySQLError extends Error {
+        code?: string;
+        constructor(code: string) {
+          super();
+          this.code = code;
+        }
+      }
 
-      vi.spyOn(dbMock, 'insert').mockRejectedValue(new Error('Duplicate entry'));
+      vi.spyOn(dbMock, '$returningId').mockRejectedValue(
+        new DrizzleQueryError('Duplicate entry', [], new MySQLError('ER_DUP_ENTRY')),
+      );
 
       await expect(usersService.createUser(user, body)).rejects.toThrow(BadRequestException);
     });
