@@ -1,26 +1,20 @@
 import { RateLimitLogSchema } from '@/_schema';
-import { UserPayload } from '@/auth/jwt.schema';
 import type { DbType } from '@/database/database.module';
 import { RateLimit } from '@/plans-config/plans-config.schema';
-import { UsersService } from '@/users/users.service';
+import { User } from '@/users/users.dto';
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { and, count, eq, gte } from 'drizzle-orm';
 
 @Injectable()
 export class RateLimitService {
-  constructor(
-    @Inject('DRIZZLE_DB') private db: DbType,
-    private usersService: UsersService,
-  ) {}
+  constructor(@Inject('DRIZZLE_DB') private db: DbType) {}
 
   testRateLimit(): string {
     return 'Rate limit service is working';
   }
 
-  async checkRateLimit(user: UserPayload, permission: string, rateLimit: RateLimit): Promise<boolean> {
+  async checkRateLimit(user: User, permission: string, rateLimit: RateLimit): Promise<boolean> {
     if (rateLimit == undefined) return true;
-
-    const userRecord = await this.usersService.getUserBySub(user.sub);
 
     const limitTime = new Date(Date.now() - rateLimit.limitSec * 1000);
 
@@ -31,7 +25,7 @@ export class RateLimitService {
       .from(RateLimitLogSchema)
       .where(
         and(
-          eq(RateLimitLogSchema.userId, userRecord.id),
+          eq(RateLimitLogSchema.userId, user.id),
           eq(RateLimitLogSchema.permission, permission),
           gte(RateLimitLogSchema.timestamp, limitTime),
         ),
@@ -45,11 +39,9 @@ export class RateLimitService {
     return logCountRecord.count < rateLimit.count;
   }
 
-  async logRateLimit(user: UserPayload, permission: string): Promise<void> {
-    const userRecord = await this.usersService.getUserBySub(user.sub);
-
+  async logRateLimit(user: User, permission: string): Promise<void> {
     await this.db.insert(RateLimitLogSchema).values({
-      userId: userRecord.id,
+      userId: user.id,
       permission,
       timestamp: new Date(),
     });

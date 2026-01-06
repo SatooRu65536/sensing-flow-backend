@@ -12,7 +12,33 @@ export class CreateUserRequest {
   readonly plan: PlanEnum;
 }
 
-class User {
+export class User {
+  @ApiProperty({ description: 'ユーザーID' })
+  @IsString()
+  readonly id: string;
+
+  @ApiProperty({ description: 'ユーザー名' })
+  @IsString()
+  readonly name: string;
+
+  @ApiProperty({ description: 'ユーザー識別子' })
+  @IsString()
+  readonly sub: string;
+
+  @ApiProperty({ enum: planEnumSchema.options, description: 'プラン' })
+  @IsEnum(planEnumSchema.options)
+  readonly plan: PlanEnum;
+
+  @ApiProperty({ description: '登録日時' })
+  @IsDate()
+  readonly createdAt: Date;
+
+  @ApiProperty({ description: '更新日時' })
+  @IsDate()
+  readonly updatedAt: Date;
+}
+
+export class CreateUserResponse {
   @ApiProperty({ description: 'ユーザーID' })
   @IsString()
   readonly id: string;
@@ -26,9 +52,19 @@ class User {
   readonly plan: PlanEnum;
 }
 
-export class CreateUserResponse extends User {}
+export class GetUserResponse {
+  @ApiProperty({ description: 'ユーザーID' })
+  @IsString()
+  readonly id: string;
 
-export class GetUserResponse extends User {
+  @ApiProperty({ description: 'ユーザー名' })
+  @IsString()
+  readonly name: string;
+
+  @ApiProperty({ enum: planEnumSchema.options, description: 'プラン' })
+  @IsEnum(planEnumSchema.options)
+  readonly plan: PlanEnum;
+
   @ApiProperty({ description: '登録日時' })
   @IsDate()
   readonly createdAt: Date;

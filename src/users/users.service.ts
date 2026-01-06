@@ -6,8 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { DbType } from '../database/database.module';
-import { UserPayload } from '@/auth/jwt.schema';
-import { CreateUserRequest, CreateUserResponse, GetPlanResponse, GetUserResponse } from './users.dto';
+import { CreateUserRequest, CreateUserResponse, GetPlanResponse, GetUserResponse, User } from './users.dto';
 import { UserSchema } from '@/_schema';
 import { eq } from 'drizzle-orm';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
@@ -17,7 +16,7 @@ import plansConfig from '@/plans.json';
 export class UsersService {
   constructor(@Inject('DRIZZLE_DB') private db: DbType) {}
 
-  async createUser(user: UserPayload, body: CreateUserRequest): Promise<CreateUserResponse> {
+  async createUser(user: User, body: CreateUserRequest): Promise<CreateUserResponse> {
     const selectable = plansConfig.plans[body.plan].selectable;
 
     if (!selectable) {
@@ -57,23 +56,21 @@ export class UsersService {
     }
   }
 
-  async getMe(user: UserPayload): Promise<GetUserResponse> {
-    const userRecord = await this.getUserBySub(user.sub);
+  getMe(user: User): GetUserResponse {
     return {
-      id: userRecord.id,
-      name: userRecord.name,
-      plan: userRecord.plan,
-      createdAt: userRecord.createdAt,
-      updatedAt: userRecord.updatedAt,
+      id: user.id,
+      name: user.name,
+      plan: user.plan,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 
-  async getPlan(user: UserPayload): Promise<GetPlanResponse> {
-    const userRecord = await this.getUserBySub(user.sub);
-    return { plan: userRecord.plan };
+  getPlan(user: User): GetPlanResponse {
+    return { plan: user.plan };
   }
 
-  async getUserBySub(sub: string) {
+  async getUserBySub(sub: string): Promise<User> {
     const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, sub) });
 
     if (userRecord == null) {

@@ -1,25 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse, SensorData } from './sensor-data.dto';
-import { UsersService } from '@/users/users.service';
 import type { DbType } from '@/database/database.module';
-import { UserPayload } from '@/auth/jwt.schema';
 import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema } from '@/_schema';
 import { S3Service } from '@/s3/s3.service';
+import { User } from '@/users/users.dto';
 
 @Injectable()
 export class SensorDataService {
   constructor(
     @Inject('DRIZZLE_DB') private db: DbType,
-    private readonly usersService: UsersService,
     private readonly s3Service: S3Service,
   ) {}
 
-  async listSensorData(user: UserPayload, page: number, perPage: number): Promise<ListSensorDataResponse> {
-    const userRecord = await this.usersService.getUserBySub(user.sub);
-
+  async listSensorData(user: User, page: number, perPage: number): Promise<ListSensorDataResponse> {
     const sensorDataRecords = await this.db.query.SensorDataSchema.findMany({
-      where: eq(SensorDataSchema.userId, userRecord.id),
+      where: eq(SensorDataSchema.userId, user.id),
       limit: perPage,
       offset: (page - 1) * perPage,
       orderBy: desc(SensorDataSchema.createdAt),
@@ -35,11 +31,9 @@ export class SensorDataService {
     return { sensorData };
   }
 
-  async getSensorDataPresignedUrl(user: UserPayload, id: string): Promise<GetSensorDataPresignedUrlResponse> {
-    const userRecord = await this.usersService.getUserBySub(user.sub);
-
+  async getSensorDataPresignedUrl(user: User, id: string): Promise<GetSensorDataPresignedUrlResponse> {
     const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
-      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, userRecord.id)),
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
     });
 
     if (sensorDataRecord == null) {

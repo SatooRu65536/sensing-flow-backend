@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { SensorUploadService } from './multipart-upload.service';
 import { Authed } from '@/auth/auth.decorator';
-import type { UserPayload } from '@/auth/jwt.schema';
 import {
   AbortMultipartUploadResponse,
   ListMultipartUploadResponse,
@@ -11,6 +10,7 @@ import {
 } from './multipart-upload.dto';
 import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/auth/permission.decorator';
+import { User } from '@/users/users.dto';
 
 @Controller('sensor-upload')
 export class MultipartUploadController {
@@ -19,7 +19,7 @@ export class MultipartUploadController {
   @Get()
   @ApiResponse({ type: ListMultipartUploadResponse })
   @Permission('list:multipart_upload')
-  async listSensorUploads(@Authed() user: UserPayload): Promise<ListMultipartUploadResponse> {
+  async listSensorUploads(@Authed() user: User): Promise<ListMultipartUploadResponse> {
     return this.sensorUploadService.listSensorUploads(user);
   }
 
@@ -28,7 +28,7 @@ export class MultipartUploadController {
   @ApiResponse({ type: StartMultipartUploadResponse })
   @Permission('post:multipart_upload')
   async startSensorUpload(
-    @Authed() user: UserPayload,
+    @Authed() user: User,
     @Body() body: StartMultipartUploadRequest,
   ): Promise<StartMultipartUploadResponse> {
     return this.sensorUploadService.startSensorUpload(user, body);
@@ -41,7 +41,7 @@ export class MultipartUploadController {
   @Permission('post:multipart_upload')
   async postMultipartUpload(
     @Body() body: string,
-    @Authed() user: UserPayload,
+    @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<PostMultipartUploadResponse> {
     return this.sensorUploadService.postMultipartUpload(user, uploadId, body);
@@ -51,7 +51,7 @@ export class MultipartUploadController {
   @ApiResponse({ type: PostMultipartUploadResponse })
   @Permission('post:multipart_upload')
   async completeSensorUpload(
-    @Authed() user: UserPayload,
+    @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<PostMultipartUploadResponse> {
     return this.sensorUploadService.completeSensorUpload(user, uploadId);
@@ -61,7 +61,7 @@ export class MultipartUploadController {
   @ApiResponse({ type: AbortMultipartUploadResponse })
   @Permission('abort:multipart_upload')
   async abortSensorUpload(
-    @Authed() user: UserPayload,
+    @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<AbortMultipartUploadResponse> {
     return this.sensorUploadService.abortSensorUpload(user, uploadId);

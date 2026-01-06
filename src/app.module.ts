@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { UsersService } from './users/users.service';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionGuard } from './auth/permission.guard';
 import { SensorUploadModule } from './multipart-upload/multipart-upload.module';
@@ -18,7 +17,6 @@ import { RateLimitModule } from './rate-limit/rate-limit.module';
   controllers: [AppController],
   providers: [
     AppService,
-    UsersService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

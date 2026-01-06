@@ -2,17 +2,15 @@ import { Injectable, CanActivate, ExecutionContext, InternalServerErrorException
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from './permission.decorator';
 import plansMap from '../plans.json';
-import { UserPayload } from './jwt.schema';
-import { UsersService } from '@/users/users.service';
 import { rateLimitStringSchema } from '@/plans-config/plans-config.schema';
 import { RateLimitService } from '@/rate-limit/rate-limit.service';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-request.exception';
+import { User } from '@/users/users.dto';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly usersService: UsersService,
     private readonly rateLimitService: RateLimitService,
   ) {}
 
@@ -20,14 +18,12 @@ export class PermissionGuard implements CanActivate {
     const requiredPermission = this.reflector.get<string>(PERMISSION_KEY, context.getHandler());
     if (!requiredPermission) return true;
 
-    const request = context.switchToHttp().getRequest<Request & { user: UserPayload }>();
+    const request = context.switchToHttp().getRequest<Request & { user: User }>();
     const user = request.user;
     if (!user) return false;
 
-    const planResponse = await this.usersService.getPlan(user);
-
     // JSON から権限を取得
-    const permissions: Record<string, string> | undefined = plansMap.plans[planResponse.plan]?.permissions;
+    const permissions: Record<string, string> | undefined = plansMap.plans[user.plan]?.permissions;
 
     if (permissions == undefined) return false;
 

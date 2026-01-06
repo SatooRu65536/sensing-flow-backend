@@ -1,10 +1,10 @@
 import { Authed } from '@/auth/auth.decorator';
-import type { UserPayload } from '@/auth/jwt.schema';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse } from './sensor-data.dto';
 import { SensorDataService } from './sensor-data.service';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/auth/permission.decorator';
+import { User } from '@/users/users.dto';
 
 @Controller('sensor-data')
 export class SensorDataController {
@@ -16,7 +16,7 @@ export class SensorDataController {
   @ApiParam({ name: 'perPage', required: false, description: '1ページあたりの件数' })
   @Permission('list:sensor_data')
   async listSensorData(
-    @Authed() user: UserPayload,
+    @Authed() user: User,
     @Query('page') page: number = 1,
     @Query('perPage') perPage: number = 10,
   ): Promise<ListSensorDataResponse> {
@@ -27,7 +27,7 @@ export class SensorDataController {
   @ApiResponse({ type: GetSensorDataPresignedUrlResponse })
   @Permission('read:sensor_data')
   async getSensorDataPresignedUrl(
-    @Authed() user: UserPayload,
+    @Authed() user: User,
     @Param('id') id: string,
   ): Promise<GetSensorDataPresignedUrlResponse> {
     return this.sensorDataService.getSensorDataPresignedUrl(user, id);

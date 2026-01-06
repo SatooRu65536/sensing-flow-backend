@@ -6,4 +6,3 @@ export const userPayloadSchema = z.object({
   iss: z.string(),
   aud: z.string(),
 });
-export type UserPayload = z.infer<typeof userPayloadSchema>;
