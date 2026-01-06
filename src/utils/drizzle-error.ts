@@ -1,5 +1,3 @@
-import { DrizzleQueryError } from 'drizzle-orm';
-
 export enum ErrorCodeEnum {
   DUPLICATE_ENTRY = 'ER_DUP_ENTRY',
   UNKNOWN = 'UNKNOWN',
@@ -16,7 +14,8 @@ export class CustomDrizzleError extends Error {
 }
 
 export function handleDrizzleError(error: unknown): CustomDrizzleError {
-  if (error instanceof DrizzleQueryError) {
+  console.log('>>', error instanceof Error);
+  if (error instanceof Error) {
     const cause = error.cause as { code?: string } | undefined;
     if (cause?.code) {
       switch (cause.code) {

@@ -35,7 +35,7 @@ export class UsersService {
         .$returningId();
 
       if (userRecords.length === 0) {
-        throw new InternalServerErrorException('Failed to create user 2');
+        throw new InternalServerErrorException('Failed to create user');
       }
 
       const userRecord = userRecords[0];
@@ -51,7 +51,7 @@ export class UsersService {
           throw new BadRequestException('登録済みのユーザーです', { cause: error });
         default:
           console.error(error.cause);
-          throw new InternalServerErrorException('Failed to create user 1', { cause: error });
+          throw new InternalServerErrorException('Failed to create user', { cause: error });
       }
     }
   }

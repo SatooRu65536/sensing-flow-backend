@@ -1,6 +1,8 @@
 {
-  "include": [
-    "src/**/*.ts",
+  "exclude": [
+    "node_modules",
+    "cdk.out",
+    "dist",
   ],
   "compilerOptions": {
     "module": "nodenext",
@@ -31,6 +33,7 @@
       ]
     },
     "types": [
+      "node",
       "vitest/globals"
     ]
   }
