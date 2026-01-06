@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CreateUserRequest, CreateUserResponse, GetUserResponse, User } from './users.dto';
 import { DrizzleQueryError } from 'drizzle-orm';
 

@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Test } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';

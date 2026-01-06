@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { handleDrizzleError, CustomDrizzleError, ErrorCodeEnum } from './drizzle-error';
 import { DrizzleQueryError } from 'drizzle-orm';
 
