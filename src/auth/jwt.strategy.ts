@@ -1,13 +1,11 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { userPayloadSchema } from './jwt.schema';
-import { UsersService } from '@/users/users.service';
-import { User } from '@/users/users.dto';
+import { UserPayload, userPayloadSchema } from './jwt.schema';
 
 @Injectable()
 export class JWTStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly usersService: UsersService) {
+  constructor() {
     super({
       ignoreExpiration: false,
       algorithms: ['RS256'],
@@ -16,7 +14,7 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any): Promise<User> {
+  validate(payload: any): UserPayload {
     const userPayload = userPayloadSchema.safeParse(payload);
 
     if (!userPayload.success) {
@@ -34,8 +32,6 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
       throw new BadRequestException('Invalid JWT payload.');
     }
 
-    const user = await this.usersService.getUserBySub(userPayload.data.sub);
-
-    return user;
+    return userPayload.data;
   }
 }

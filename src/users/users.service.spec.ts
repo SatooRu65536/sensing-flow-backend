@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserRequest, CreateUserResponse, GetUserResponse, User } from './users.dto';
 import { DrizzleQueryError } from 'drizzle-orm';
+import { UserPayload } from '@/auth/jwt.schema';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -34,13 +35,11 @@ describe('UsersService', () => {
 
   describe('createUser', () => {
     it('正常にユーザーを作成できる', async () => {
-      const user: User = {
+      const userPayload: UserPayload = {
         sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        aud: 'sensing-flow',
+        iss: 'sensing-flow',
+        email: 'taro@example.com',
       };
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
       const response: CreateUserResponse = {
@@ -49,48 +48,42 @@ describe('UsersService', () => {
         plan: 'basic',
       };
 
-      const result = await usersService.createUser(user, body);
+      const result = await usersService.createUser(userPayload, body);
       expect(result).toEqual(response);
     });
 
     it('選択不可能なプランの場合、BadRequestExceptionを投げる', async () => {
-      const user: User = {
+      const userPayload: UserPayload = {
         sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        aud: 'sensing-flow',
+        iss: 'sensing-flow',
+        email: 'taro@example.com',
       };
       const body: CreateUserRequest = { name: 'Taro', plan: 'admin' };
 
-      await expect(usersService.createUser(user, body)).rejects.toThrow(BadRequestException);
+      await expect(usersService.createUser(userPayload, body)).rejects.toThrow(BadRequestException);
     });
 
     it('DB挿入でIDが返ってこない場合、InternalServerErrorExceptionを投げる', async () => {
-      const user: User = {
+      const userPayload: UserPayload = {
         sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        aud: 'sensing-flow',
+        iss: 'sensing-flow',
+        email: 'taro@example.com',
       };
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
 
       vi.spyOn(dbMock, '$returningId').mockResolvedValue([]);
 
-      await expect(usersService.createUser(user, body)).rejects.toThrow(InternalServerErrorException);
+      await expect(usersService.createUser(userPayload, body)).rejects.toThrow(InternalServerErrorException);
     });
 
     it('重複エラーの場合、BadRequestExceptionを投げる', async () => {
-      const user: User = {
+      const userPayload: UserPayload = {
         sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        aud: 'sensing-flow',
+        iss: 'sensing-flow',
+        email: 'taro@example.com',
       };
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
 
@@ -106,7 +99,7 @@ describe('UsersService', () => {
         new DrizzleQueryError('Duplicate entry', [], new MySQLError('ER_DUP_ENTRY')),
       );
 
-      await expect(usersService.createUser(user, body)).rejects.toThrow(BadRequestException);
+      await expect(usersService.createUser(userPayload, body)).rejects.toThrow(BadRequestException);
     });
   });
 

@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, InternalServerErrorException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PERMISSION_KEY } from './permission.decorator';
+import { PERMISSION_KEY } from '../common/decorators/permission.decorator';
 import plansMap from '../plans.json';
 import { rateLimitStringSchema } from '@/plans-config/plans-config.schema';
 import { RateLimitService } from '@/rate-limit/rate-limit.service';

@@ -11,12 +11,13 @@ import { UserSchema } from '@/_schema';
 import { eq } from 'drizzle-orm';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
 import plansConfig from '@/plans.json';
+import { UserPayload } from '@/auth/jwt.schema';
 
 @Injectable()
 export class UsersService {
   constructor(@Inject('DRIZZLE_DB') private db: DbType) {}
 
-  async createUser(user: User, body: CreateUserRequest): Promise<CreateUserResponse> {
+  async createUser(userPayload: UserPayload, body: CreateUserRequest): Promise<CreateUserResponse> {
     const selectable = plansConfig.plans[body.plan].selectable;
 
     if (!selectable) {
@@ -27,14 +28,14 @@ export class UsersService {
       const userRecords = await this.db
         .insert(UserSchema)
         .values({
-          sub: user.sub,
+          sub: userPayload.sub,
           name: body.name,
           plan: body.plan,
         })
         .$returningId();
 
       if (userRecords.length === 0) {
-        throw new InternalServerErrorException('Failed to create user');
+        throw new InternalServerErrorException('Failed to create user 2');
       }
 
       const userRecord = userRecords[0];
@@ -50,7 +51,7 @@ export class UsersService {
           throw new BadRequestException('登録済みのユーザーです', { cause: error });
         default:
           console.error(error.cause);
-          throw new InternalServerErrorException('Failed to create user', { cause: error });
+          throw new InternalServerErrorException('Failed to create user 1', { cause: error });
       }
     }
   }

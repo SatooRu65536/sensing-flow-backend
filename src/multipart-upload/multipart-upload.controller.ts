@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { SensorUploadService } from './multipart-upload.service';
-import { Authed } from '@/auth/auth.decorator';
+import { Authed } from '@/common/decorators/auth.decorator';
 import {
   AbortMultipartUploadResponse,
   ListMultipartUploadResponse,
@@ -9,7 +9,7 @@ import {
   StartMultipartUploadResponse,
 } from './multipart-upload.dto';
 import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
-import { Permission } from '@/auth/permission.decorator';
+import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
 
 @Controller('sensor-upload')

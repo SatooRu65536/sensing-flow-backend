@@ -3,6 +3,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { BadRequestException } from '@nestjs/common';
 import { CreateUserRequest, CreateUserResponse, GetPlanResponse, User } from './users.dto';
+import { UserPayload } from '@/auth/jwt.schema';
 
 describe('UsersController', () => {
   let usersController: UsersController;
@@ -29,13 +30,11 @@ describe('UsersController', () => {
 
   describe('createUser', () => {
     it('Serviceの結果を返す', async () => {
-      const user: User = {
+      const userPayload: UserPayload = {
         sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        aud: 'sensing-flow',
+        iss: 'sensing-flow',
+        email: 'taro@example.com',
       };
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
       const response: CreateUserResponse = {
@@ -45,18 +44,18 @@ describe('UsersController', () => {
       };
 
       vi.spyOn(usersService, 'createUser').mockResolvedValue(response);
-      const result = await usersController.createUser(user, body);
+      const result = await usersController.createUser(userPayload, body);
 
       expect(result).toEqual(response);
     });
 
     it('Serviceの例外を伝播する', async () => {
-      const user = {} as User;
+      const userPayload = {} as UserPayload;
       const body = {} as CreateUserRequest;
 
       vi.spyOn(usersService, 'createUser').mockRejectedValue(new BadRequestException());
 
-      await expect(usersController.createUser(user, body)).rejects.toThrow(BadRequestException);
+      await expect(usersController.createUser(userPayload, body)).rejects.toThrow(BadRequestException);
     });
   });
 

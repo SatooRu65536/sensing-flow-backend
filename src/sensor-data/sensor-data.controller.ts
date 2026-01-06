@@ -1,9 +1,9 @@
-import { Authed } from '@/auth/auth.decorator';
+import { Authed } from '@/common/decorators/auth.decorator';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse } from './sensor-data.dto';
 import { SensorDataService } from './sensor-data.service';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
-import { Permission } from '@/auth/permission.decorator';
+import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
 
 @Controller('sensor-data')

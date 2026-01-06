@@ -81,8 +81,8 @@ export const plansConfigSchema = z.strictObject({
 });
 
 export function generatePermissionEnumSchema() {
-  const permissionGenPath = resolve(__dirname, '../../../src/permissions.gen.ts');
-  const plansSchemaPath = resolve(__dirname, '../../../src/plans.schema.json');
+  const permissionGenPath = resolve(__dirname, '../../src/permissions.gen.ts');
+  const plansSchemaPath = resolve(__dirname, '../../src/plans.schema.json');
 
   const permissionNames = Object.keys(permissionsConfig.permissions);
 
