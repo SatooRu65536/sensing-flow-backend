@@ -5,7 +5,7 @@ export enum ErrorCodeEnum {
   UNKNOWN = 'UNKNOWN',
 }
 
-class CustomDrizzleError extends Error {
+export class CustomDrizzleError extends Error {
   code: ErrorCodeEnum;
 
   constructor(message: string, code: ErrorCodeEnum, cause?: unknown) {
