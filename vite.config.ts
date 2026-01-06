@@ -42,5 +42,14 @@ export default defineConfig(({ mode }) => ({
     globals: true,
     root: './',
     setupFiles: ['./src/vitest.setup.ts'],
+    coverage: {
+      exclude: [
+        'src/_schema/index.ts',
+        'src/**/*.decorator.ts',
+        'src/**/*.schema.ts',
+        'src/**/*.dto.ts',
+        'src/**/*.json',
+      ],
+    },
   },
 }));
