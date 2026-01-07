@@ -18,7 +18,8 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     const userPayload = userPayloadSchema.safeParse(payload);
 
     if (!userPayload.success) {
-      throw new BadRequestException(`Invalid JWT payload. Errors: ${JSON.stringify(userPayload.error.issues)}`);
+      console.error(userPayload.error);
+      throw new BadRequestException('Invalid JWT payload.');
     }
 
     const expectedIssuer = process.env.JWT_ISSUER;
