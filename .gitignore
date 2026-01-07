@@ -53,6 +53,3 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 cdk.out
-
-# stryker temp files
-.stryker-tmp
