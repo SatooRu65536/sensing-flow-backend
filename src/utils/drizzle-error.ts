@@ -2,6 +2,7 @@ export enum ErrorCodeEnum {
   DUPLICATE_ENTRY = 'ER_DUP_ENTRY',
   UNKNOWN = 'UNKNOWN',
 }
+export type ErrorCode = 'ER_DUP_ENTRY' | 'UNKNOWN';
 
 export class CustomDrizzleError extends Error {
   code: ErrorCodeEnum;

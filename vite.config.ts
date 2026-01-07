@@ -41,6 +41,7 @@ export default defineConfig(({ mode }) => ({
   test: {
     globals: true,
     setupFiles: ['./src/vitest.setup.ts'],
+    include: ['src/**/*.spec.ts'],
     coverage: {
       include: ['src/**/*.ts'],
       exclude: [

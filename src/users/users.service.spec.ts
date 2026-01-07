@@ -1,25 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { CreateUserRequest, CreateUserResponse, GetUserResponse, User } from './users.dto';
-import { DrizzleQueryError } from 'drizzle-orm';
-import { UserPayload } from '@/auth/jwt.schema';
+import { CreateUserRequest, CreateUserResponse, GetUserResponse } from './users.dto';
+import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
+import { createDbServiceMock, DbMock } from '@/utils/test/service-mocks';
+import { createUser, createUserPayload } from '@/utils/test/test-factories';
 
 describe('UsersService', () => {
   let usersService: UsersService;
-  const dbMock = {
-    insert: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
-    // デフォルトの成功値を設定しておく
-    $returningId: vi.fn().mockResolvedValue([{ id: '00000000-0000-0000-0000-000000000000' }]),
-    query: {
-      UserSchema: {
-        findFirst: vi.fn(),
-      },
-    },
-  };
+  let dbMock: DbMock;
 
   beforeEach(async () => {
+    dbMock = createDbServiceMock();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
@@ -35,12 +28,7 @@ describe('UsersService', () => {
 
   describe('createUser', () => {
     it('正常にユーザーを作成できる', async () => {
-      const userPayload: UserPayload = {
-        sub: 'sub_example',
-        aud: 'sensing-flow',
-        iss: 'sensing-flow',
-        email: 'taro@example.com',
-      };
+      const userPayload = createUserPayload();
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
       const response: CreateUserResponse = {
         id: '00000000-0000-0000-0000-000000000000',
@@ -48,29 +36,21 @@ describe('UsersService', () => {
         plan: 'basic',
       };
 
+      vi.spyOn(dbMock, '$returningId').mockResolvedValue([{ id: response.id }]);
+
       const result = await usersService.createUser(userPayload, body);
       expect(result).toEqual(response);
     });
 
     it('選択不可能なプランの場合、BadRequestExceptionを投げる', async () => {
-      const userPayload: UserPayload = {
-        sub: 'sub_example',
-        aud: 'sensing-flow',
-        iss: 'sensing-flow',
-        email: 'taro@example.com',
-      };
+      const userPayload = createUserPayload();
       const body: CreateUserRequest = { name: 'Taro', plan: 'admin' };
 
       await expect(usersService.createUser(userPayload, body)).rejects.toThrow(BadRequestException);
     });
 
     it('DB挿入でIDが返ってこない場合、InternalServerErrorExceptionを投げる', async () => {
-      const userPayload: UserPayload = {
-        sub: 'sub_example',
-        aud: 'sensing-flow',
-        iss: 'sensing-flow',
-        email: 'taro@example.com',
-      };
+      const userPayload = createUserPayload();
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
 
       vi.spyOn(dbMock, '$returningId').mockResolvedValue([]);
@@ -79,25 +59,10 @@ describe('UsersService', () => {
     });
 
     it('重複エラーの場合、BadRequestExceptionを投げる', async () => {
-      const userPayload: UserPayload = {
-        sub: 'sub_example',
-        aud: 'sensing-flow',
-        iss: 'sensing-flow',
-        email: 'taro@example.com',
-      };
+      const userPayload = createUserPayload();
       const body: CreateUserRequest = { name: 'Taro', plan: 'basic' };
 
-      class MySQLError extends Error {
-        code?: string;
-        constructor(code: string) {
-          super();
-          this.code = code;
-        }
-      }
-
-      vi.spyOn(dbMock, '$returningId').mockRejectedValue(
-        new DrizzleQueryError('Duplicate entry', [], new MySQLError('ER_DUP_ENTRY')),
-      );
+      vi.spyOn(dbMock, '$returningId').mockRejectedValue(new DrizzleDuplicateError());
 
       await expect(usersService.createUser(userPayload, body)).rejects.toThrow(BadRequestException);
     });
@@ -105,14 +70,7 @@ describe('UsersService', () => {
 
   describe('getMe', () => {
     it('ユーザー情報をそのまま返す', () => {
-      const user: User = {
-        sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      const user = createUser();
       const response: GetUserResponse = {
         id: user.id,
         name: user.name,
@@ -127,28 +85,14 @@ describe('UsersService', () => {
 
   describe('getPlan', () => {
     it('プラン情報のみを返す', () => {
-      const user: User = {
-        sub: 'sub_example',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      const user = createUser({ plan: 'basic' });
       expect(usersService.getPlan(user)).toEqual({ plan: 'basic' });
     });
   });
 
   describe('getUserBySub', () => {
     it('ユーザーが見つかった場合、そのレコードを返す', async () => {
-      const user: User = {
-        sub: 'sub_exist',
-        id: '00000000-0000-0000-0000-000000000000',
-        name: 'Taro',
-        plan: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      const user = createUser({ sub: 'sub_exist' });
 
       vi.spyOn(dbMock.query.UserSchema, 'findFirst').mockResolvedValue(user);
 

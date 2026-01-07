@@ -16,11 +16,10 @@ import {
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { and, desc, eq } from 'drizzle-orm';
-import { SensorDataSchema, SensorUploadSchema, UserSchema } from '@/_schema';
+import { SensorDataSchema, SensorUploadSchema } from '@/_schema';
 import { v4 } from 'uuid';
 import { SensorUploadStatusEnum } from './multipart-upload.model';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
-import { UsersService } from '@/users/users.service';
 import { User } from '@/users/users.dto';
 
 @Injectable()
@@ -28,7 +27,6 @@ export class MultipartUploadService {
   constructor(
     @Inject('DRIZZLE_DB') private readonly db: DbType,
     private readonly s3Service: S3Service,
-    private readonly usersService: UsersService,
   ) {}
 
   async listSensorUploads(user: User): Promise<ListMultipartUploadResponse> {
@@ -55,13 +53,14 @@ export class MultipartUploadService {
     const uploadId = v4();
 
     const sensorUploadKey = this.s3Service.getSensorUploadKey(user.id, uploadId);
-    const uploadResponse = await this.s3Service.createMultipartUpload(sensorUploadKey);
-
-    if (uploadResponse.UploadId == null) {
-      throw new InternalServerErrorException('Failed to create multipart upload');
-    }
 
     try {
+      const uploadResponse = await this.s3Service.createMultipartUpload(sensorUploadKey);
+
+      if (uploadResponse.UploadId == null) {
+        throw new InternalServerErrorException('Failed to create multipart upload');
+      }
+
       const sensorUploadRecords = await this.db
         .insert(SensorUploadSchema)
         .values({
@@ -94,11 +93,11 @@ export class MultipartUploadService {
 
   async postMultipartUpload(user: User, uploadId: string, body: string): Promise<PostMultipartUploadResponse> {
     const sensorUploadRecord = await this.db.query.SensorUploadSchema.findFirst({
-      where: eq(SensorUploadSchema.id, uploadId),
+      where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
     });
 
     if (sensorUploadRecord?.userId !== user.id) {
-      throw new BadRequestException('You do not have permission to abort this upload');
+      throw new NotFoundException('Sensor upload not found');
     }
 
     if (sensorUploadRecord.status !== SensorUploadStatusEnum.IN_PROGRESS) {
@@ -132,8 +131,8 @@ export class MultipartUploadService {
           where: eq(SensorUploadSchema.id, sensorUploadRecord.id),
         });
 
-        if (record == null) {
-          throw new NotFoundException('Sensor upload not found in transaction');
+        if (record == undefined) {
+          throw new NotFoundException('Sensor upload not found');
         }
 
         await tx
@@ -145,6 +144,10 @@ export class MultipartUploadService {
       });
     } catch (e) {
       console.error(e);
+      if (e instanceof NotFoundException) {
+        // transaction 内で NotFoundException が投げられた場合はそのまま投げ直す
+        throw e;
+      }
       throw new InternalServerErrorException('Failed to upload part', { cause: e });
     }
 
@@ -155,99 +158,94 @@ export class MultipartUploadService {
   }
 
   async completeSensorUpload(user: User, uploadId: string): Promise<PostMultipartUploadResponse> {
-    const records = await this.db
-      .select()
-      .from(SensorUploadSchema)
-      .where(eq(SensorUploadSchema.id, uploadId))
-      .innerJoin(UserSchema, eq(SensorUploadSchema.userId, UserSchema.id));
+    const sensorUploadRecord = await this.db.query.SensorUploadSchema.findFirst({
+      where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
+    });
 
-    if (records.length === 0) {
+    if (sensorUploadRecord == undefined) {
       throw new NotFoundException('Sensor upload not found');
     }
 
-    const record = records[0];
-
-    if (record.users.sub !== user.sub) {
-      throw new BadRequestException('You do not have permission to complete this upload');
-    }
-
-    if (record.sensor_uploads.status !== SensorUploadStatusEnum.IN_PROGRESS) {
+    if (sensorUploadRecord.status !== SensorUploadStatusEnum.IN_PROGRESS) {
       throw new BadRequestException('Cannot complete a completed or aborted upload');
     }
 
-    const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
-    try {
-      await this.s3Service.completeMultipartUpload(
-        sensorUploadKey,
-        record.sensor_uploads.s3uploadId,
-        record.sensor_uploads.parts,
-      );
-    } catch (e) {
-      console.error(e);
-      throw new InternalServerErrorException('Failed to complete multipart upload', { cause: e });
-    }
+    const sensorUploadKey = this.s3Service.getSensorUploadKey(sensorUploadRecord.userId, sensorUploadRecord.id);
 
-    await this.db.transaction(
-      async (tx) =>
+    try {
+      await this.db.transaction(async (tx) => {
         await Promise.all([
           tx
             .update(SensorUploadSchema)
             .set({ status: SensorUploadStatusEnum.COMPLETED })
             .where(eq(SensorUploadSchema.id, uploadId)),
           tx.insert(SensorDataSchema).values({
+            userId: user.id,
             s3key: sensorUploadKey,
-            userId: record.users.id,
-            dataName: record.sensor_uploads.dataName,
+            dataName: sensorUploadRecord.dataName,
           }),
-        ]),
-    );
+        ]);
+
+        try {
+          await this.s3Service.completeMultipartUpload(
+            sensorUploadKey,
+            sensorUploadRecord.s3uploadId,
+            sensorUploadRecord.parts,
+          );
+        } catch (e) {
+          tx.rollback();
+          throw new InternalServerErrorException('Failed to complete multipart upload', { cause: e });
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      // transaction 内での InternalServerErrorException 以外に注意
+      throw new InternalServerErrorException('Failed to complete sensor upload');
+    }
 
     return {
-      uploadId: record.sensor_uploads.id,
-      dataName: record.sensor_uploads.dataName,
+      uploadId: sensorUploadRecord.id,
+      dataName: sensorUploadRecord.dataName,
     };
   }
 
   async abortSensorUpload(user: User, uploadId: string): Promise<AbortMultipartUploadResponse> {
-    const records = await this.db
-      .select()
-      .from(SensorUploadSchema)
-      .where(eq(SensorUploadSchema.id, uploadId))
-      .innerJoin(UserSchema, eq(SensorUploadSchema.userId, UserSchema.id));
+    const sensorUploadRecord = await this.db.query.SensorUploadSchema.findFirst({
+      where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
+    });
 
-    if (records.length === 0) {
+    if (sensorUploadRecord == undefined) {
       throw new NotFoundException('Sensor upload not found');
     }
 
-    const record = records[0];
-
-    if (record.users.sub !== user.sub) {
-      throw new BadRequestException('You do not have permission to abort this upload');
-    }
-
-    if (record.sensor_uploads.status !== SensorUploadStatusEnum.IN_PROGRESS) {
+    if (sensorUploadRecord.status !== SensorUploadStatusEnum.IN_PROGRESS) {
       throw new BadRequestException('Cannot abort a completed or aborted upload');
     }
 
     try {
-      const sensorUploadKey = this.s3Service.getSensorUploadKey(record.users.id, record.sensor_uploads.id);
-      await this.s3Service.abortMultipartUpload(sensorUploadKey, record.sensor_uploads.s3uploadId);
+      const sensorUploadKey = this.s3Service.getSensorUploadKey(sensorUploadRecord.userId, sensorUploadRecord.id);
+      await this.s3Service.abortMultipartUpload(sensorUploadKey, sensorUploadRecord.s3uploadId);
     } catch (e) {
       console.error(e);
       throw new InternalServerErrorException('Failed to abort multipart upload', { cause: e });
     }
 
-    await this.db
-      .update(SensorUploadSchema)
-      .set({ status: SensorUploadStatusEnum.ABORTED })
-      .where(eq(SensorUploadSchema.id, uploadId));
+    try {
+      await this.db
+        .update(SensorUploadSchema)
+        .set({ status: SensorUploadStatusEnum.ABORTED })
+        .where(eq(SensorUploadSchema.id, uploadId));
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException('Failed to update sensor upload status', { cause: e });
+    }
 
     return {
-      uploadId: record.sensor_uploads.id,
-      dataName: record.sensor_uploads.dataName,
+      uploadId: sensorUploadRecord.id,
+      dataName: sensorUploadRecord.dataName,
       status: SensorUploadStatusEnum.ABORTED,
-      createdAt: record.sensor_uploads.createdAt,
-      updatedAt: record.sensor_uploads.updatedAt,
+      createdAt: sensorUploadRecord.createdAt,
+      updatedAt: sensorUploadRecord.updatedAt,
     };
   }
 }
