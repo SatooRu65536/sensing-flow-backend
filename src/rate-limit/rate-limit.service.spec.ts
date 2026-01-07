@@ -58,6 +58,16 @@ describe('RateLimitService', () => {
       const result = await rateLimitService.checkRateLimit(user, 'unit_test:rate_limit', undefined);
       expect(result).toBe(true);
     });
+
+    it('ログカウントの取得に失敗した場合は例外をスローする', async () => {
+      const user = createUser();
+
+      vi.spyOn(dbMock, 'where').mockResolvedValue([]);
+
+      await expect(
+        rateLimitService.checkRateLimit(user, 'unit_test:rate_limit', { count: 1, limitSec: 60 }),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
   });
 
   describe('logRateLimit', () => {
