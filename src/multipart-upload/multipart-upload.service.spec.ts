@@ -158,10 +158,12 @@ describe('MultipartUploadService', () => {
   });
 
   describe('postMultipartUpload', () => {
-    it('マルチパートアップロードのパーツ情報を登録できる', async () => {
+    it('マルチパートアップロードのパーツ情報を登録できる（初回）', async () => {
       const user = createUser();
-      const sensorUpload = createSensorUpload();
       const etag = 'etag_example';
+      const sensorUpload = createSensorUpload({
+        parts: [],
+      });
 
       vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
@@ -169,6 +171,26 @@ describe('MultipartUploadService', () => {
       const result = await multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example');
 
       expect(result).toEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
+    });
+
+    it('マルチパートアップロードのパーツ情報を登録できる（複数回目）', async () => {
+      const user = createUser();
+      const etag = 'etag_example';
+      const sensorUpload = createSensorUpload({
+        parts: [
+          { etag, partNumber: 1 },
+          { etag, partNumber: 3 },
+          { etag, partNumber: 2 },
+        ],
+      });
+
+      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
+
+      const result = await multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example');
+
+      expect(result).toEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
+      expect(vi.spyOn(s3Service, 'postMultipartUpload').mock.calls[0][2]).toBe(4); // partNumber が 4 になっていることを確認
     });
 
     it('存在しないアップロードIDの場合、例外を投げる', async () => {
