@@ -10,13 +10,12 @@ import { PlansConfigRaw } from '@/plans-config/plans-config.schema';
 import { InternalServerErrorException } from '@nestjs/common';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-request.exception';
 
-const plans = plansJson as PlansConfigRaw;
-
 describe('PermissionGuard', () => {
   let guard: PermissionGuard;
   let reflector: Reflector;
   let rateLimitService: RateLimitService;
   let dbMock: DbMock;
+  let plansConfig: PlansConfigRaw;
 
   beforeEach(async () => {
     reflector = createReflectorMock();
@@ -34,6 +33,7 @@ describe('PermissionGuard', () => {
 
     rateLimitService = module.get<RateLimitService>(RateLimitService);
     guard = new PermissionGuard(reflector, rateLimitService);
+    plansConfig = plansJson as PlansConfigRaw;
   });
 
   it('requiredPermission がない場合は true を返す（user がある場合）', async () => {
@@ -64,6 +64,18 @@ describe('PermissionGuard', () => {
     expect(result).toBe(false);
   });
 
+  it('プランの権限設定がない場合は false を返す', async () => {
+    const user = createUser({ plan: 'developer' });
+    const ctx = createContext({ user });
+
+    vi.spyOn(reflector, 'get').mockReturnValue('write:data');
+    // plansConfig.plans.developer を削除する
+    delete plansConfig.plans.developer;
+
+    const result = await guard.canActivate(ctx);
+    expect(result).toBe(false);
+  });
+
   it('プランに権限がない場合は false を返す', async () => {
     const user = createUser({ plan: 'trial' });
     const ctx = createContext({ user });
@@ -79,7 +91,10 @@ describe('PermissionGuard', () => {
     const ctx = createContext({ user });
 
     vi.spyOn(reflector, 'get').mockReturnValue('any:perm');
-    plans.plans.developer.permissions = { '*': '*' }; // 全権限
+    plansConfig.plans['developer'] = {
+      selectable: false,
+      permissions: { '*': '*' },
+    };
 
     const result = await guard.canActivate(ctx);
     expect(result).toBe(true);
@@ -90,7 +105,7 @@ describe('PermissionGuard', () => {
     const ctx = createContext({ user });
 
     vi.spyOn(reflector, 'get').mockReturnValue('read:data');
-    plans.plans.developer.permissions = { 'read:data': 'invalid-string' };
+    plansConfig.plans.developer = { selectable: true, permissions: { 'read:data': 'invalid-string' } };
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(InternalServerErrorException);
   });
@@ -100,7 +115,7 @@ describe('PermissionGuard', () => {
     const ctx = createContext({ user });
 
     vi.spyOn(reflector, 'get').mockReturnValue('read:data');
-    plans.plans.developer.permissions = { 'read:data': '10/min' };
+    plansConfig.plans.developer = { selectable: true, permissions: { 'read:data': '10/min' } };
 
     vi.spyOn(rateLimitService, 'checkRateLimit').mockResolvedValue(false);
 
@@ -112,7 +127,7 @@ describe('PermissionGuard', () => {
     const ctx = createContext({ user });
 
     vi.spyOn(reflector, 'get').mockReturnValue('read:data');
-    plans.plans.developer.permissions = { 'read:data': '10/min' };
+    plansConfig.plans.developer = { selectable: true, permissions: { 'read:data': '10/min' } };
 
     vi.spyOn(rateLimitService, 'checkRateLimit').mockResolvedValue(true);
     const logSpy = vi.spyOn(rateLimitService, 'logRateLimit').mockResolvedValue(undefined);

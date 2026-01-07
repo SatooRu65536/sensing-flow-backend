@@ -73,19 +73,23 @@ export type RateLimit = z.infer<typeof rateLimitStringSchema>;
 export const plansConfigSchema = z.strictObject({
   plans: z.record(
     planEnumSchema,
-    z.strictObject({
-      selectable: z.boolean().optional().default(true),
-      permissions: z.record(permissionNameSchema, rateLimitStringSchema),
-    }),
+    z
+      .strictObject({
+        selectable: z.boolean().optional().default(true),
+        permissions: z.record(permissionNameSchema, rateLimitStringSchema),
+      })
+      .optional(),
   ),
 });
 export const plansConfigRawSchema = z.strictObject({
   plans: z.record(
     planEnumSchema,
-    z.strictObject({
-      selectable: z.boolean().optional().default(true),
-      permissions: z.record(permissionNameSchema, z.string()),
-    }),
+    z
+      .strictObject({
+        selectable: z.boolean().optional().default(true),
+        permissions: z.record(permissionNameSchema, z.string()),
+      })
+      .optional(),
   ),
 });
 export type PlansConfigRaw = z.infer<typeof plansConfigRawSchema>;

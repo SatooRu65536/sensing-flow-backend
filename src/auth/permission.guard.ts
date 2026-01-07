@@ -1,7 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext, InternalServerErrorException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSION_KEY } from '../common/decorators/permission.decorator';
-import plans from '../plans.json';
+import plansConfig from '../plans.json';
 import { rateLimitStringSchema } from '@/plans-config/plans-config.schema';
 import { RateLimitService } from '@/rate-limit/rate-limit.service';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-request.exception';
@@ -23,7 +23,7 @@ export class PermissionGuard implements CanActivate {
     if (!user) return false;
 
     // JSON から権限を取得
-    const permissions: Record<string, string> | undefined = plans.plans[user.plan]?.permissions;
+    const permissions: Record<string, string> | undefined = plansConfig.plans[user.plan]?.permissions;
 
     if (permissions == undefined) return false;
 
