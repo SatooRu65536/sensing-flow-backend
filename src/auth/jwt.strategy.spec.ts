@@ -26,7 +26,10 @@ describe('JWTStrategy', () => {
   });
 
   it('スキーマ検証に失敗した場合、BadRequestException を投げる', () => {
-    const validPayload = createUserPayload();
+    const validPayload = createUserPayload({
+      iss: jwtIssuer,
+      aud: jwtAudience,
+    });
 
     const invalidPayload = { ...validPayload, email: 123 }; // email が不正
 
@@ -34,16 +37,20 @@ describe('JWTStrategy', () => {
   });
 
   it('iss が期待値と異なる場合、BadRequestException を投げる', () => {
-    const validPayload = createUserPayload();
+    const validPayload = createUserPayload({
+      iss: 'wrong-issuer',
+      aud: jwtAudience,
+    });
 
-    const wrongIss = { ...validPayload, iss: 'wrong-issuer' };
-    expect(() => strategy.validate(wrongIss)).toThrow(BadRequestException);
+    expect(() => strategy.validate(validPayload)).toThrow(BadRequestException);
   });
 
   it('aud が期待値と異なる場合、BadRequestException を投げる', () => {
-    const validPayload = createUserPayload();
+    const validPayload = createUserPayload({
+      iss: jwtIssuer,
+      aud: 'wrong-audience',
+    });
 
-    const wrongAud = { ...validPayload, aud: 'wrong-audience' };
-    expect(() => strategy.validate(wrongAud)).toThrow(BadRequestException);
+    expect(() => strategy.validate(validPayload)).toThrow(BadRequestException);
   });
 });
