@@ -1,9 +1,12 @@
 {
+  "include": [
+    "src",
+    "stryker.config.mjs"
+  ],
   "exclude": [
     "node_modules",
     "cdk.out",
     "dist",
-    "stryker.config.mjs"
   ],
   "compilerOptions": {
     "module": "nodenext",
