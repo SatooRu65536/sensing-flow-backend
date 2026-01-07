@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
-import { SensorUploadService } from './multipart-upload.service';
+import { MultipartUploadService } from './multipart-upload.service';
 import { Authed } from '@/common/decorators/auth.decorator';
 import {
   AbortMultipartUploadResponse,
@@ -14,7 +14,7 @@ import { User } from '@/users/users.dto';
 
 @Controller('sensor-upload')
 export class MultipartUploadController {
-  constructor(private readonly sensorUploadService: SensorUploadService) {}
+  constructor(private readonly sensorUploadService: MultipartUploadService) {}
 
   @Get()
   @ApiResponse({ type: ListMultipartUploadResponse })

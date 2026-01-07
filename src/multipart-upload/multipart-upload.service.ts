@@ -24,7 +24,7 @@ import { UsersService } from '@/users/users.service';
 import { User } from '@/users/users.dto';
 
 @Injectable()
-export class SensorUploadService {
+export class MultipartUploadService {
   constructor(
     @Inject('DRIZZLE_DB') private readonly db: DbType,
     private readonly s3Service: S3Service,
