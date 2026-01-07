@@ -14,7 +14,6 @@ export class CustomDrizzleError extends Error {
 }
 
 export function handleDrizzleError(error: unknown): CustomDrizzleError {
-  console.log('>>', error instanceof Error);
   if (error instanceof Error) {
     const cause = error.cause as { code?: string } | undefined;
     if (cause?.code) {
