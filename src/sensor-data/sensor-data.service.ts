@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse, SensorData } from './sensor-data.dto';
 import type { DbType } from '@/database/database.module';
 import { and, desc, eq } from 'drizzle-orm';
@@ -36,21 +36,26 @@ export class SensorDataService {
       where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
     });
 
-    if (sensorDataRecord == null) {
-      throw new Error('Sensor data not found');
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
     }
 
-    const presignedUrl = await this.s3Service.getPresignedUrl(
-      sensorDataRecord.s3key,
-      `${sensorDataRecord.dataName}.csv`,
-    );
+    try {
+      const presignedUrl = await this.s3Service.getPresignedUrl(
+        sensorDataRecord.s3key,
+        `${sensorDataRecord.dataName}.csv`,
+      );
 
-    return {
-      id: sensorDataRecord.id,
-      dataName: sensorDataRecord.dataName,
-      createdAt: sensorDataRecord.createdAt,
-      updatedAt: sensorDataRecord.updatedAt,
-      presignedUrl,
-    };
+      return {
+        id: sensorDataRecord.id,
+        dataName: sensorDataRecord.dataName,
+        createdAt: sensorDataRecord.createdAt,
+        updatedAt: sensorDataRecord.updatedAt,
+        presignedUrl,
+      };
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException('Failed to get presigned URL');
+    }
   }
 }

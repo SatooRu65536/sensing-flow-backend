@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MultipartUploadService } from './multipart-upload.service';
-import { SensorUpload } from './multipart-upload.model';
+import { SensorUploadRecordT } from './multipart-upload.model';
 import { MultiPartUpload } from './multipart-upload.dto';
 import { S3Service } from '@/s3/s3.service';
-import { S3Key } from '@/s3/s3.types';
 import {
   CompleteMultipartUploadCommandOutput,
   CreateMultipartUploadCommandOutput,
@@ -11,7 +10,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
-import { DbMock, createDbServiceMock } from '@/utils/test/service-mocks';
+import { DbMock, createDbServiceMock, createS3ServiceMock } from '@/utils/test/service-mocks';
 import { createSensorUpload, createUser } from '@/utils/test/test-factories';
 
 describe('MultipartUploadService', () => {
@@ -27,14 +26,7 @@ describe('MultipartUploadService', () => {
         MultipartUploadService,
         {
           provide: S3Service,
-          useValue: {
-            createMultipartUpload: vi.fn(),
-            postMultipartUpload: vi.fn(),
-            completeMultipartUpload: vi.fn(),
-            abortMultipartUpload: vi.fn(),
-            getPresignedUrl: vi.fn(),
-            getSensorUploadKey: vi.fn().mockReturnValue('sensor/upload/key' as S3Key),
-          },
+          useValue: createS3ServiceMock(),
         },
         {
           provide: 'DRIZZLE_DB',
@@ -50,7 +42,7 @@ describe('MultipartUploadService', () => {
   describe('listSensorUploads', () => {
     it('アップロード中のセンサーデータ一覧を取得できる', async () => {
       const user = createUser();
-      const sensorUploads: SensorUpload[] = [
+      const sensorUploads: SensorUploadRecordT[] = [
         createSensorUpload({
           id: '00000000-0000-0000-0000-000000000001',
           s3uploadId: 's3uploadid_1',

@@ -3,7 +3,7 @@ import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
 const sensorUploadZodSchema = createSelectSchema(SensorUploadSchema);
-export type SensorUpload = z.infer<typeof sensorUploadZodSchema>;
+export type SensorUploadRecordT = z.infer<typeof sensorUploadZodSchema>;
 
 export const sensorUploadStatusEnumSchema = sensorUploadZodSchema.shape.status;
 export type SensorUploadStatusEnum = z.infer<typeof sensorUploadStatusEnumSchema>;
