@@ -48,4 +48,11 @@ describe('handleDrizzleError', () => {
     expect(result).toBeInstanceOf(CustomDrizzleError);
     expect(result.code).toBe(ErrorCodeEnum.UNKNOWN);
   });
+
+  it('非エラーオブジェクトの場合は CustomDrizzleError で UNKNOWN を返す', () => {
+    const result = handleDrizzleError('Some string error');
+
+    expect(result).toBeInstanceOf(CustomDrizzleError);
+    expect(result.code).toBe(ErrorCodeEnum.UNKNOWN);
+  });
 });
