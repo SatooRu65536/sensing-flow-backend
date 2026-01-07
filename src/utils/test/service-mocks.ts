@@ -5,6 +5,8 @@ export function createDbServiceMock(overrides: Record<string, any> = {}) {
     $returningId: vi.fn(),
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     query: {
       SensorUploadSchema: {

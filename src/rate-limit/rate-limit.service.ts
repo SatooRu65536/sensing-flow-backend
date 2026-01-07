@@ -40,10 +40,15 @@ export class RateLimitService {
   }
 
   async logRateLimit(user: User, permission: string): Promise<void> {
-    await this.db.insert(RateLimitLogSchema).values({
-      userId: user.id,
-      permission,
-      timestamp: new Date(),
-    });
+    try {
+      await this.db.insert(RateLimitLogSchema).values({
+        userId: user.id,
+        permission,
+        timestamp: new Date(),
+      });
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException('Failed to log rate limit');
+    }
   }
 }
