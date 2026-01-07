@@ -79,6 +79,16 @@ export const plansConfigSchema = z.strictObject({
     }),
   ),
 });
+export const plansConfigRawSchema = z.strictObject({
+  plans: z.record(
+    planEnumSchema,
+    z.strictObject({
+      selectable: z.boolean().optional().default(true),
+      permissions: z.record(permissionNameSchema, z.string()),
+    }),
+  ),
+});
+export type PlansConfigRaw = z.infer<typeof plansConfigRawSchema>;
 
 export function generatePermissionEnumSchema() {
   const permissionGenPath = resolve(__dirname, '../../src/permissions.gen.ts');

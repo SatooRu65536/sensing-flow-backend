@@ -1,7 +1,7 @@
 import { UserPayload } from '@/auth/jwt.schema';
-import { createUserPayload } from './test-factories';
+import { User } from '@/users/users.dto';
 
-export function createContext(requestInit?: { user?: UserPayload }) {
+export function createContext(requestInit?: { user?: UserPayload | User }) {
   return {
     getClass: vi.fn(),
     getHandler: vi.fn(),
@@ -13,7 +13,7 @@ export function createContext(requestInit?: { user?: UserPayload }) {
     switchToHttp: () => ({
       getRequest<T = any>(): T {
         if (requestInit) return requestInit as T;
-        else return { user: createUserPayload() } as T;
+        else return {} as T;
       },
       getResponse: vi.fn(),
       getNext: vi.fn(),
