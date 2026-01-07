@@ -59,6 +59,16 @@ describe('JwtAuthGuard', () => {
       expect(result).toBe(true);
     });
 
+    it('JWT 認証失敗の場合は false を返す', async () => {
+      vi.spyOn(reflector, 'get').mockReturnValue(false); // IS_PUBLIC_KEY
+
+      const ctx = createContext();
+
+      spySuperCanActivate.mockReturnValue(false); // JWT 認証失敗
+      const result = await guard.canActivate(ctx);
+      expect(result).toBe(false);
+    });
+
     it('JWT 認証成功 & Raw Payload なしの場合 user を差し替える', async () => {
       const user = createUser();
       const userPayload = createUserPayload({ sub: 'sub-1' });
