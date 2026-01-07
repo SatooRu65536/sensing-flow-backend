@@ -45,6 +45,7 @@ export default defineConfig(({ mode }) => ({
       include: ['src/**/*.ts'],
       exclude: [
         '**/*.json',
+        '**/*.controller.ts',
         '**/*.module.ts',
         '**/*.decorator.ts',
         '**/*.schema.ts',
