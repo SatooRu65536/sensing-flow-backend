@@ -11,7 +11,7 @@ export function createDbServiceMock(overrides: Record<string, any> = {}) {
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     query: {
-      SensorUploadSchema: {
+      MultipartUploadSchema: {
         findFirst: vi.fn(),
         findMany: vi.fn(),
       },

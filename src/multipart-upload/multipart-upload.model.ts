@@ -1,8 +1,8 @@
-import { SensorUploadSchema } from '@/_schema';
+import { MultipartUploadSchema } from '@/_schema';
 import { createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-const sensorUploadZodSchema = createSelectSchema(SensorUploadSchema);
+const sensorUploadZodSchema = createSelectSchema(MultipartUploadSchema);
 export type SensorUploadRecordT = z.infer<typeof sensorUploadZodSchema>;
 
 export const sensorUploadStatusEnumSchema = sensorUploadZodSchema.shape.status;

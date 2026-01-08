@@ -16,7 +16,7 @@ import {
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { and, desc, eq } from 'drizzle-orm';
-import { SensorDataSchema, SensorUploadSchema } from '@/_schema';
+import { SensorDataSchema, MultipartUploadSchema } from '@/_schema';
 import { v4 } from 'uuid';
 import { SensorUploadStatusEnum } from './multipart-upload.model';
 import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
@@ -30,12 +30,12 @@ export class MultipartUploadService {
   ) {}
 
   async listSensorUploads(user: User): Promise<ListMultipartUploadResponse> {
-    const sensorUploadRecords = await this.db.query.SensorUploadSchema.findMany({
+    const sensorUploadRecords = await this.db.query.MultipartUploadSchema.findMany({
       where: and(
-        eq(SensorUploadSchema.userId, user.id),
-        eq(SensorUploadSchema.status, SensorUploadStatusEnum.IN_PROGRESS),
+        eq(MultipartUploadSchema.userId, user.id),
+        eq(MultipartUploadSchema.status, SensorUploadStatusEnum.IN_PROGRESS),
       ),
-      orderBy: desc(SensorUploadSchema.createdAt),
+      orderBy: desc(MultipartUploadSchema.createdAt),
     });
 
     const sensorUploads: MultiPartUpload[] = sensorUploadRecords.map((record) => ({
@@ -62,7 +62,7 @@ export class MultipartUploadService {
       }
 
       const sensorUploadRecords = await this.db
-        .insert(SensorUploadSchema)
+        .insert(MultipartUploadSchema)
         .values({
           id: uploadId,
           s3uploadId: uploadResponse.UploadId,
@@ -92,8 +92,8 @@ export class MultipartUploadService {
   }
 
   async postMultipartUpload(user: User, uploadId: string, body: string): Promise<PostMultipartUploadResponse> {
-    const sensorUploadRecord = await this.db.query.SensorUploadSchema.findFirst({
-      where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
+    const sensorUploadRecord = await this.db.query.MultipartUploadSchema.findFirst({
+      where: and(eq(MultipartUploadSchema.id, uploadId), eq(MultipartUploadSchema.userId, user.id)),
     });
 
     if (sensorUploadRecord == undefined) {
@@ -127,8 +127,8 @@ export class MultipartUploadService {
 
       await this.db.transaction(async (tx) => {
         // トランザクション内で再取得してロックをかける
-        const record = await tx.query.SensorUploadSchema.findFirst({
-          where: eq(SensorUploadSchema.id, sensorUploadRecord.id),
+        const record = await tx.query.MultipartUploadSchema.findFirst({
+          where: eq(MultipartUploadSchema.id, sensorUploadRecord.id),
         });
 
         if (record == undefined) {
@@ -136,11 +136,11 @@ export class MultipartUploadService {
         }
 
         await tx
-          .update(SensorUploadSchema)
+          .update(MultipartUploadSchema)
           .set({
             parts: [...sensorUploadRecord.parts, { partNumber, etag }],
           })
-          .where(eq(SensorUploadSchema.id, sensorUploadRecord.id));
+          .where(eq(MultipartUploadSchema.id, sensorUploadRecord.id));
       });
     } catch (e) {
       console.error(e);
@@ -158,8 +158,8 @@ export class MultipartUploadService {
   }
 
   async completeSensorUpload(user: User, uploadId: string): Promise<PostMultipartUploadResponse> {
-    const sensorUploadRecord = await this.db.query.SensorUploadSchema.findFirst({
-      where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
+    const sensorUploadRecord = await this.db.query.MultipartUploadSchema.findFirst({
+      where: and(eq(MultipartUploadSchema.id, uploadId), eq(MultipartUploadSchema.userId, user.id)),
     });
 
     if (sensorUploadRecord == undefined) {
@@ -176,9 +176,9 @@ export class MultipartUploadService {
       await this.db.transaction(async (tx) => {
         await Promise.all([
           tx
-            .update(SensorUploadSchema)
+            .update(MultipartUploadSchema)
             .set({ status: SensorUploadStatusEnum.COMPLETED })
-            .where(eq(SensorUploadSchema.id, uploadId)),
+            .where(eq(MultipartUploadSchema.id, uploadId)),
           tx.insert(SensorDataSchema).values({
             userId: user.id,
             s3key: sensorUploadKey,
@@ -210,8 +210,8 @@ export class MultipartUploadService {
   }
 
   async abortSensorUpload(user: User, uploadId: string): Promise<AbortMultipartUploadResponse> {
-    const sensorUploadRecord = await this.db.query.SensorUploadSchema.findFirst({
-      where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
+    const sensorUploadRecord = await this.db.query.MultipartUploadSchema.findFirst({
+      where: and(eq(MultipartUploadSchema.id, uploadId), eq(MultipartUploadSchema.userId, user.id)),
     });
 
     if (sensorUploadRecord == undefined) {
@@ -232,9 +232,9 @@ export class MultipartUploadService {
 
     try {
       await this.db
-        .update(SensorUploadSchema)
+        .update(MultipartUploadSchema)
         .set({ status: SensorUploadStatusEnum.ABORTED })
-        .where(eq(SensorUploadSchema.id, uploadId));
+        .where(eq(MultipartUploadSchema.id, uploadId));
     } catch (e) {
       console.error(e);
       throw new InternalServerErrorException('Failed to update sensor upload status', { cause: e });

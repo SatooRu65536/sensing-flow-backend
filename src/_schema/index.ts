@@ -26,7 +26,7 @@ export const UserSchema = mysqlTable('users', {
   updatedAt: updatedAt(),
 });
 
-export const SensorUploadSchema = mysqlTable('sensor_uploads', {
+export const MultipartUploadSchema = mysqlTable('multipart_uploads', {
   id: uuid('id').primaryKey(),
   s3uploadId: varchar('s3_upload_id', { length: 255 }).notNull().unique(),
   userId: uuid('user_id')

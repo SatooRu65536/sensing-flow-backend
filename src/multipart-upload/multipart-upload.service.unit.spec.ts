@@ -55,7 +55,7 @@ describe('MultipartUploadService', () => {
         }),
       ];
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findMany').mockResolvedValue(sensorUploads);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findMany').mockResolvedValue(sensorUploads);
 
       const result = await multipartUploadService.listSensorUploads(user);
       expect(result.sensorUploads).toHaveLength(sensorUploads.length);
@@ -71,7 +71,7 @@ describe('MultipartUploadService', () => {
     it('アップロード中のセンサーデータがない場合、空配列を返す', async () => {
       const user = createUser();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findMany').mockResolvedValue([]);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findMany').mockResolvedValue([]);
 
       const result = await multipartUploadService.listSensorUploads(user);
       expect(result.sensorUploads).toHaveLength(0);
@@ -165,7 +165,7 @@ describe('MultipartUploadService', () => {
         parts: [],
       });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
 
       const result = await multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example');
@@ -184,7 +184,7 @@ describe('MultipartUploadService', () => {
         ],
       });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
 
       const result = await multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example');
@@ -195,7 +195,7 @@ describe('MultipartUploadService', () => {
 
     it('存在しないアップロードIDの場合、例外を投げる', async () => {
       const user = createUser();
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(undefined);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(undefined);
 
       await expect(
         multipartUploadService.postMultipartUpload(user, 'nonexistent-upload-id', 'csv,content,example'),
@@ -206,7 +206,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'completed' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       await expect(
         multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example'),
@@ -217,7 +217,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'aborted' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       await expect(
         multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example'),
@@ -228,7 +228,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({} as UploadPartCommandOutput);
 
       await expect(
@@ -241,7 +241,7 @@ describe('MultipartUploadService', () => {
       const sensorUpload = createSensorUpload();
       const etag = 'etag_example';
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst')
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst')
         .mockResolvedValueOnce(sensorUpload) // 1回目の呼び出し
         .mockResolvedValueOnce(undefined); // 2回目の呼び出し（トランザクション内）
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
@@ -256,7 +256,7 @@ describe('MultipartUploadService', () => {
       const sensorUpload = createSensorUpload();
       const etag = 'etag_example';
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
       vi.spyOn(dbMock, 'transaction').mockRejectedValue(new Error('Some transaction error'));
 
@@ -269,7 +269,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockRejectedValue(new Error('S3 upload error'));
 
       await expect(
@@ -283,7 +283,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'completeMultipartUpload').mockResolvedValue({} as CompleteMultipartUploadCommandOutput);
 
       const result = await multipartUploadService.completeSensorUpload(user, sensorUpload.id);
@@ -294,7 +294,7 @@ describe('MultipartUploadService', () => {
     it('存在しないアップロードIDの場合、例外を投げる', async () => {
       const user = createUser();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(undefined);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(undefined);
 
       await expect(multipartUploadService.completeSensorUpload(user, 'nonexistent-upload-id')).rejects.toThrow(
         NotFoundException,
@@ -305,7 +305,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'completed' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       await expect(multipartUploadService.completeSensorUpload(user, sensorUpload.id)).rejects.toThrow(
         BadRequestException,
@@ -316,7 +316,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'aborted' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       await expect(multipartUploadService.completeSensorUpload(user, sensorUpload.id)).rejects.toThrow(
         BadRequestException,
@@ -327,7 +327,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(dbMock, 'where').mockRejectedValue(new Error('DB update error'));
       vi.spyOn(s3Service, 'completeMultipartUpload').mockResolvedValue({} as CompleteMultipartUploadCommandOutput);
 
@@ -340,7 +340,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(dbMock, 'insert').mockRejectedValue(new Error('DB insert error'));
       vi.spyOn(s3Service, 'completeMultipartUpload').mockResolvedValue({} as CompleteMultipartUploadCommandOutput);
 
@@ -353,7 +353,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'completeMultipartUpload').mockRejectedValue(new Error('S3 complete error'));
 
       await expect(multipartUploadService.completeSensorUpload(user, sensorUpload.id)).rejects.toThrow(
@@ -367,7 +367,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'in_progress' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       const result = await multipartUploadService.abortSensorUpload(user, sensorUpload.id);
 
@@ -383,7 +383,7 @@ describe('MultipartUploadService', () => {
     it('存在しないアップロードIDの場合、例外を投げる', async () => {
       const user = createUser();
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(undefined);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(undefined);
 
       await expect(multipartUploadService.abortSensorUpload(user, 'nonexistent-upload-id')).rejects.toThrow(
         NotFoundException,
@@ -394,7 +394,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'completed' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       await expect(multipartUploadService.abortSensorUpload(user, sensorUpload.id)).rejects.toThrow(
         BadRequestException,
@@ -405,7 +405,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'aborted' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
 
       await expect(multipartUploadService.abortSensorUpload(user, sensorUpload.id)).rejects.toThrow(
         BadRequestException,
@@ -416,7 +416,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'in_progress' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(s3Service, 'abortMultipartUpload').mockRejectedValue(new Error('S3 abort error'));
 
       await expect(multipartUploadService.abortSensorUpload(user, sensorUpload.id)).rejects.toThrow(
@@ -428,7 +428,7 @@ describe('MultipartUploadService', () => {
       const user = createUser();
       const sensorUpload = createSensorUpload({ status: 'in_progress' });
 
-      vi.spyOn(dbMock.query.SensorUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
+      vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(sensorUpload);
       vi.spyOn(dbMock, 'update').mockRejectedValue(new Error('DB update error'));
 
       await expect(multipartUploadService.abortSensorUpload(user, sensorUpload.id)).rejects.toThrow(

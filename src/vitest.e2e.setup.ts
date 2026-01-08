@@ -3,7 +3,7 @@ import * as schema from '@/_schema';
 
 async function resetDb() {
   await db.delete(schema.SensorDataSchema);
-  await db.delete(schema.SensorUploadSchema);
+  await db.delete(schema.MultipartUploadSchema);
   await db.delete(schema.RateLimitLogSchema);
   await db.delete(schema.UserSchema);
 }

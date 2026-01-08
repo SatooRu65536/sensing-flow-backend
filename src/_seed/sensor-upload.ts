@@ -1,4 +1,4 @@
-import { SensorUploadSchema } from '@/_schema';
+import { MultipartUploadSchema } from '@/_schema';
 import { db } from '@/database/database.module';
 import { SensorUploadRecordT, sensorUploadStatusOptions } from '@/multipart-upload/multipart-upload.model';
 
@@ -7,7 +7,7 @@ interface Options {
   additional?: SensorUploadRecordT[];
 }
 export async function seedSensorUploads(userIds: string[], { count, additional }: Options) {
-  await db.insert(SensorUploadSchema).values([
+  await db.insert(MultipartUploadSchema).values([
     ...userIds.flatMap((userId) =>
       Array.from({ length: count ?? 20 }).map((_, index) => ({
         userId,

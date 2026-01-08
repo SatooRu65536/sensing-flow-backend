@@ -57,6 +57,13 @@
       "when": 1767651224879,
       "tag": "0007_sloppy_doctor_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1767881481737,
+      "tag": "0008_loud_albert_cleary",
+      "breakpoints": true
     }
   ]
 }
