@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { generatePermissionEnumSchema } from './plans-config/plans-config.schema';
 
 export async function bootstrap() {
-  const loggerLevels: LogLevel[] = ['warn', 'error', 'debug'];
+  const loggerLevels: LogLevel[] = ['warn', 'error', 'debug', 'log'];
   const nestApp = await NestFactory.create(AppModule, { logger: loggerLevels });
 
   nestApp.enableCors({

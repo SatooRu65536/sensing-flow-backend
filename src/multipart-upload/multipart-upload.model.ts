@@ -6,6 +6,7 @@ const sensorUploadZodSchema = createSelectSchema(SensorUploadSchema);
 export type SensorUploadRecordT = z.infer<typeof sensorUploadZodSchema>;
 
 export const sensorUploadStatusEnumSchema = sensorUploadZodSchema.shape.status;
+export const sensorUploadStatusOptions = sensorUploadStatusEnumSchema.options;
 export type SensorUploadStatusEnum = z.infer<typeof sensorUploadStatusEnumSchema>;
 
 export const SensorUploadStatusEnum = {

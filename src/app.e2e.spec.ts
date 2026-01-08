@@ -20,15 +20,21 @@ describe('AppModule', () => {
     await app.close();
   });
 
-  it('[200] GET /', async () => {
-    const res = await request(app.getHttpServer()).get('/');
-    expect(res.status).toBe(200);
-    expect(res.text).toBe('Hello World!');
+  describe('GET /', () => {
+    it('[200] 取得できる', async () => {
+      const res = await request(app.getHttpServer()).get('/');
+
+      expect(res.status).toBe(200);
+      expect(res.text).toBe('Hello World!');
+    });
   });
 
-  it('[200] GET /hello', async () => {
-    const res = await request(app.getHttpServer()).get('/hello');
-    expect(res.status).toBe(200);
-    expect(res.text).toBe('Hello World!');
+  describe('GET /hello', () => {
+    it('[200] 取得できる', async () => {
+      const res = await request(app.getHttpServer()).get('/hello');
+
+      expect(res.status).toBe(200);
+      expect(res.text).toBe('Hello World!');
+    });
   });
 });

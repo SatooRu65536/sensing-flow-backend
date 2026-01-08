@@ -2,7 +2,6 @@ services:
   sensing-flow-db:
     image: mysql:8.0
     container_name: sensing-flow-db
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: sensing-flow-root-pass
       MYSQL_DATABASE: sensing_flow
@@ -15,16 +14,17 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d:ro
 
   localstack:
-    image: localstack/localstack:s3-latest
+    image: localstack/localstack:4.12.0
+    container_name: localstack
     ports:
       - 4566:4566
     environment:
-      SERVICES: S3
+      SERVICES: s3
       AWS_ACCESS_KEY_ID: localstack-test
       AWS_SECRET_ACCESS_KEY: localstack-test
       AWS_DEFAULT_REGION: ap-northeast-1
     volumes:
-      - ./init-s3:/etc/localstack/init/ready.d/:ro
+      - ./localstack-init/:/etc/localstack/init/ready.d/:ro
 
 volumes:
   mysql-data:

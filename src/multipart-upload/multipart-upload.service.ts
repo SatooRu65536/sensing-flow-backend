@@ -73,7 +73,7 @@ export class MultipartUploadService {
         .$returningId();
 
       if (sensorUploadRecords.length === 0) {
-        throw new InternalServerErrorException('Failed to create sensor upload record');
+        throw new InternalServerErrorException('Failed to create multipart upload');
       }
 
       const sensorUploadRecord = sensorUploadRecords[0];
@@ -83,10 +83,10 @@ export class MultipartUploadService {
       const error = handleDrizzleError(e);
       switch (error.code) {
         case ErrorCodeEnum.DUPLICATE_ENTRY:
-          throw new BadRequestException('既に存在するアップロードIDです', { cause: error });
+          throw new BadRequestException('既に存在するアップロードIDです');
         default:
           console.error(error.cause);
-          throw new InternalServerErrorException('Failed to create sensor upload record', { cause: error });
+          throw new InternalServerErrorException('Failed to create multipart upload');
       }
     }
   }
