@@ -48,12 +48,6 @@ export class AppModule {}
     RateLimitModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: PermissionGuard,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModuleMock {}

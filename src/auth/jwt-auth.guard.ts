@@ -7,7 +7,7 @@ import { USE_RAW_JWT_PAYLOAD } from '../common/decorators/before-register.decora
 import { User } from '@/users/users.dto';
 import { UserPayload } from './jwt.schema';
 import { isObservable, lastValueFrom } from 'rxjs';
-import { createUser } from '@/utils/test/test-factories';
+import { createUser, createUserPayload } from '@/utils/test/test-factories';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -42,6 +42,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
 interface JwtAuthGuardMockOverride {
   user: Partial<User>;
+  userPayload?: Partial<UserPayload>;
 }
 
 @Injectable()
@@ -72,6 +73,8 @@ export class JwtAuthGuardMock implements CanActivate {
 
     if (!useRawPayload) {
       request.user = createUser(this.override?.user);
+    } else {
+      request.user = createUserPayload(this.override?.userPayload);
     }
 
     return true;
