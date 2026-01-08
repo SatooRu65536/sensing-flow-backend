@@ -1,28 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDate, IsEnum, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { SensorUploadStatusEnum, sensorUploadStatusEnumSchema } from './multipart-upload.model';
 import { Type } from 'class-transformer';
 
 export class MultiPartUpload {
   @ApiProperty({ description: 'センサデータのアップロードID' })
   @IsString()
-  uploadId: string;
+  @IsNotEmpty()
+  readonly uploadId: string;
 
   @ApiProperty({ description: 'センサデータ名' })
   @IsString()
-  dataName: string;
+  @IsNotEmpty()
+  readonly dataName: string;
 
   @ApiProperty({ description: 'ステータス', enum: sensorUploadStatusEnumSchema.options })
   @IsEnum(sensorUploadStatusEnumSchema.options)
-  status: SensorUploadStatusEnum;
+  @IsNotEmpty()
+  readonly status: SensorUploadStatusEnum;
 
   @ApiProperty({ description: '作成日時' })
   @IsDate()
-  createdAt: Date;
+  @Type(() => Date)
+  @IsNotEmpty()
+  readonly createdAt: Date;
 
   @ApiProperty({ description: '更新日時' })
   @IsDate()
-  updatedAt: Date;
+  @Type(() => Date)
+  @IsNotEmpty()
+  readonly updatedAt: Date;
 }
 
 export class ListMultipartUploadResponse {
@@ -30,33 +37,39 @@ export class ListMultipartUploadResponse {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MultiPartUpload)
-  sensorUploads: MultiPartUpload[];
+  @IsNotEmpty()
+  readonly sensorUploads: MultiPartUpload[];
 }
 
 export class StartMultipartUploadRequest {
   @ApiProperty({ description: 'センサデータ名' })
   @IsString()
-  dataName: string;
+  @IsNotEmpty()
+  readonly dataName: string;
 }
 
 export class StartMultipartUploadResponse {
   @ApiProperty({ description: 'センサデータのアップロードID' })
   @IsString()
-  uploadId: string;
+  @IsNotEmpty()
+  readonly uploadId: string;
 
   @ApiProperty({ description: 'センサデータ名' })
   @IsString()
-  dataName: string;
+  @IsNotEmpty()
+  readonly dataName: string;
 }
 
 export class PostMultipartUploadResponse {
   @ApiProperty({ description: 'センサデータのアップロードID' })
   @IsString()
-  uploadId: string;
+  @IsNotEmpty()
+  readonly uploadId: string;
 
   @ApiProperty({ description: 'センサデータ名' })
   @IsString()
-  dataName: string;
+  @IsNotEmpty()
+  readonly dataName: string;
 }
 
 export class AbortMultipartUploadResponse extends MultiPartUpload {}
