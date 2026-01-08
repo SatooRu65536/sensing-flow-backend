@@ -1,13 +1,14 @@
 import { SensorUploadSchema } from '@/_schema';
 import { db } from '@/database/database.module';
-import { sensorUploadStatusOptions } from '@/multipart-upload/multipart-upload.model';
+import { SensorUploadRecordT, sensorUploadStatusOptions } from '@/multipart-upload/multipart-upload.model';
 
 interface Options {
   count?: number;
+  additional?: SensorUploadRecordT[];
 }
-export async function seedSensorUploads(userIds: string[], { count }: Options) {
-  await db.insert(SensorUploadSchema).values(
-    userIds.flatMap((userId) =>
+export async function seedSensorUploads(userIds: string[], { count, additional }: Options) {
+  await db.insert(SensorUploadSchema).values([
+    ...userIds.flatMap((userId) =>
       Array.from({ length: count ?? 20 }).map((_, index) => ({
         userId,
         parts: Array.from({ length: index }).map((_, partIndex) => ({
@@ -19,5 +20,6 @@ export async function seedSensorUploads(userIds: string[], { count }: Options) {
         status: sensorUploadStatusOptions.at(index) ?? 'in_progress',
       })),
     ),
-  );
+    ...(additional ?? []),
+  ]);
 }

@@ -24,6 +24,7 @@
     "migrate:dev": "pnpm env:dev drizzle-kit migrate",
     "migrate:test": "pnpm env:test drizzle-kit migrate",
     "studio:dev": "pnpm env:dev drizzle-kit studio",
+    "studio:test": "pnpm env:test drizzle-kit studio",
     "basti:connect": "basti connect --aws-profile sensing-flow-dev --aws-region ap-northeast-1"
   },
   "dependencies": {

@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard.mock';
 import { ValidationPipe } from '@nestjs/common';
+import bodyParser from 'body-parser';
 
 export async function createTestApp(imports: any[]) {
   const authGuardRef: { current?: JwtAuthGuardMock } = {};
@@ -29,6 +30,9 @@ export async function createTestApp(imports: any[]) {
       transform: true,
     }),
   );
+  app.enableShutdownHooks();
+  app.use(bodyParser.json({ limit: '15mb' }));
+  app.use(bodyParser.text({ type: 'text/csv', limit: '100mb' }));
 
   await app.init();
 

@@ -11,6 +11,7 @@ import {
 import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
+import { CsvValidationPipe } from '@/common/pipes/csv-validation.pipe';
 
 @Controller('sensor-upload')
 export class MultipartUploadController {
@@ -40,7 +41,7 @@ export class MultipartUploadController {
   @ApiResponse({ type: PostMultipartUploadResponse })
   @Permission('post:multipart_upload')
   async postMultipartUpload(
-    @Body() body: string,
+    @Body(new CsvValidationPipe()) body: string,
     @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<PostMultipartUploadResponse> {

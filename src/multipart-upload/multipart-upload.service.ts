@@ -96,7 +96,7 @@ export class MultipartUploadService {
       where: and(eq(SensorUploadSchema.id, uploadId), eq(SensorUploadSchema.userId, user.id)),
     });
 
-    if (sensorUploadRecord?.userId !== user.id) {
+    if (sensorUploadRecord == undefined) {
       throw new NotFoundException('Sensor upload not found');
     }
 
@@ -148,7 +148,7 @@ export class MultipartUploadService {
         // transaction 内で NotFoundException が投げられた場合はそのまま投げ直す
         throw e;
       }
-      throw new InternalServerErrorException('Failed to upload part', { cause: e });
+      throw new InternalServerErrorException('Failed to upload part');
     }
 
     return {

@@ -13,9 +13,12 @@ import {
   StartMultipartUploadResponse,
 } from './multipart-upload.dto';
 import { validate } from 'class-validator';
+import { S3Service } from '@/s3/s3.service';
 
 describe('MultipartUploadModule', () => {
   const userId = 'test-user-id';
+  const s3service = new S3Service();
+  const startedUploadId = 'test-upload-id';
   let app: INestApplication<App>;
   let authGuard: JwtAuthGuardMock;
 
@@ -25,7 +28,35 @@ describe('MultipartUploadModule', () => {
 
   beforeEach(async () => {
     const userIds = await seedUsers({ userIds: [userId] });
-    await seedSensorUploads(userIds, { count: 20 });
+    const s3key = s3service.getSensorUploadKey(userId, startedUploadId);
+    const { UploadId } = await s3service.createMultipartUpload(s3key);
+    const { ETag } = await s3service.postMultipartUpload(
+      s3key,
+      UploadId!,
+      1,
+      Buffer.from('this,is,a,test,csv,data').toString('base64'),
+    );
+
+    await seedSensorUploads(userIds, {
+      count: 20,
+      additional: [
+        {
+          id: startedUploadId,
+          userId,
+          parts: [
+            {
+              etag: ETag!,
+              partNumber: 1,
+            },
+          ],
+          dataName: `sensor-upload-started`,
+          s3uploadId: UploadId!,
+          status: 'in_progress',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ],
+    });
   });
 
   afterEach(() => {
@@ -80,6 +111,111 @@ describe('MultipartUploadModule', () => {
       const res = await request(app.getHttpServer()).post('/sensor-upload').send({});
 
       expect(res.status).toBe(400);
+    });
+
+    it('[400] リクエストボディが誤りの場合', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).post('/sensor-upload').send({ dataName: 123 });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe('POST /sensor-upload/:uploadId', () => {
+    it('[200] アップロードできる', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer())
+        .put(`/sensor-upload/${startedUploadId}`)
+        .set('Content-Type', 'text/csv')
+        .send('this,is,a,test,csv,data');
+
+      expect(res.status).toBe(200);
+
+      const dto = plainToInstance(StartMultipartUploadResponse, res.body);
+      const errors = await validate(dto);
+
+      expect(errors.length).toBe(0);
+    });
+
+    it('[400] Content-Type が CSV でない場合', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer())
+        .put(`/sensor-upload/${startedUploadId}`)
+        // .set('Content-Type', 'text/csv')
+        .send('this,is,a,test,csv,data');
+
+      expect(res.status).toBe(400);
+    });
+
+    it('[400] リクエストボディが空の場合', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer())
+        .put(`/sensor-upload/${startedUploadId}`)
+        .set('Content-Type', 'text/csv')
+        .send('');
+
+      expect(res.status).toBe(400);
+    });
+
+    it('[404] アップロードIDが存在しない場合', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer())
+        .put(`/sensor-upload/non-existent-upload-id`)
+        .set('Content-Type', 'text/csv')
+        .send('this,is,a,test,csv,data');
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('PATCH /sensor-upload/:uploadId', () => {
+    it('[200] 完了できる', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).patch(`/sensor-upload/${startedUploadId}`);
+
+      expect(res.status).toBe(200);
+
+      const dto = plainToInstance(StartMultipartUploadResponse, res.body);
+      const errors = await validate(dto);
+
+      expect(errors.length).toBe(0);
+    });
+
+    it('[404] アップロードIDが存在しない場合', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).patch(`/sensor-upload/non-existent-upload-id`);
+
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('DELETE /sensor-upload/:uploadId', () => {
+    it('[200] 中止できる', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).delete(`/sensor-upload/${startedUploadId}`);
+
+      expect(res.status).toBe(200);
+
+      const dto = plainToInstance(StartMultipartUploadResponse, res.body);
+      const errors = await validate(dto);
+
+      expect(errors.length).toBe(0);
+    });
+
+    it('[404] アップロードIDが存在しない場合', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).delete(`/sensor-upload/non-existent-upload-id`);
+
+      expect(res.status).toBe(404);
     });
   });
 });
