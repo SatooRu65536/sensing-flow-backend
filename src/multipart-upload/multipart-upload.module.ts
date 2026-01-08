@@ -8,4 +8,4 @@ import { S3Module } from '@/s3/s3.module';
   controllers: [MultipartUploadController],
   providers: [MultipartUploadService],
 })
-export class SensorUploadModule {}
+export class MultipartUploadModule {}

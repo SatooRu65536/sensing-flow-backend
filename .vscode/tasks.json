@@ -4,14 +4,21 @@
     {
       "label": "Docker Compose Up",
       "type": "shell",
-      "command": "docker compose up -d",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow up -d",
       "problemMatcher": [],
       "group": "build"
     },
     {
       "label": "Docker Compose Down",
       "type": "shell",
-      "command": "docker compose down",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow down",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Docker Compose Rebuild",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow up -d --build",
       "problemMatcher": [],
       "group": "build"
     }

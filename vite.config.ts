@@ -4,6 +4,9 @@ import { resolve } from 'path';
 import swc from 'unplugin-swc';
 import dotenv from 'dotenv';
 
+const args = process.argv.slice(3);
+const e2e = args.some((arg) => arg.includes('e2e.spec.ts')) || args.every((arg) => !arg.includes('.ts'));
+
 export default defineConfig(({ mode }) => ({
   server: {
     host: true,
@@ -42,7 +45,7 @@ export default defineConfig(({ mode }) => ({
   test: {
     globals: true,
     env: dotenv.config({ path: '.env.test' }).parsed,
-    setupFiles: ['./src/vitest.setup.ts'],
+    setupFiles: e2e ? ['./src/vitest.setup.ts', './src/vitest.e2e.setup.ts'] : ['./src/vitest.setup.ts'],
     include: ['src/**/*.spec.ts'],
     coverage: {
       include: ['src/**/*.ts', 'src/*.ts'],
