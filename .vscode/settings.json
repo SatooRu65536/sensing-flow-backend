@@ -7,7 +7,7 @@
     "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, bun.lock",
     "*.json": "${capture}.schema.json,${capture}.gen.ts",
     ".env.example.rest-client": ".env",
-    ".env.example": ".env.development*,.env.staging*,.env.production*",
+    ".env.example": ".env.development*,.env.staging*,.env.production*,.env.test*",
   },
   "files.exclude": {
     ".dart_tool": true,

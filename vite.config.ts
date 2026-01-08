@@ -2,6 +2,7 @@ import { VitePluginNode } from 'vite-plugin-node';
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 import swc from 'unplugin-swc';
+import dotenv from 'dotenv';
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -40,12 +41,14 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     globals: true,
+    env: dotenv.config({ path: '.env.test' }).parsed,
     setupFiles: ['./src/vitest.setup.ts'],
     include: ['src/**/*.spec.ts'],
     coverage: {
       include: ['src/**/*.ts', 'src/*.ts'],
       exclude: [
         '**/*.json',
+        '**/*.module.ts',
         '**/*.controller.ts',
         '**/*.decorator.ts',
         '**/*.schema.ts',
