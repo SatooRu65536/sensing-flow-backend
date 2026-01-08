@@ -12,6 +12,8 @@
     "prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "vitest run",
+    "test:unit": "vitest run src/{*,**/*}.unit.spec.ts",
+    "test:e2e": "vitest run src/{*,**/*}.e2e.spec.ts",
     "test:watch": "vitest --watch",
     "test:cov": "vitest run --coverage",
     "deploy:dev": "pnpm build && pnpm env:dev cdk deploy --all --profile sensing-flow-dev --region ap-northeast-1 --require-approval never --context env=dev",

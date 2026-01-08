@@ -43,11 +43,10 @@ export default defineConfig(({ mode }) => ({
     setupFiles: ['./src/vitest.setup.ts'],
     include: ['src/**/*.spec.ts'],
     coverage: {
-      include: ['src/**/*.ts'],
+      include: ['src/**/*.ts', 'src/*.ts'],
       exclude: [
         '**/*.json',
         '**/*.controller.ts',
-        '**/*.module.ts',
         '**/*.decorator.ts',
         '**/*.schema.ts',
         '**/*.model.ts',

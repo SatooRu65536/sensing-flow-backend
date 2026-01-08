@@ -1,7 +1,7 @@
 {
   "include": [
     "src",
-    "stryker.config.mjs"
+    "vite.config.ts",
   ],
   "exclude": [
     "node_modules",
