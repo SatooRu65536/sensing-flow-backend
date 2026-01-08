@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { APP_GUARD, Reflector } from '@nestjs/core';
-import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard';
+import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard.mock';
 
 export async function createTestApp(imports: any[]) {
   const authGuardRef: { current?: JwtAuthGuardMock } = {};

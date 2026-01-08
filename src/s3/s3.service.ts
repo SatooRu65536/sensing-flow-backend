@@ -18,10 +18,24 @@ export class S3Service {
   private readonly bucketName: string;
 
   constructor() {
-    this.s3Client = new S3Client({
-      region: process.env.S3_REGION,
-      credentials: process.env.ENV_DEV ? fromIni() : undefined,
-    });
+    switch (process.env.ENV) {
+      case 'development':
+        this.s3Client = new S3Client({
+          region: process.env.S3_REGION,
+          credentials: fromIni(),
+        });
+        break;
+      case 'test':
+        this.s3Client = new S3Client({
+          endpoint: process.env.S3_ENDPOINT,
+        });
+        break;
+      default:
+        this.s3Client = new S3Client({
+          region: process.env.S3_REGION,
+        });
+        break;
+    }
     this.bucketName = process.env.S3_BUCKET_NAME!;
   }
 

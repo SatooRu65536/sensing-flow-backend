@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { INestApplication } from '@nestjs/common';
-import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard';
-import { AppModuleMock } from '@/app.module';
+import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard.mock';
+import { AppModuleMock } from '@/app.module.mock';
 import { createTestApp } from '@/utils/test/create-test-app';
 
 describe('MultipartUploadModule', () => {

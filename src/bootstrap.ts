@@ -26,7 +26,7 @@ export async function bootstrap() {
   nestApp.use(bodyParser.json({ limit: '15mb' }));
   nestApp.use(bodyParser.text({ type: 'text/csv', limit: '100mb' }));
 
-  if (process.env.ENV_DEV === 'true') {
+  if (process.env.ENV === 'development') {
     const config = new DocumentBuilder()
       .setTitle('Sensing Flow API')
       .setDescription('API documentation for Sensing Flow')
@@ -48,13 +48,13 @@ export async function bootstrap() {
     SwaggerModule.setup('docs', nestApp, document);
   }
 
-  if (process.env.ENV_DEV === 'true') {
+  if (process.env.ENV === 'development') {
     generatePermissionEnumSchema();
   }
 
   await nestApp.init();
 
-  if (process.env.ENV_DEV === 'true') {
+  if (process.env.ENV === 'development') {
     await nestApp.listen(5173);
   }
 

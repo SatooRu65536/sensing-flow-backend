@@ -1,8 +1,7 @@
 {
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.patterns": {
-    "*.ts": "${capture}.story.ts,${capture}.test.ts,${capture}.spec.ts,${capture}.unit.spec.ts,${capture}.js,${capture}.module.scss,${capture}.module.css",
-    "*.tsx": "${capture}.story.ts,${capture}.test.ts,${capture}.spec.ts,${capture}.unit.spec.ts,${capture}.ts,${capture}.js",
+    "*.ts": "${capture}.story.ts,${capture}.mock.ts,${capture}.test.ts,${capture}.spec.ts,${capture}.unit.spec.ts,${capture}.js,${capture}.module.scss,${capture}.module.css",
     "tsconfig.json": "tsconfig.*.json",
     "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb, bun.lock",
     "*.json": "${capture}.schema.json,${capture}.gen.ts",

@@ -5,22 +5,55 @@
       "label": "Docker Compose Up",
       "type": "shell",
       "command": "docker compose -f docker/compose.yml -p sensing-flow up -d",
-      "problemMatcher": [],
       "group": "build"
     },
     {
-      "label": "Docker Compose Down",
+      "label": "Docker Compose Stop",
       "type": "shell",
-      "command": "docker compose -f docker/compose.yml -p sensing-flow down",
-      "problemMatcher": [],
+      "command": "docker compose -f docker/compose.yml -p sensing-flow stop",
       "group": "build"
     },
     {
       "label": "Docker Compose Rebuild",
       "type": "shell",
       "command": "docker compose -f docker/compose.yml -p sensing-flow up -d --build",
-      "problemMatcher": [],
       "group": "build"
-    }
+    },
+    {
+      "label": "Docker Compose Up (DB)",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow up -d sensing-flow-db",
+      "group": "build"
+    },
+    {
+      "label": "Docker Compose Stop (DB)",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow stop sensing-flow-db",
+      "group": "build"
+    },
+    {
+      "label": "Docker Compose Rebuild (DB)",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow up -d --build sensing-flow-db",
+      "group": "build"
+    },
+    {
+      "label": "Docker Compose Up (localstack)",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow up -d localstack",
+      "group": "build"
+    },
+    {
+      "label": "Docker Compose Stop (localstack)",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow stop localstack",
+      "group": "build"
+    },
+    {
+      "label": "Docker Compose Rebuild (localstack)",
+      "type": "shell",
+      "command": "docker compose -f docker/compose.yml -p sensing-flow up -d --build localstack",
+      "group": "build"
+    },
   ]
 }
