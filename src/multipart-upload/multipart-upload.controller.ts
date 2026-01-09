@@ -3,6 +3,7 @@ import { MultipartUploadService } from './multipart-upload.service';
 import { Authed } from '@/common/decorators/auth.decorator';
 import {
   AbortMultipartUploadResponse,
+  CompleteMultipartUploadResponse,
   ListMultipartUploadResponse,
   PostMultipartUploadResponse,
   StartMultipartUploadRequest,
@@ -49,12 +50,12 @@ export class MultipartUploadController {
   }
 
   @Patch(':uploadId')
-  @ApiResponse({ type: PostMultipartUploadResponse })
+  @ApiResponse({ type: CompleteMultipartUploadResponse })
   @Permission('post:multipart_upload')
   async completeSensorUpload(
     @Authed() user: User,
     @Param('uploadId') uploadId: string,
-  ): Promise<PostMultipartUploadResponse> {
+  ): Promise<CompleteMultipartUploadResponse> {
     return this.sensorUploadService.completeSensorUpload(user, uploadId);
   }
 

@@ -12,6 +12,7 @@ import {
   StartMultipartUploadRequest,
   StartMultipartUploadResponse,
   PostMultipartUploadResponse,
+  CompleteMultipartUploadResponse,
 } from './multipart-upload.dto';
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
@@ -157,7 +158,7 @@ export class MultipartUploadService {
     };
   }
 
-  async completeSensorUpload(user: User, uploadId: string): Promise<PostMultipartUploadResponse> {
+  async completeSensorUpload(user: User, uploadId: string): Promise<CompleteMultipartUploadResponse> {
     const sensorUploadRecord = await this.db.query.MultipartUploadSchema.findFirst({
       where: and(eq(MultipartUploadSchema.id, uploadId), eq(MultipartUploadSchema.userId, user.id)),
     });
@@ -243,9 +244,6 @@ export class MultipartUploadService {
     return {
       uploadId: sensorUploadRecord.id,
       dataName: sensorUploadRecord.dataName,
-      status: SensorUploadStatusEnum.ABORTED,
-      createdAt: sensorUploadRecord.createdAt,
-      updatedAt: sensorUploadRecord.updatedAt,
     };
   }
 }

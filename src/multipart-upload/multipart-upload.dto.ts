@@ -61,4 +61,22 @@ export class PostMultipartUploadResponse {
   readonly dataName: string;
 }
 
-export class AbortMultipartUploadResponse extends MultiPartUpload {}
+export class CompleteMultipartUploadResponse {
+  @ApiProperty({ description: 'センサデータのアップロードID' })
+  @IsString()
+  readonly uploadId: string;
+
+  @ApiProperty({ description: 'センサデータ名' })
+  @IsString()
+  readonly dataName: string;
+}
+
+export class AbortMultipartUploadResponse {
+  @ApiProperty({ description: 'センサデータのアップロードID' })
+  @IsString()
+  readonly uploadId: string;
+
+  @ApiProperty({ description: 'センサデータ名' })
+  @IsString()
+  readonly dataName: string;
+}

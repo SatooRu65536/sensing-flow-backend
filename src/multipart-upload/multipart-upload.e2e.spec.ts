@@ -5,8 +5,10 @@ import { AppModuleMock } from '@/app.module.mock';
 import { createTestApp } from '@/common/utils/test/create-test-app';
 import { seedUsers } from '@/_seed/users';
 import { seedSensorUploads } from '@/_seed/sensor-upload';
-import { plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import {
+  AbortMultipartUploadResponse,
+  CompleteMultipartUploadResponse,
   ListMultipartUploadResponse,
   StartMultipartUploadRequest,
   StartMultipartUploadResponse,
@@ -136,6 +138,9 @@ describe('MultipartUploadModule', () => {
       const errors = await validate(dto);
 
       expect(errors.length).toBe(0);
+      expect(instanceToPlain(dto)).toMatchObject({
+        uploadId: startedUploadId,
+      });
     });
 
     it('[400] Content-Type が CSV でない場合', async () => {
@@ -180,10 +185,13 @@ describe('MultipartUploadModule', () => {
 
       expect(res.status).toBe(200);
 
-      const dto = plainToInstance(StartMultipartUploadResponse, res.body);
+      const dto = plainToInstance(CompleteMultipartUploadResponse, res.body);
       const errors = await validate(dto);
 
       expect(errors.length).toBe(0);
+      expect(instanceToPlain(dto)).toMatchObject({
+        uploadId: startedUploadId,
+      });
     });
 
     it('[404] アップロードIDが存在しない場合', async () => {
@@ -203,10 +211,13 @@ describe('MultipartUploadModule', () => {
 
       expect(res.status).toBe(200);
 
-      const dto = plainToInstance(StartMultipartUploadResponse, res.body);
+      const dto = plainToInstance(AbortMultipartUploadResponse, res.body);
       const errors = await validate(dto);
 
       expect(errors.length).toBe(0);
+      expect(instanceToPlain(dto)).toMatchObject({
+        uploadId: startedUploadId,
+      });
     });
 
     it('[404] アップロードIDが存在しない場合', async () => {
