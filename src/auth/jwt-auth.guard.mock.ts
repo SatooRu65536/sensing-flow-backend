@@ -5,9 +5,12 @@ import { USE_RAW_JWT_PAYLOAD } from '../common/decorators/before-register.decora
 import { User } from '@/users/users.dto';
 import { UserPayload } from './jwt.schema';
 import { createUser, createUserPayload } from '@/common/utils/test/test-factories';
+import { db } from '@/database/database.module';
+import { eq } from 'drizzle-orm';
+import { UserSchema } from '@/_schema';
 
 interface JwtAuthGuardMockOverride {
-  user: Partial<User>;
+  user?: Partial<User>;
   userPayload?: Partial<UserPayload>;
 }
 
@@ -20,6 +23,16 @@ export class JwtAuthGuardMock implements CanActivate {
 
   setUser(override: JwtAuthGuardMockOverride) {
     this.override = override;
+  }
+
+  async setExistingUser(userId: string): Promise<User> {
+    const userRecord = await db.query.UserSchema.findFirst({ where: eq(UserSchema.id, userId) });
+    if (!userRecord) {
+      throw new Error(`User with id ${userId} not found in database`);
+    }
+    this.override = { user: userRecord };
+
+    return userRecord;
   }
 
   resetUser() {
