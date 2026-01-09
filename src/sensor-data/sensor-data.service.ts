@@ -133,6 +133,31 @@ export class SensorDataService {
     };
   }
 
+  async deleteSensorData(user: User, id: string): Promise<void> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
+    }
+
+    try {
+      await this.db.transaction(async (tx) => {
+        await tx.delete(SensorDataSchema).where(and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)));
+        try {
+          await this.s3Service.deleteObject(sensorDataRecord.s3key);
+        } catch (e) {
+          tx.rollback();
+          throw e;
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException('Failed to delete sensor data');
+    }
+  }
+
   async getSensorDataPresignedUrl(user: User, id: string): Promise<GetSensorDataPresignedUrlResponse> {
     const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
       where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),

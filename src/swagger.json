@@ -336,9 +336,26 @@
       "post": {
         "operationId": "SensorDataController_uploadSensorDataFile",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadSensorDataRequest"
+              }
+            }
+          }
+        },
         "responses": {
-          "201": {
-            "description": ""
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadSensorDataResponse"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -352,6 +369,110 @@
       }
     },
     "/sensor-data/{id}": {
+      "get": {
+        "operationId": "SensorDataController_getSensorData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSensorDataResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      },
+      "patch": {
+        "operationId": "SensorDataController_updateSensorData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSensorDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSensorDataResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      },
+      "delete": {
+        "operationId": "SensorDataController_deleteSensorData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      }
+    },
+    "/sensor-data/{id}/presigned-url": {
       "get": {
         "operationId": "SensorDataController_getSensorDataPresignedUrl",
         "parameters": [
@@ -726,6 +847,117 @@
         },
         "required": [
           "sensorData"
+        ]
+      },
+      "UploadSensorDataRequest": {
+        "type": "object",
+        "properties": {
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "dataName"
+        ]
+      },
+      "UploadSensorDataResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "GetSensorDataResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateSensorDataRequest": {
+        "type": "object",
+        "properties": {
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "dataName"
+        ]
+      },
+      "UpdateSensorDataResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "GetSensorDataPresignedUrlResponse": {

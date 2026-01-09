@@ -1,5 +1,16 @@
 import { Authed } from '@/common/decorators/auth.decorator';
-import { Body, Controller, Get, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import {
   GetSensorDataPresignedUrlResponse,
   GetSensorDataResponse,
@@ -61,6 +72,12 @@ export class SensorDataController {
     @Body() body: UpdateSensorDataRequest,
   ): Promise<UpdateSensorDataResponse> {
     return this.sensorDataService.updateSensorData(user, id, body);
+  }
+
+  @Delete(':id')
+  @Permission('delete:sensor_data')
+  async deleteSensorData(@Authed() user: User, @Param('id') id: string): Promise<void> {
+    return this.sensorDataService.deleteSensorData(user, id);
   }
 
   @Get(':id/presigned-url')

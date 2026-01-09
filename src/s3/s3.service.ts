@@ -3,6 +3,7 @@ import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -52,6 +53,15 @@ export class S3Service {
         Key: key,
         Body: body,
         ContentType: 'text/csv',
+      }),
+    );
+  }
+
+  async deleteObject(key: string) {
+    return await this.s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
       }),
     );
   }
