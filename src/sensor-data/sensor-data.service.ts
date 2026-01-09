@@ -14,7 +14,8 @@ import { SensorDataSchema } from '@/_schema';
 import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
 import { v4 } from 'uuid';
-import { ErrorCodeEnum, handleDrizzleError } from '@/common/utils/drizzle-error';
+import { handleDrizzleError } from '@/common/utils/drizzle-error';
+import { ErrorCodeEnum } from '@/common/errors/custom-drizzle.error';
 
 @Injectable()
 export class SensorDataService {

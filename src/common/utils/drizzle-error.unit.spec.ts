@@ -1,5 +1,6 @@
 import { CustomMySQLError } from '@/common/errors/custom-mysql.error';
-import { handleDrizzleError, CustomDrizzleError, ErrorCodeEnum } from './drizzle-error';
+import { handleDrizzleError } from './drizzle-error';
+import { CustomDrizzleError, ErrorCodeEnum } from '@/common/errors/custom-drizzle.error';
 import { DrizzleQueryError } from 'drizzle-orm';
 
 describe('handleDrizzleError', () => {
