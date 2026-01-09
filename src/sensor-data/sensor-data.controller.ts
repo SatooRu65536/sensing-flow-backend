@@ -1,10 +1,17 @@
 import { Authed } from '@/common/decorators/auth.decorator';
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse } from './sensor-data.dto';
+import { Body, Controller, Get, Param, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  GetSensorDataPresignedUrlResponse,
+  ListSensorDataResponse,
+  UploadSensorDataRequest,
+  UploadSensorDataResponse,
+} from './sensor-data.dto';
 import { SensorDataService } from './sensor-data.service';
 import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CSVFilePipe } from '@/common/pipes/sensor-file.pipe';
 
 @Controller('sensor-data')
 export class SensorDataController {
@@ -21,6 +28,18 @@ export class SensorDataController {
     @Query('perPage') perPage: number = 10,
   ): Promise<ListSensorDataResponse> {
     return this.sensorDataService.listSensorData(user, page, perPage);
+  }
+
+  @Post()
+  @ApiResponse({ type: UploadSensorDataResponse })
+  @UseInterceptors(FileInterceptor('file'))
+  @Permission('upload:sensor_data')
+  async uploadSensorDataFile(
+    @Authed() user: User,
+    @Body() body: UploadSensorDataRequest,
+    @UploadedFile(CSVFilePipe(5, 'MB')) file: Express.Multer.File,
+  ): Promise<UploadSensorDataResponse> {
+    return await this.sensorDataService.uploadSensorDataFile(user, body, file);
   }
 
   @Get(':id')

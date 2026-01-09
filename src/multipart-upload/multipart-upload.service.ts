@@ -53,7 +53,7 @@ export class MultipartUploadService {
   async startMultipartUpload(user: User, body: StartMultipartUploadRequest): Promise<StartMultipartUploadResponse> {
     const uploadId = v4();
 
-    const multipartUploadKey = this.s3Service.getMultipartUploadKey(user.id, uploadId);
+    const multipartUploadKey = this.s3Service.getUploadS3Key(user.id, uploadId);
 
     try {
       const uploadResponse = await this.s3Service.createMultipartUpload(multipartUploadKey);
@@ -84,7 +84,7 @@ export class MultipartUploadService {
       const error = handleDrizzleError(e);
       switch (error.code) {
         case ErrorCodeEnum.DUPLICATE_ENTRY:
-          throw new BadRequestException('既に存在するアップロードIDです');
+          throw new BadRequestException('Already existing upload ID');
         default:
           console.error(error.cause);
           throw new InternalServerErrorException('Failed to create multipart upload');
@@ -111,10 +111,7 @@ export class MultipartUploadService {
     );
     const partNumber = lastNumber + 1;
 
-    const multipartUploadKey = this.s3Service.getMultipartUploadKey(
-      multipartUploadRecord.userId,
-      multipartUploadRecord.id,
-    );
+    const multipartUploadKey = this.s3Service.getUploadS3Key(multipartUploadRecord.userId, multipartUploadRecord.id);
 
     try {
       const multupartUploadRes = await this.s3Service.postMultipartUpload(
@@ -174,10 +171,7 @@ export class MultipartUploadService {
       throw new BadRequestException('Cannot complete a completed or aborted upload');
     }
 
-    const multipartUploadKey = this.s3Service.getMultipartUploadKey(
-      multipartUploadRecord.userId,
-      multipartUploadRecord.id,
-    );
+    const multipartUploadKey = this.s3Service.getUploadS3Key(multipartUploadRecord.userId, multipartUploadRecord.id);
 
     try {
       await this.db.transaction(async (tx) => {
@@ -230,10 +224,7 @@ export class MultipartUploadService {
     }
 
     try {
-      const multipartUploadKey = this.s3Service.getMultipartUploadKey(
-        multipartUploadRecord.userId,
-        multipartUploadRecord.id,
-      );
+      const multipartUploadKey = this.s3Service.getUploadS3Key(multipartUploadRecord.userId, multipartUploadRecord.id);
       await this.s3Service.abortMultipartUpload(multipartUploadKey, multipartUploadRecord.s3uploadId);
     } catch (e) {
       console.error(e);

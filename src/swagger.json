@@ -179,7 +179,7 @@
     },
     "/multipart-upload/{uploadId}": {
       "put": {
-        "operationId": "MultipartUploadController_postMultipartUpload",
+        "operationId": "MultipartUploadController_uploadMultipartUpload",
         "parameters": [
           {
             "name": "uploadId",

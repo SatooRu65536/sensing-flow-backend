@@ -1,10 +1,18 @@
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { GetSensorDataPresignedUrlResponse, ListSensorDataResponse, SensorData } from './sensor-data.dto';
+import {
+  GetSensorDataPresignedUrlResponse,
+  ListSensorDataResponse,
+  SensorData,
+  UploadSensorDataRequest,
+  UploadSensorDataResponse,
+} from './sensor-data.dto';
 import type { DbType } from '@/database/database.module';
 import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema } from '@/_schema';
 import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
+import { v4 } from 'uuid';
+import { ErrorCodeEnum, handleDrizzleError } from '@/common/utils/drizzle-error';
 
 @Injectable()
 export class SensorDataService {
@@ -29,6 +37,51 @@ export class SensorDataService {
     }));
 
     return { sensorData };
+  }
+
+  async uploadSensorDataFile(
+    user: User,
+    body: UploadSensorDataRequest,
+    file: Express.Multer.File,
+  ): Promise<UploadSensorDataResponse> {
+    const uploadId = v4();
+    const s3key = this.s3Service.getUploadS3Key(user.id, uploadId);
+
+    try {
+      await this.db.transaction(async (tx) => {
+        await this.s3Service.putObject(s3key, file.buffer);
+        await tx.insert(SensorDataSchema).values({
+          id: uploadId,
+          userId: user.id,
+          dataName: body.dataName,
+          s3key,
+        });
+      });
+    } catch (e) {
+      console.error(e);
+      const error = handleDrizzleError(e);
+      switch (error.code) {
+        case ErrorCodeEnum.DUPLICATE_ENTRY:
+          throw new InternalServerErrorException('Already existing upload ID');
+        default:
+          throw new InternalServerErrorException('Failed to save sensor data metadata');
+      }
+    }
+
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: eq(SensorDataSchema.id, uploadId),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new InternalServerErrorException('Failed to retrieve saved sensor data');
+    }
+
+    return {
+      id: sensorDataRecord.id,
+      dataName: sensorDataRecord.dataName,
+      createdAt: sensorDataRecord.createdAt,
+      updatedAt: sensorDataRecord.updatedAt,
+    };
   }
 
   async getSensorDataPresignedUrl(user: User, id: string): Promise<GetSensorDataPresignedUrlResponse> {
