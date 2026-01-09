@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MultipartUploadService } from './multipart-upload.service';
 import { SensorUploadRecordT } from './multipart-upload.model';
-import { MultiPartUpload } from './multipart-upload.dto';
+import { AbortMultipartUploadResponse, MultiPartUpload } from './multipart-upload.dto';
 import { S3Service } from '@/s3/s3.service';
 import {
   CompleteMultipartUploadCommandOutput,
@@ -374,10 +374,7 @@ describe('MultipartUploadService', () => {
       expect(result).toEqual({
         uploadId: sensorUpload.id,
         dataName: sensorUpload.dataName,
-        status: 'aborted',
-        createdAt: sensorUpload.createdAt,
-        updatedAt: sensorUpload.updatedAt,
-      });
+      } satisfies AbortMultipartUploadResponse);
     });
 
     it('存在しないアップロードIDの場合、例外を投げる', async () => {
