@@ -4,6 +4,7 @@ import {
   GetSensorDataResponse,
   ListSensorDataResponse,
   SensorData,
+  UpdateSensorDataResponse,
   UploadSensorDataRequest,
   UploadSensorDataResponse,
 } from './sensor-data.dto';
@@ -99,6 +100,36 @@ export class SensorDataService {
       dataName: sensorDataRecord.dataName,
       createdAt: sensorDataRecord.createdAt,
       updatedAt: sensorDataRecord.updatedAt,
+    };
+  }
+
+  async updateSensorData(user: User, id: string, body: { dataName: string }): Promise<UpdateSensorDataResponse> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
+    }
+
+    await this.db
+      .update(SensorDataSchema)
+      .set({ dataName: body.dataName })
+      .where(and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)));
+
+    const updatedRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (updatedRecord == undefined) {
+      throw new InternalServerErrorException('Failed to retrieve updated sensor data');
+    }
+
+    return {
+      id: updatedRecord.id,
+      dataName: updatedRecord.dataName,
+      createdAt: updatedRecord.createdAt,
+      updatedAt: updatedRecord.updatedAt,
     };
   }
 

@@ -40,6 +40,14 @@ export class UploadSensorDataResponse extends SensorData {}
 
 export class GetSensorDataResponse extends SensorData {}
 
+export class UpdateSensorDataRequest {
+  @ApiProperty({ description: 'センサデータ名' })
+  @IsString()
+  readonly dataName: string;
+}
+
+export class UpdateSensorDataResponse extends SensorData {}
+
 export class GetSensorDataPresignedUrlResponse extends SensorData {
   @ApiProperty({ description: 'presigned URL' })
   @IsString()
