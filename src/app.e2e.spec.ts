@@ -1,4 +1,3 @@
-import request from 'supertest';
 import { App } from 'supertest/types';
 import { Test } from '@nestjs/testing';
 import { AppModule } from './app.module';

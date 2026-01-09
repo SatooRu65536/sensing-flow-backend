@@ -1,5 +1,9 @@
 import { db } from './database/database.module';
 import * as schema from '@/_schema';
+import { typedRequest } from '@/common/utils/test/typed-request';
+
+// グローバル変数に設定
+global.request = typedRequest;
 
 async function resetDb() {
   await db.delete(schema.SensorDataSchema);

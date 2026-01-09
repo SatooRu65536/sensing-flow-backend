@@ -1,4 +1,3 @@
-import request from 'supertest';
 import { App } from 'supertest/types';
 import { INestApplication } from '@nestjs/common';
 import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard.mock';
