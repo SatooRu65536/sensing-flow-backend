@@ -25,7 +25,7 @@ import { ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CSVFilePipe } from '@/common/pipes/sensor-file.pipe';
+import { FilePipe } from '@/common/pipes/sensor-file.pipe';
 
 @Controller('sensor-data')
 export class SensorDataController {
@@ -51,7 +51,7 @@ export class SensorDataController {
   async uploadSensorDataFile(
     @Authed() user: User,
     @Body() body: UploadSensorDataRequest,
-    @UploadedFile(CSVFilePipe(5, 'MB')) file: Express.Multer.File,
+    @UploadedFile(FilePipe(5, 'MB')) file: Express.Multer.File,
   ): Promise<UploadSensorDataResponse> {
     return this.sensorDataService.uploadSensorDataFile(user, body, file);
   }

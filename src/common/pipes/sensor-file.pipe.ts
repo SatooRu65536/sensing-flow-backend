@@ -2,7 +2,7 @@ import { ParseFilePipeBuilder } from '@nestjs/common';
 
 type Unit = 'KB' | 'MB' | 'GB';
 
-export const CSVFilePipe = (maxSize: number, unit: Unit = 'MB') => {
+export const FilePipe = (maxSize: number, unit: Unit = 'MB') => {
   let maxSizeBytes: number;
   switch (unit) {
     case 'KB':
@@ -17,8 +17,5 @@ export const CSVFilePipe = (maxSize: number, unit: Unit = 'MB') => {
       break;
   }
 
-  return new ParseFilePipeBuilder()
-    .addMaxSizeValidator({ maxSize: maxSizeBytes })
-    .addFileTypeValidator({ fileType: 'text/csv' })
-    .build();
+  return new ParseFilePipeBuilder().addMaxSizeValidator({ maxSize: maxSizeBytes }).build();
 };
