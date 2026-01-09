@@ -10,6 +10,7 @@ export function createDbServiceMock(overrides: Record<string, any> = {}) {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
     query: {
       MultipartUploadSchema: {
         findFirst: vi.fn(),

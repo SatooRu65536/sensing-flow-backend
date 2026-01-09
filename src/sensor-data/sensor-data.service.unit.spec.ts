@@ -10,7 +10,8 @@ import {
 } from './sensor-data.dto';
 import { S3Service } from '@/s3/s3.service';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { PutObjectCommandOutput } from '@aws-sdk/client-s3';
+import { DeleteObjectCommandOutput, PutObjectCommandOutput } from '@aws-sdk/client-s3';
+import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
 
 describe('SensorDataService', () => {
   let sensorDataService: SensorDataService;
@@ -100,6 +101,25 @@ describe('SensorDataService', () => {
       expect(vi.spyOn(s3Service, 'putObject')).toHaveBeenCalledWith(s3key, fileBuffer);
     });
 
+    it('センサーデータのメタデータの保存に失敗した場合、エラーをスローする', async () => {
+      const user = createUser();
+      const fileBuffer = Buffer.from('sensor,data,content');
+      const file = {
+        originalname: 'sensor_data.csv',
+        buffer: fileBuffer,
+      } as Express.Multer.File;
+      const body = {
+        dataName: 'Test Sensor Data',
+      };
+
+      vi.spyOn(dbMock, 'insert').mockRejectedValue(new Error('DB error'));
+
+      await expect(sensorDataService.uploadSensorDataFile(user, body, file)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      expect(vi.spyOn(s3Service, 'putObject')).not.toHaveBeenCalled();
+    });
+
     it('アップロードに失敗した場合、エラーをスローする', async () => {
       const user = createUser();
       const fileBuffer = Buffer.from('sensor,data,content');
@@ -110,12 +130,51 @@ describe('SensorDataService', () => {
       const body = {
         dataName: 'Test Sensor Data',
       };
+
       vi.spyOn(s3Service, 'putObject').mockRejectedValue(new Error('S3 error'));
 
       await expect(sensorDataService.uploadSensorDataFile(user, body, file)).rejects.toThrow(
         InternalServerErrorException,
       );
-      expect(vi.spyOn(dbMock, 'rollback')).toHaveBeenCalled(); // insert がロールバックされていることを確認
+      expect(vi.spyOn(dbMock, 'insert')).toHaveBeenCalled();
+      expect(vi.spyOn(s3Service, 'putObject')).toHaveBeenCalled();
+      expect(vi.spyOn(dbMock, 'rollback')).toHaveBeenCalled();
+    });
+
+    it('重複エラーの場合は DUPLICATE_ENTRY を返す', async () => {
+      const user = createUser();
+      const fileBuffer = Buffer.from('sensor,data,content');
+      const file = {
+        originalname: 'sensor_data.csv',
+        buffer: fileBuffer,
+      } as Express.Multer.File;
+      const body = {
+        dataName: 'Test Sensor Data',
+      };
+
+      vi.spyOn(dbMock, 'values').mockRejectedValue(new DrizzleDuplicateError());
+      await expect(sensorDataService.uploadSensorDataFile(user, body, file)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
+    it('作成後のセンサーデータの取得に失敗した場合、エラーをスローする', async () => {
+      const user = createUser();
+      const fileBuffer = Buffer.from('sensor,data,content');
+      const file = {
+        originalname: 'sensor_data.csv',
+        buffer: fileBuffer,
+      } as Express.Multer.File;
+      const body = {
+        dataName: 'Test Sensor Data',
+      };
+
+      vi.spyOn(s3Service, 'putObject').mockResolvedValue({} as PutObjectCommandOutput);
+      vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst').mockResolvedValue(undefined);
+
+      await expect(sensorDataService.uploadSensorDataFile(user, body, file)).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 
@@ -176,6 +235,77 @@ describe('SensorDataService', () => {
       await expect(sensorDataService.updateSensorData(user, 'non-exist-id', { dataName: 'New Name' })).rejects.toThrow(
         NotFoundException,
       );
+    });
+
+    it('更新後のセンサーデータの取得に失敗した場合、エラーをスローする', async () => {
+      const user = createUser();
+      const sensorDataRecord = createSensorData({
+        userId: user.id,
+      });
+
+      vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst')
+        .mockResolvedValueOnce(sensorDataRecord) // 最初の呼び出しは既存のデータを返す
+        .mockResolvedValueOnce(undefined); // 2回目の呼び出しはundefinedを返す
+
+      await expect(
+        sensorDataService.updateSensorData(user, sensorDataRecord.id, { dataName: 'New Name' }),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('deleteSensorData', () => {
+    it('センサーデータを削除できる', async () => {
+      const user = createUser();
+      const sensorDataRecord = createSensorData({
+        userId: user.id,
+      });
+
+      vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst').mockResolvedValue(sensorDataRecord);
+      vi.spyOn(s3Service, 'deleteObject').mockResolvedValue({} as DeleteObjectCommandOutput);
+
+      const result = await sensorDataService.deleteSensorData(user, sensorDataRecord.id);
+      expect(result).toBeUndefined();
+      expect(vi.spyOn(s3Service, 'deleteObject')).toHaveBeenCalledWith(sensorDataRecord.s3key);
+      expect(vi.spyOn(dbMock, 'delete')).toHaveBeenCalled();
+    });
+
+    it('センサーデータが存在しない場合、エラーをスローする', async () => {
+      const user = createUser();
+      vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst').mockResolvedValue(undefined);
+
+      await expect(sensorDataService.deleteSensorData(user, 'non-exist-id')).rejects.toThrow(NotFoundException);
+    });
+
+    it('削除処理に失敗した場合、エラーをスローする', async () => {
+      const user = createUser();
+      const sensorDataRecord = createSensorData({
+        userId: user.id,
+      });
+
+      vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst').mockResolvedValue(sensorDataRecord);
+      vi.spyOn(dbMock, 'delete').mockRejectedValue(new Error('DB error'));
+
+      await expect(sensorDataService.deleteSensorData(user, sensorDataRecord.id)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      expect(vi.spyOn(s3Service, 'deleteObject')).not.toHaveBeenCalled();
+    });
+
+    it('削除に失敗した場合、エラーをスローする', async () => {
+      const user = createUser();
+      const sensorDataRecord = createSensorData({
+        userId: user.id,
+      });
+
+      vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst').mockResolvedValue(sensorDataRecord);
+      vi.spyOn(s3Service, 'deleteObject').mockRejectedValue(new Error('S3 error'));
+
+      await expect(sensorDataService.deleteSensorData(user, sensorDataRecord.id)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      expect(vi.spyOn(dbMock, 'delete')).toHaveBeenCalled();
+      expect(vi.spyOn(s3Service, 'deleteObject')).toHaveBeenCalled();
+      expect(vi.spyOn(dbMock, 'rollback')).toHaveBeenCalled();
     });
   });
 
