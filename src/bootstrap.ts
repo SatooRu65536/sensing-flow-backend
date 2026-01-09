@@ -27,8 +27,8 @@ export async function bootstrap() {
   nestApp.use(bodyParser.text({ type: 'text/csv', limit: '100mb' }));
 
   if (process.env.ENV === 'development') {
-    generateSwaggerJson(nestApp, 'swagger.json');
-    generatePermissionEnumSchema('permissions.gen.ts', 'plans.schema.json');
+    generateSwaggerJson(nestApp, 'src/swagger.json');
+    generatePermissionEnumSchema('src/permissions.gen.ts', 'src/plans.schema.json');
   }
 
   await nestApp.init();

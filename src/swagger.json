@@ -117,7 +117,7 @@
         ]
       }
     },
-    "/sensor-upload": {
+    "/multipart-upload": {
       "get": {
         "operationId": "MultipartUploadController_listSensorUploads",
         "parameters": [],
@@ -177,7 +177,7 @@
         ]
       }
     },
-    "/sensor-upload/{uploadId}": {
+    "/multipart-upload/{uploadId}": {
       "put": {
         "operationId": "MultipartUploadController_postMultipartUpload",
         "parameters": [
@@ -240,7 +240,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PostMultipartUploadResponse"
+                  "$ref": "#/components/schemas/CompleteMultipartUploadResponse"
                 }
               }
             }
@@ -633,6 +633,23 @@
           "dataName"
         ]
       },
+      "CompleteMultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "センサデータのアップロードID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "uploadId",
+          "dataName"
+        ]
+      },
       "AbortMultipartUploadResponse": {
         "type": "object",
         "properties": {
@@ -643,33 +660,11 @@
           "dataName": {
             "type": "string",
             "description": "センサデータ名"
-          },
-          "status": {
-            "type": "string",
-            "description": "ステータス",
-            "enum": [
-              "in_progress",
-              "completed",
-              "aborted"
-            ]
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "作成日時"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "更新日時"
           }
         },
         "required": [
           "uploadId",
-          "dataName",
-          "status",
-          "createdAt",
-          "updatedAt"
+          "dataName"
         ]
       },
       "SensorData": {
