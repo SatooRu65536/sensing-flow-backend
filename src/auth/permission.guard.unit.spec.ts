@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PermissionGuard } from './permission.guard';
 import { Reflector } from '@nestjs/core';
 import { RateLimitService } from '@/rate-limit/rate-limit.service';
-import plansJson from '../plans.json';
+import plansConfigJson from '@/plans.json';
 import { createContext, createReflectorMock } from '@/common/utils/test/execution-context';
 import { createDbServiceMock, DbMock } from '@/common/utils/test/service-mocks';
 import { createUser } from '@/common/utils/test/test-factories';
@@ -11,11 +11,11 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-request.exception';
 
 describe('PermissionGuard', () => {
+  const plansConfig: PlansConfigRaw = plansConfigJson;
   let guard: PermissionGuard;
   let reflector: Reflector;
   let rateLimitService: RateLimitService;
   let dbMock: DbMock;
-  let plansConfig: PlansConfigRaw;
 
   beforeEach(async () => {
     reflector = createReflectorMock();
@@ -33,7 +33,6 @@ describe('PermissionGuard', () => {
 
     rateLimitService = module.get<RateLimitService>(RateLimitService);
     guard = new PermissionGuard(reflector, rateLimitService);
-    plansConfig = plansJson as PlansConfigRaw;
   });
 
   it('requiredPermission がない場合は true を返す（user がある場合）', async () => {

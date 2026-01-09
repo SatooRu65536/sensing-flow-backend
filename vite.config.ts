@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     globals: true,
+    maxWorkers: e2e ? 1 : undefined, // E2EテストではDBの競合を避けるためシングルスレッドで実行
     env: dotenv.config({ path: '.env.test' }).parsed,
     setupFiles: e2e ? ['./src/vitest.setup.ts', './src/vitest.e2e.setup.ts'] : ['./src/vitest.setup.ts'],
     include: ['src/**/*.spec.ts'],

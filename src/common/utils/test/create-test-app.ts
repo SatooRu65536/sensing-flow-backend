@@ -1,14 +1,21 @@
 import { Test } from '@nestjs/testing';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard.mock';
-import { ValidationPipe } from '@nestjs/common';
+import { ModuleMetadata, ValidationPipe } from '@nestjs/common';
 import bodyParser from 'body-parser';
+import { PermissionGuard } from '@/auth/permission.guard';
+import { RateLimitModule } from '@/rate-limit/rate-limit.module';
 
-export async function createTestApp(imports: any[]) {
+interface CreateTestAppOption {
+  imports: ModuleMetadata['imports'];
+  usePermissionGuard?: boolean;
+}
+export async function createTestApp({ imports, usePermissionGuard }: CreateTestAppOption) {
   const authGuardRef: { current?: JwtAuthGuardMock } = {};
 
   const moduleRef = await Test.createTestingModule({
-    imports,
+    // imports と RateLimitService を必ず登録
+    imports: [...(imports ?? []), RateLimitModule],
     providers: [
       {
         provide: APP_GUARD,
@@ -19,6 +26,14 @@ export async function createTestApp(imports: any[]) {
           return guard;
         },
       },
+      ...(usePermissionGuard
+        ? [
+            {
+              provide: APP_GUARD,
+              useClass: PermissionGuard,
+            },
+          ]
+        : []),
     ],
   }).compile();
 

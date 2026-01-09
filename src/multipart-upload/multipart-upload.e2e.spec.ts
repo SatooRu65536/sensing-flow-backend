@@ -22,7 +22,7 @@ describe('MultipartUploadModule', () => {
   let authGuard: JwtAuthGuardMock;
 
   beforeAll(async () => {
-    ({ app, authGuard } = await createTestApp([AppModuleMock]));
+    ({ app, authGuard } = await createTestApp({ imports: [AppModuleMock] }));
   });
 
   beforeEach(async () => {
