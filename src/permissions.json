@@ -1,9 +1,12 @@
 {
   "permissions": {
-    "list:multipart_upload": "List sensor data uploads",
-    "post:multipart_upload": "Upload sensor data",
-    "abort:multipart_upload": "Abort sensor data upload",
     "list:sensor_data": "List sensor data",
+    "upload:sensor_data": "Upload sensor data",
+    "start:multipart_upload": "Start sensor data upload",
+    "list:multipart_upload": "List sensor data uploads",
+    "upload:multipart_upload": "Upload sensor data",
+    "complete:multipart_upload": "Complete sensor data upload",
+    "abort:multipart_upload": "Abort sensor data upload",
     "test:rate_limit": "Test rate limit functionality"
   }
 }

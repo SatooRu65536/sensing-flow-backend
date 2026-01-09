@@ -28,7 +28,7 @@ export class MultipartUploadController {
   @Post()
   @ApiBody({ type: StartMultipartUploadRequest })
   @ApiResponse({ type: StartMultipartUploadResponse })
-  @Permission('post:multipart_upload')
+  @Permission('start:multipart_upload')
   async startMultipartUpload(
     @Authed() user: User,
     @Body() body: StartMultipartUploadRequest,
@@ -40,18 +40,18 @@ export class MultipartUploadController {
   @ApiConsumes('text/csv')
   @ApiBody({ description: 'CSVデータ', type: String })
   @ApiResponse({ type: PostMultipartUploadResponse })
-  @Permission('post:multipart_upload')
-  async postMultipartUpload(
+  @Permission('upload:multipart_upload')
+  async uploadMultipartUpload(
     @Body(new CsvValidationPipe()) body: string,
     @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<PostMultipartUploadResponse> {
-    return this.multipartUploadService.postMultipartUpload(user, uploadId, body);
+    return this.multipartUploadService.uploadMultipartUpload(user, uploadId, body);
   }
 
   @Patch(':uploadId')
   @ApiResponse({ type: CompleteMultipartUploadResponse })
-  @Permission('post:multipart_upload')
+  @Permission('complete:multipart_upload')
   async completeMultipartUpload(
     @Authed() user: User,
     @Param('uploadId') uploadId: string,

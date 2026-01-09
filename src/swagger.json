@@ -119,7 +119,7 @@
     },
     "/multipart-upload": {
       "get": {
-        "operationId": "MultipartUploadController_listSensorUploads",
+        "operationId": "MultipartUploadController_listMultipartUploads",
         "parameters": [],
         "responses": {
           "default": {
@@ -143,7 +143,7 @@
         ]
       },
       "post": {
-        "operationId": "MultipartUploadController_startSensorUpload",
+        "operationId": "MultipartUploadController_startMultipartUpload",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -223,7 +223,7 @@
         ]
       },
       "patch": {
-        "operationId": "MultipartUploadController_completeSensorUpload",
+        "operationId": "MultipartUploadController_completeMultipartUpload",
         "parameters": [
           {
             "name": "uploadId",
@@ -256,7 +256,7 @@
         ]
       },
       "delete": {
-        "operationId": "MultipartUploadController_abortSensorUpload",
+        "operationId": "MultipartUploadController_abortMultipartUpload",
         "parameters": [
           {
             "name": "uploadId",
@@ -322,6 +322,23 @@
                 }
               }
             }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      },
+      "post": {
+        "operationId": "SensorDataController_uploadSensorDataFile",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
           }
         },
         "security": [
@@ -575,7 +592,7 @@
       "ListMultipartUploadResponse": {
         "type": "object",
         "properties": {
-          "sensorUploads": {
+          "multipartUploads": {
             "description": "センサデータアップロード一覧",
             "type": "array",
             "items": {
@@ -584,7 +601,7 @@
           }
         },
         "required": [
-          "sensorUploads"
+          "multipartUploads"
         ]
       },
       "StartMultipartUploadRequest": {

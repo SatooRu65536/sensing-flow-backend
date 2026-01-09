@@ -25,10 +25,11 @@
             "propertyNames": {
               "type": "string",
               "enum": [
+                "list:sensor_data",
+                "upload:sensor_data",
                 "list:multipart_upload",
                 "post:multipart_upload",
                 "abort:multipart_upload",
-                "list:sensor_data",
                 "test:rate_limit",
                 "*"
               ]

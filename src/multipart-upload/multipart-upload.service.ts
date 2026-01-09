@@ -92,7 +92,7 @@ export class MultipartUploadService {
     }
   }
 
-  async postMultipartUpload(user: User, uploadId: string, body: string): Promise<PostMultipartUploadResponse> {
+  async uploadMultipartUpload(user: User, uploadId: string, body: string): Promise<PostMultipartUploadResponse> {
     const multipartUploadRecord = await this.db.query.MultipartUploadSchema.findFirst({
       where: and(eq(MultipartUploadSchema.id, uploadId), eq(MultipartUploadSchema.userId, user.id)),
     });
