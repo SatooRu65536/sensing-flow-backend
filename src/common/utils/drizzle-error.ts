@@ -7,8 +7,8 @@ export function handleDrizzleError(error: unknown): CustomDrizzleError {
       switch (cause.code) {
         case 'ER_DUP_ENTRY':
           return new CustomDrizzleError('Duplicate entry error', ErrorCodeEnum.DUPLICATE_ENTRY, error);
-        case 'ER_DBACCESS_DENIED_ERROR':
-          return new CustomDrizzleError('Access denied error', ErrorCodeEnum.ER_DBACCESS_DENIED_ERROR, error);
+        // case 'ER_DBACCESS_DENIED_ERROR':
+        //   return new CustomDrizzleError('Access denied error', ErrorCodeEnum.ER_DBACCESS_DENIED_ERROR, error);
       }
     }
   }
