@@ -16,24 +16,24 @@ import { CsvValidationPipe } from '@/common/pipes/csv-validation.pipe';
 
 @Controller('multipart-upload')
 export class MultipartUploadController {
-  constructor(private readonly sensorUploadService: MultipartUploadService) {}
+  constructor(private readonly multipartUploadService: MultipartUploadService) {}
 
   @Get()
   @ApiResponse({ type: ListMultipartUploadResponse })
   @Permission('list:multipart_upload')
-  async listSensorUploads(@Authed() user: User): Promise<ListMultipartUploadResponse> {
-    return this.sensorUploadService.listSensorUploads(user);
+  async listMultipartUploads(@Authed() user: User): Promise<ListMultipartUploadResponse> {
+    return this.multipartUploadService.listMultipartUploads(user);
   }
 
   @Post()
   @ApiBody({ type: StartMultipartUploadRequest })
   @ApiResponse({ type: StartMultipartUploadResponse })
   @Permission('post:multipart_upload')
-  async startSensorUpload(
+  async startMultipartUpload(
     @Authed() user: User,
     @Body() body: StartMultipartUploadRequest,
   ): Promise<StartMultipartUploadResponse> {
-    return this.sensorUploadService.startSensorUpload(user, body);
+    return this.multipartUploadService.startMultipartUpload(user, body);
   }
 
   @Put(':uploadId')
@@ -46,26 +46,26 @@ export class MultipartUploadController {
     @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<PostMultipartUploadResponse> {
-    return this.sensorUploadService.postMultipartUpload(user, uploadId, body);
+    return this.multipartUploadService.postMultipartUpload(user, uploadId, body);
   }
 
   @Patch(':uploadId')
   @ApiResponse({ type: CompleteMultipartUploadResponse })
   @Permission('post:multipart_upload')
-  async completeSensorUpload(
+  async completeMultipartUpload(
     @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<CompleteMultipartUploadResponse> {
-    return this.sensorUploadService.completeSensorUpload(user, uploadId);
+    return this.multipartUploadService.completeMultipartUpload(user, uploadId);
   }
 
   @Delete(':uploadId')
   @ApiResponse({ type: AbortMultipartUploadResponse })
   @Permission('abort:multipart_upload')
-  async abortSensorUpload(
+  async abortMultipartUpload(
     @Authed() user: User,
     @Param('uploadId') uploadId: string,
   ): Promise<AbortMultipartUploadResponse> {
-    return this.sensorUploadService.abortSensorUpload(user, uploadId);
+    return this.multipartUploadService.abortMultipartUpload(user, uploadId);
   }
 }

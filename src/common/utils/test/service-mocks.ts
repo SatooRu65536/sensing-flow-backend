@@ -40,7 +40,7 @@ export function createS3ServiceMock(overrides: Record<string, any> = {}) {
     completeMultipartUpload: vi.fn(),
     abortMultipartUpload: vi.fn(),
     getPresignedUrl: vi.fn(),
-    getSensorUploadKey: vi.fn().mockReturnValue('sensor/upload/key' as S3Key),
+    getMultipartUploadKey: vi.fn().mockReturnValue('multipart/upload/key' as S3Key),
     ...overrides,
   };
 }

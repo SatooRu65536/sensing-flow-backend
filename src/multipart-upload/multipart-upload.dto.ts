@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsDate, IsEnum, IsString, ValidateNested } from 'class-validator';
-import { SensorUploadStatusEnum, sensorUploadStatusEnumSchema } from './multipart-upload.model';
+import { MultipartUploadStatusEnum, multipartUploadStatusEnumSchema } from './multipart-upload.model';
 import { Type } from 'class-transformer';
 
 export class MultiPartUpload {
@@ -12,9 +12,9 @@ export class MultiPartUpload {
   @IsString()
   readonly dataName: string;
 
-  @ApiProperty({ description: 'ステータス', enum: sensorUploadStatusEnumSchema.options })
-  @IsEnum(sensorUploadStatusEnumSchema.options)
-  readonly status: SensorUploadStatusEnum;
+  @ApiProperty({ description: 'ステータス', enum: multipartUploadStatusEnumSchema.options })
+  @IsEnum(multipartUploadStatusEnumSchema.options)
+  readonly status: MultipartUploadStatusEnum;
 
   @ApiProperty({ description: '作成日時' })
   @IsDate()
@@ -32,7 +32,7 @@ export class ListMultipartUploadResponse {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MultiPartUpload)
-  readonly sensorUploads: MultiPartUpload[];
+  readonly multipartUploads: MultiPartUpload[];
 }
 
 export class StartMultipartUploadRequest {

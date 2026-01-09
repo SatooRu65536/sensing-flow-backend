@@ -1,10 +1,10 @@
 import { MultipartUploadSchema } from '@/_schema';
 import { db } from '@/database/database.module';
-import { SensorUploadInsertT, sensorUploadStatusOptions } from '@/multipart-upload/multipart-upload.model';
+import { MultipartUploadInsertT, multipartUploadStatusOptions } from '@/multipart-upload/multipart-upload.model';
 
 interface Options {
   count?: number;
-  additional?: SensorUploadInsertT[];
+  additional?: MultipartUploadInsertT[];
 }
 export async function seedMultipartUploads(userIds: string[], options?: Options) {
   const count = (options?.count ?? 20) - (options?.additional?.length ?? 0);
@@ -19,9 +19,9 @@ export async function seedMultipartUploads(userIds: string[], options?: Options)
             partNumber: partIndex + 1,
             etag: `etag-${partIndex + 1}`,
           })),
-          dataName: `sensor-upload-${index + 1}`,
+          dataName: `multipart-upload-${index + 1}`,
           s3uploadId: `s3-upload-${userId}-${index + 1}`,
-          status: sensorUploadStatusOptions.at(index) ?? 'in_progress',
+          status: multipartUploadStatusOptions.at(index) ?? 'in_progress',
         })),
       ),
       ...(options?.additional ?? []),

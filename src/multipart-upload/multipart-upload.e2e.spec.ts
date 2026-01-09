@@ -29,7 +29,7 @@ describe('MultipartUpload', () => {
 
   beforeEach(async () => {
     const userIds = await seedUsers({ userIds: [userId] });
-    const s3key = s3service.getSensorUploadKey(userId, startedUploadId);
+    const s3key = s3service.getMultipartUploadKey(userId, startedUploadId);
     const { UploadId } = await s3service.createMultipartUpload(s3key);
     const { ETag } = await s3service.postMultipartUpload(
       s3key,

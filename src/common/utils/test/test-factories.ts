@@ -1,5 +1,5 @@
 import { UserPayload } from '@/auth/jwt.schema';
-import { SensorUploadRecordT } from '@/multipart-upload/multipart-upload.model';
+import { MultipartUploadRecordT } from '@/multipart-upload/multipart-upload.model';
 import { SensorDataRecordT } from '@/sensor-data/sensor-data.model';
 import { User } from '@/users/users.dto';
 
@@ -25,7 +25,7 @@ export function createUser(overrides?: Partial<User>): User {
   };
 }
 
-export function createSensorUpload(overrides?: Partial<SensorUploadRecordT>): SensorUploadRecordT {
+export function createMultipartUpload(overrides?: Partial<MultipartUploadRecordT>): MultipartUploadRecordT {
   return {
     id: '00000000-0000-0000-0000-000000000001',
     s3uploadId: 's3_upload_id_1',

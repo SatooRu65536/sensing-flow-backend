@@ -24,7 +24,7 @@ describe('SensorData', () => {
 
   beforeEach(async () => {
     const dataName = 'test-data';
-    const s3key = s3service.getSensorUploadKey(userId, dataName);
+    const s3key = s3service.getMultipartUploadKey(userId, dataName);
     await s3service.putObject(s3key, Buffer.from('this,is,a,test,csv,data'));
 
     await seedUsers({ userIds: [userId] });
