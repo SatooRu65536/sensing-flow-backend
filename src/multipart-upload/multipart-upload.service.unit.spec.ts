@@ -159,7 +159,7 @@ describe('MultipartUploadService', () => {
     });
   });
 
-  describe('postMultipartUpload', () => {
+  describe('uploadMultipartUpload', () => {
     it('マルチパートアップロードのパーツ情報を登録できる（初回）', async () => {
       const user = createUser();
       const etag = 'etag_example';
@@ -170,7 +170,11 @@ describe('MultipartUploadService', () => {
       vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(multipartUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
 
-      const result = await multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example');
+      const result = await multipartUploadService.uploadMultipartUpload(
+        user,
+        multipartUpload.id,
+        'csv,content,example',
+      );
 
       expect(result).toStrictEqual({ uploadId: multipartUpload.id, dataName: multipartUpload.dataName });
     });
@@ -189,7 +193,11 @@ describe('MultipartUploadService', () => {
       vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(multipartUpload);
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
 
-      const result = await multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example');
+      const result = await multipartUploadService.uploadMultipartUpload(
+        user,
+        multipartUpload.id,
+        'csv,content,example',
+      );
 
       expect(result).toStrictEqual({ uploadId: multipartUpload.id, dataName: multipartUpload.dataName });
       expect(vi.spyOn(s3Service, 'postMultipartUpload').mock.calls[0][2]).toBe(4); // partNumber が 4 になっていることを確認
@@ -200,7 +208,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(undefined);
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, 'nonexistent-upload-id', 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, 'nonexistent-upload-id', 'csv,content,example'),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -211,7 +219,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(multipartUpload);
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -222,7 +230,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(dbMock.query.MultipartUploadSchema, 'findFirst').mockResolvedValue(multipartUpload);
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -234,7 +242,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({} as UploadPartCommandOutput);
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
       ).rejects.toThrow(InternalServerErrorException);
     });
 
@@ -249,7 +257,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(s3Service, 'postMultipartUpload').mockResolvedValue({ ETag: etag } as UploadPartCommandOutput);
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -263,7 +271,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(dbMock, 'transaction').mockRejectedValue(new Error('Some transaction error'));
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
       ).rejects.toThrow(InternalServerErrorException);
     });
 
@@ -275,7 +283,7 @@ describe('MultipartUploadService', () => {
       vi.spyOn(s3Service, 'postMultipartUpload').mockRejectedValue(new Error('S3 upload error'));
 
       await expect(
-        multipartUploadService.postMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
+        multipartUploadService.uploadMultipartUpload(user, multipartUpload.id, 'csv,content,example'),
       ).rejects.toThrow(InternalServerErrorException);
     });
   });
