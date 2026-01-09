@@ -1,6 +1,6 @@
 import { UserPayload } from '@/auth/jwt.schema';
 import { SensorUploadRecordT } from '@/multipart-upload/multipart-upload.model';
-import { SensorDataRecord } from '@/sensor-data/sensor-data.model';
+import { SensorDataRecordT } from '@/sensor-data/sensor-data.model';
 import { User } from '@/users/users.dto';
 
 export function createUserPayload(overrides?: Partial<UserPayload>): UserPayload {
@@ -39,7 +39,7 @@ export function createSensorUpload(overrides?: Partial<SensorUploadRecordT>): Se
   };
 }
 
-export function createSensorData(overrides?: Partial<SensorDataRecord>): SensorDataRecord {
+export function createSensorData(overrides?: Partial<SensorDataRecordT>): SensorDataRecordT {
   return {
     id: '00000000-0000-0000-0000-000000000001',
     userId: 'user_id_1',

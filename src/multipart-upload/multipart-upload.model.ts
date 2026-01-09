@@ -1,11 +1,14 @@
 import { MultipartUploadSchema } from '@/_schema';
-import { createSelectSchema } from 'drizzle-zod';
+import { createSelectSchema, createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-const sensorUploadZodSchema = createSelectSchema(MultipartUploadSchema);
-export type SensorUploadRecordT = z.infer<typeof sensorUploadZodSchema>;
+export const sensorUploadInsertZodSchema = createInsertSchema(MultipartUploadSchema);
+export type SensorUploadInsertT = z.infer<typeof sensorUploadInsertZodSchema>;
 
-export const sensorUploadStatusEnumSchema = sensorUploadZodSchema.shape.status;
+export const sensorUploadSelectZodSchema = createSelectSchema(MultipartUploadSchema);
+export type SensorUploadRecordT = z.infer<typeof sensorUploadSelectZodSchema>;
+
+export const sensorUploadStatusEnumSchema = sensorUploadSelectZodSchema.shape.status;
 export const sensorUploadStatusOptions = sensorUploadStatusEnumSchema.options;
 export type SensorUploadStatusEnum = z.infer<typeof sensorUploadStatusEnumSchema>;
 
@@ -15,4 +18,4 @@ export const SensorUploadStatusEnum = {
   ABORTED: 'aborted',
 } as const satisfies Record<string, SensorUploadStatusEnum>;
 
-export type SensorUploadParts = z.infer<typeof sensorUploadZodSchema.shape.parts>;
+export type SensorUploadParts = z.infer<typeof sensorUploadSelectZodSchema.shape.parts>;

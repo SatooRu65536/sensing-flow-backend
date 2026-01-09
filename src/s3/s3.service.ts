@@ -4,6 +4,7 @@ import {
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
   GetObjectCommand,
+  PutObjectCommand,
   S3Client,
   UploadPartCommand,
 } from '@aws-sdk/client-s3';
@@ -42,6 +43,17 @@ export class S3Service {
         break;
     }
     this.bucketName = process.env.S3_BUCKET_NAME!;
+  }
+
+  async putObject(key: S3Key, body: Buffer) {
+    return await this.s3Client.send(
+      new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: body,
+        ContentType: 'text/csv',
+      }),
+    );
   }
 
   async createMultipartUpload(key: S3Key) {

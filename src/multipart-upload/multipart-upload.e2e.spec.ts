@@ -16,7 +16,7 @@ import {
 import { validate } from 'class-validator';
 import { S3Service } from '@/s3/s3.service';
 
-describe('MultipartUploadModule', () => {
+describe('MultipartUpload', () => {
   const userId = 'test-user-id';
   const s3service = new S3Service();
   const startedUploadId = 'test-upload-id';
@@ -53,8 +53,6 @@ describe('MultipartUploadModule', () => {
           dataName: `multipart-upload-started`,
           s3uploadId: UploadId!,
           status: 'in_progress',
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
       ],
     });
