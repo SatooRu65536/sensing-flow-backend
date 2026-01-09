@@ -2,6 +2,7 @@ import { Authed } from '@/common/decorators/auth.decorator';
 import { Body, Controller, Get, Param, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import {
   GetSensorDataPresignedUrlResponse,
+  GetSensorDataResponse,
   ListSensorDataResponse,
   UploadSensorDataRequest,
   UploadSensorDataResponse,
@@ -39,10 +40,17 @@ export class SensorDataController {
     @Body() body: UploadSensorDataRequest,
     @UploadedFile(CSVFilePipe(5, 'MB')) file: Express.Multer.File,
   ): Promise<UploadSensorDataResponse> {
-    return await this.sensorDataService.uploadSensorDataFile(user, body, file);
+    return this.sensorDataService.uploadSensorDataFile(user, body, file);
   }
 
   @Get(':id')
+  @ApiResponse({ type: GetSensorDataResponse })
+  @Permission('read:sensor_data')
+  async getSensorData(@Authed() user: User, @Param('id') id: string): Promise<GetSensorDataResponse> {
+    return this.sensorDataService.getSensorData(user, id);
+  }
+
+  @Get(':id/presigned-url')
   @ApiResponse({ type: GetSensorDataPresignedUrlResponse })
   @Permission('read:sensor_data')
   async getSensorDataPresignedUrl(

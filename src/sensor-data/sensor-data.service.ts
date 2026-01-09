@@ -1,6 +1,7 @@
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import {
   GetSensorDataPresignedUrlResponse,
+  GetSensorDataResponse,
   ListSensorDataResponse,
   SensorData,
   UploadSensorDataRequest,
@@ -74,6 +75,23 @@ export class SensorDataService {
 
     if (sensorDataRecord == undefined) {
       throw new InternalServerErrorException('Failed to retrieve saved sensor data');
+    }
+
+    return {
+      id: sensorDataRecord.id,
+      dataName: sensorDataRecord.dataName,
+      createdAt: sensorDataRecord.createdAt,
+      updatedAt: sensorDataRecord.updatedAt,
+    };
+  }
+
+  async getSensorData(user: User, id: string): Promise<GetSensorDataResponse> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
     }
 
     return {

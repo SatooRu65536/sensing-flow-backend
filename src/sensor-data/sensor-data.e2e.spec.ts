@@ -129,11 +129,11 @@ describe('SensorData', () => {
     });
   });
 
-  describe('GET /sensor-data/:id', () => {
+  describe('GET /sensor-data/:id/presigned-url', () => {
     it('[200] presigned URL 付きで取得できる', async () => {
       authGuard.setUser({ user: { id: userId } });
 
-      const res = await request(app.getHttpServer()).get(`/sensor-data/${sensorDataId}`);
+      const res = await request(app.getHttpServer()).get(`/sensor-data/${sensorDataId}/presigned-url`);
 
       expect(res.status).toBe(200);
 
@@ -148,7 +148,7 @@ describe('SensorData', () => {
     it('[404] 存在しないIDは取得できない', async () => {
       authGuard.setUser({ user: { id: userId } });
 
-      const res = await request(app.getHttpServer()).get('/sensor-data/invalid-sensor-data-id');
+      const res = await request(app.getHttpServer()).get('/sensor-data/invalid-sensor-data-id/presigned-url');
 
       expect(res.status).toBe(404);
     });
