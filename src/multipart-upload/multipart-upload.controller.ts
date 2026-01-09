@@ -14,7 +14,7 @@ import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
 import { CsvValidationPipe } from '@/common/pipes/csv-validation.pipe';
 
-@Controller('sensor-upload')
+@Controller('multipart-upload')
 export class MultipartUploadController {
   constructor(private readonly sensorUploadService: MultipartUploadService) {}
 

@@ -6,7 +6,7 @@ interface Options {
   count?: number;
   additional?: SensorUploadRecordT[];
 }
-export async function seedSensorUploads(userIds: string[], { count, additional }: Options) {
+export async function seedMultipartUploads(userIds: string[], { count, additional }: Options) {
   await db.insert(MultipartUploadSchema).values([
     ...userIds.flatMap((userId) =>
       Array.from({ length: count ?? 20 }).map((_, index) => ({
