@@ -9,7 +9,7 @@ import type { DbType } from '../database/database.module';
 import { CreateUserRequest, CreateUserResponse, GetPlanResponse, GetUserResponse, User } from './users.dto';
 import { UserSchema } from '@/_schema';
 import { eq } from 'drizzle-orm';
-import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
+import { ErrorCodeEnum, handleDrizzleError } from '@/common/utils/drizzle-error';
 import plansConfig from '@/plans.json';
 import { UserPayload } from '@/auth/jwt.schema';
 

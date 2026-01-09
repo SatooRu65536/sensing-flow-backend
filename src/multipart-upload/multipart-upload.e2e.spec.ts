@@ -3,7 +3,7 @@ import { App } from 'supertest/types';
 import { INestApplication } from '@nestjs/common';
 import { JwtAuthGuardMock } from '@/auth/jwt-auth.guard.mock';
 import { AppModuleMock } from '@/app.module.mock';
-import { createTestApp } from '@/utils/test/create-test-app';
+import { createTestApp } from '@/common/utils/test/create-test-app';
 import { seedUsers } from '@/_seed/users';
 import { seedSensorUploads } from '@/_seed/sensor-upload';
 import { plainToInstance } from 'class-transformer';

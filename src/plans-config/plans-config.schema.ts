@@ -1,7 +1,4 @@
-import { writeFileSync } from 'fs';
-import { resolve } from 'path';
 import z from 'zod';
-import permissionsConfig from '../permissions.json';
 import { createSelectSchema } from 'drizzle-zod';
 import { UserSchema } from '@/_schema';
 
@@ -93,60 +90,3 @@ export const plansConfigRawSchema = z.strictObject({
   ),
 });
 export type PlansConfigRaw = z.infer<typeof plansConfigRawSchema>;
-
-export function generatePermissionEnumSchema() {
-  const permissionGenPath = resolve(__dirname, '../../src/permissions.gen.ts');
-  const plansSchemaPath = resolve(__dirname, '../../src/plans.schema.json');
-
-  const permissionNames = Object.keys(permissionsConfig.permissions);
-
-  // Zod enum を生成
-  const content = `/* eslint-disable prettier/prettier */
-import z from 'zod';
-
-export const permissionEnumSchema = z.enum(${JSON.stringify(permissionNames)});
-export type PermissionEnum = z.infer<typeof permissionEnumSchema>;
-`;
-
-  const jsonSchemaTemplate = {
-    $schema: 'http://json-schema.org/draft-07/schema#',
-    type: 'object',
-    properties: {
-      plans: {
-        type: 'object',
-        propertyNames: {
-          enum: planEnumSchema.options,
-        },
-        additionalProperties: {
-          type: 'object',
-          properties: {
-            selectable: {
-              type: 'boolean',
-            },
-            permissions: {
-              type: 'object',
-              propertyNames: {
-                type: 'string',
-                enum: [...permissionNames, '*'],
-              },
-              additionalProperties: {
-                anyOf: [
-                  {
-                    type: 'string',
-                    pattern: '^(\\*|\\d+/(1?(sec|min|hour|day)|[2-9]\\d*(secs|mins|hours|days)))$',
-                  },
-                ],
-              },
-            },
-          },
-          required: ['selectable', 'permissions'],
-          additionalProperties: false,
-        },
-      },
-    },
-    required: ['plans'],
-    additionalProperties: false,
-  };
-  writeFileSync(permissionGenPath, content);
-  writeFileSync(plansSchemaPath, JSON.stringify(jsonSchemaTemplate, null, 2));
-}

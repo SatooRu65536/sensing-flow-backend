@@ -19,7 +19,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema, MultipartUploadSchema } from '@/_schema';
 import { v4 } from 'uuid';
 import { SensorUploadStatusEnum } from './multipart-upload.model';
-import { ErrorCodeEnum, handleDrizzleError } from '@/utils/drizzle-error';
+import { ErrorCodeEnum, handleDrizzleError } from '@/common/utils/drizzle-error';
 import { User } from '@/users/users.dto';
 
 @Injectable()

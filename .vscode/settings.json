@@ -20,15 +20,18 @@
   },
   "files.watcherExclude": {
     "**/permissions.gen.ts": true,
-    "**/plans.schema.json": true
+    "**/plans.schema.json": true,
+    "**/swagger.json": true
   },
   "search.exclude": {
     "**/permissions.gen.ts": true,
-    "**/plans.schema.json": true
+    "**/plans.schema.json": true,
+    "**/swagger.json": true
   },
   "files.readonlyInclude": {
     "**/permissions.gen.ts": true,
-    "**/plans.schema.json": true
+    "**/plans.schema.json": true,
+    "**/swagger.json": true
   },
   "json.schemas": [
     {

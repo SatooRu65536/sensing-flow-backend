@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createDbServiceMock, createS3ServiceMock, DbMock } from '@/utils/test/service-mocks';
+import { createDbServiceMock, createS3ServiceMock, DbMock } from '@/common/utils/test/service-mocks';
 import { SensorDataService } from './sensor-data.service';
-import { createSensorData, createUser } from '@/utils/test/test-factories';
+import { createSensorData, createUser } from '@/common/utils/test/test-factories';
 import { GetSensorDataPresignedUrlResponse, SensorData } from './sensor-data.dto';
 import { S3Service } from '@/s3/s3.service';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';

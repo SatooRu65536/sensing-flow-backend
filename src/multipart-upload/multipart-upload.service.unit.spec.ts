@@ -10,8 +10,8 @@ import {
 } from '@aws-sdk/client-s3';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
-import { DbMock, createDbServiceMock, createS3ServiceMock } from '@/utils/test/service-mocks';
-import { createSensorUpload, createUser } from '@/utils/test/test-factories';
+import { DbMock, createDbServiceMock, createS3ServiceMock } from '@/common/utils/test/service-mocks';
+import { createSensorUpload, createUser } from '@/common/utils/test/test-factories';
 
 describe('MultipartUploadService', () => {
   let multipartUploadService: MultipartUploadService;

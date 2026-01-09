@@ -1,0 +1,755 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getRoot",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/hello": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/plan": {
+      "get": {
+        "operationId": "UsersController_getPlan",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlanResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/sensor-upload": {
+      "get": {
+        "operationId": "MultipartUploadController_listSensorUploads",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMultipartUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "MultipartUpload"
+        ]
+      },
+      "post": {
+        "operationId": "MultipartUploadController_startSensorUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartMultipartUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartMultipartUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "MultipartUpload"
+        ]
+      }
+    },
+    "/sensor-upload/{uploadId}": {
+      "put": {
+        "operationId": "MultipartUploadController_postMultipartUpload",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "CSVデータ",
+          "content": {
+            "text/csv": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostMultipartUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "MultipartUpload"
+        ]
+      },
+      "patch": {
+        "operationId": "MultipartUploadController_completeSensorUpload",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostMultipartUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "MultipartUpload"
+        ]
+      },
+      "delete": {
+        "operationId": "MultipartUploadController_abortSensorUpload",
+        "parameters": [
+          {
+            "name": "uploadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbortMultipartUploadResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "MultipartUpload"
+        ]
+      }
+    },
+    "/sensor-data": {
+      "get": {
+        "operationId": "SensorDataController_listSensorData",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "path",
+            "description": "ページ番号",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "path",
+            "description": "1ページあたりの件数",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSensorDataResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      }
+    },
+    "/sensor-data/{id}": {
+      "get": {
+        "operationId": "SensorDataController_getSensorDataPresignedUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSensorDataPresignedUrlResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      }
+    },
+    "/rate-limit/test": {
+      "get": {
+        "operationId": "RateLimitController_testRateLimit",
+        "parameters": [],
+        "responses": {
+          "default": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "RateLimit"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Sensing Flow API",
+    "description": "API documentation for Sensing Flow",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "jwt": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "jwt",
+        "description": "Enter your JWT",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "CreateUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "ユーザー名"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "trial",
+              "basic",
+              "pro",
+              "admin",
+              "developer"
+            ],
+            "description": "プラン"
+          }
+        },
+        "required": [
+          "name",
+          "plan"
+        ]
+      },
+      "CreateUserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ユーザーID"
+          },
+          "name": {
+            "type": "string",
+            "description": "ユーザー名"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "trial",
+              "basic",
+              "pro",
+              "admin",
+              "developer"
+            ],
+            "description": "プラン"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "plan"
+        ]
+      },
+      "GetUserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ユーザーID"
+          },
+          "name": {
+            "type": "string",
+            "description": "ユーザー名"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "trial",
+              "basic",
+              "pro",
+              "admin",
+              "developer"
+            ],
+            "description": "プラン"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "登録日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "plan",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "GetPlanResponse": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "trial",
+              "basic",
+              "pro",
+              "admin",
+              "developer"
+            ],
+            "description": "プラン"
+          }
+        },
+        "required": [
+          "plan"
+        ]
+      },
+      "MultiPartUpload": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "センサデータのアップロードID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "status": {
+            "type": "string",
+            "description": "ステータス",
+            "enum": [
+              "in_progress",
+              "completed",
+              "aborted"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "uploadId",
+          "dataName",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ListMultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "sensorUploads": {
+            "description": "センサデータアップロード一覧",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MultiPartUpload"
+            }
+          }
+        },
+        "required": [
+          "sensorUploads"
+        ]
+      },
+      "StartMultipartUploadRequest": {
+        "type": "object",
+        "properties": {
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "dataName"
+        ]
+      },
+      "StartMultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "センサデータのアップロードID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "uploadId",
+          "dataName"
+        ]
+      },
+      "PostMultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "センサデータのアップロードID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "uploadId",
+          "dataName"
+        ]
+      },
+      "AbortMultipartUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "センサデータのアップロードID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "status": {
+            "type": "string",
+            "description": "ステータス",
+            "enum": [
+              "in_progress",
+              "completed",
+              "aborted"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "uploadId",
+          "dataName",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SensorData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ListSensorDataResponse": {
+        "type": "object",
+        "properties": {
+          "sensorData": {
+            "description": "センサデータ一覧",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SensorData"
+            }
+          }
+        },
+        "required": [
+          "sensorData"
+        ]
+      },
+      "GetSensorDataPresignedUrlResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          },
+          "presignedUrl": {
+            "type": "string",
+            "description": "presigned URL"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "createdAt",
+          "updatedAt",
+          "presignedUrl"
+        ]
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 {
   "include": [
     "src",
+    "scripts",
     "vite.config.ts",
   ],
   "exclude": [

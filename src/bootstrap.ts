@@ -2,8 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { LogLevel, ValidationPipe } from '@nestjs/common';
 import bodyParser from 'body-parser';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { generatePermissionEnumSchema } from './plans-config/plans-config.schema';
+import { generatePermissionEnumSchema } from '@/common/utils/generate-permission-enum-schema';
+import { generateSwaggerJson } from '@/common/utils/generate-swagger';
 
 export async function bootstrap() {
   const loggerLevels: LogLevel[] = ['warn', 'error', 'debug', 'log'];
@@ -27,29 +27,8 @@ export async function bootstrap() {
   nestApp.use(bodyParser.text({ type: 'text/csv', limit: '100mb' }));
 
   if (process.env.ENV === 'development') {
-    const config = new DocumentBuilder()
-      .setTitle('Sensing Flow API')
-      .setDescription('API documentation for Sensing Flow')
-      .setVersion('1.0')
-      .addBearerAuth(
-        {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          name: 'jwt',
-          description: 'Enter your JWT',
-          in: 'header',
-        },
-        'jwt',
-      )
-      .build();
-
-    const document = SwaggerModule.createDocument(nestApp, config);
-    SwaggerModule.setup('docs', nestApp, document);
-  }
-
-  if (process.env.ENV === 'development') {
-    generatePermissionEnumSchema();
+    generateSwaggerJson(nestApp, 'swagger.json');
+    generatePermissionEnumSchema('permissions.gen.ts', 'plans.schema.json');
   }
 
   await nestApp.init();

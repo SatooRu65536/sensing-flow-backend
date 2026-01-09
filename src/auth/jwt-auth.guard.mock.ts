@@ -4,7 +4,7 @@ import { IS_PUBLIC_KEY } from '../common/decorators/auth.decorator';
 import { USE_RAW_JWT_PAYLOAD } from '../common/decorators/before-register.decorator';
 import { User } from '@/users/users.dto';
 import { UserPayload } from './jwt.schema';
-import { createUser, createUserPayload } from '@/utils/test/test-factories';
+import { createUser, createUserPayload } from '@/common/utils/test/test-factories';
 
 interface JwtAuthGuardMockOverride {
   user: Partial<User>;

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { createDbServiceMock, DbMock } from '@/utils/test/service-mocks';
+import { createDbServiceMock, DbMock } from '@/common/utils/test/service-mocks';
 import { RateLimitService } from './rate-limit.service';
-import { createUser } from '@/utils/test/test-factories';
+import { createUser } from '@/common/utils/test/test-factories';
 import { InternalServerErrorException } from '@nestjs/common';
 
 describe('RateLimitService', () => {

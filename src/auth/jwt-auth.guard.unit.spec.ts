@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UsersService } from '@/users/users.service';
 import { MockInstance } from 'vitest';
-import { createContext, createReflectorMock, ReflectorMock } from '@/utils/test/execution-context';
-import { createDbServiceMock, DbMock } from '@/utils/test/service-mocks';
-import { createUser, createUserPayload } from '@/utils/test/test-factories';
+import { createContext, createReflectorMock, ReflectorMock } from '@/common/utils/test/execution-context';
+import { createDbServiceMock, DbMock } from '@/common/utils/test/service-mocks';
+import { createUser, createUserPayload } from '@/common/utils/test/test-factories';
 import { of } from 'rxjs';
 
 describe('JwtAuthGuard', () => {

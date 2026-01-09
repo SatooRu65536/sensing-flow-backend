@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { S3Service } from './s3.service';
-import { createS3ServiceMock } from '@/utils/test/service-mocks';
+import { createS3ServiceMock } from '@/common/utils/test/service-mocks';
 
 @Module({
   providers: [

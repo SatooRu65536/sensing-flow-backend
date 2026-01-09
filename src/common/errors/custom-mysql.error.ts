@@ -1,4 +1,4 @@
-import { ErrorCode } from '@/utils/drizzle-error';
+import { ErrorCode } from '@/common/utils/drizzle-error';
 
 /**
  * ユニットテスト用のMySQLエラー例外クラス

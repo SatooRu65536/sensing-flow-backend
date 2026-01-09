@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { JWTStrategy } from './jwt.strategy';
-import { createUserPayload } from '@/utils/test/test-factories';
+import { createUserPayload } from '@/common/utils/test/test-factories';
 
 describe('JWTStrategy', () => {
   const jwtIssuer = 'test-issuer';

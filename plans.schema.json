@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "plans": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "guest",
+          "trial",
+          "basic",
+          "pro",
+          "admin",
+          "developer"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "selectable": {
+            "type": "boolean"
+          },
+          "permissions": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "list:multipart_upload",
+                "post:multipart_upload",
+                "abort:multipart_upload",
+                "list:sensor_data",
+                "test:rate_limit",
+                "*"
+              ]
+            },
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(\\*|\\d+/(1?(sec|min|hour|day)|[2-9]\\d*(secs|mins|hours|days)))$"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "selectable",
+          "permissions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "plans"
+  ],
+  "additionalProperties": false
+}
