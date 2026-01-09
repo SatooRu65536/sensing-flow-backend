@@ -59,7 +59,7 @@ describe('SensorData', () => {
   });
 
   describe('GET /sensor-data', () => {
-    it('[200] 取得できる', async () => {
+    it('[200] 取得', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       // 1ページ目
@@ -72,7 +72,7 @@ describe('SensorData', () => {
       expect(errors.length).toBe(0);
     });
 
-    it('[200] ページングできる', async () => {
+    it('[200] ページング', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       // 1ページ目
@@ -104,7 +104,7 @@ describe('SensorData', () => {
       expect(instanceToPlain(dto3.sensorData)).toHaveLength(page3Count); // 3ページ目の件数
     });
 
-    it('[200] 件数指定できる', async () => {
+    it('[200] 件数指定', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       // 5件取得
@@ -160,7 +160,7 @@ describe('SensorData', () => {
       expect(dto.dataName).toBe(body.dataName);
     });
 
-    it('[400] ファイル未添付ではアップロードできない', async () => {
+    it('[400] ファイル未添付', async () => {
       const body: UploadSensorDataRequest = {
         dataName: 'uploaded-data',
       };
@@ -171,10 +171,42 @@ describe('SensorData', () => {
 
       expect(res.status).toBe(400);
     });
+
+    it('[400] センサデータ名未指定', async () => {
+      const fileBuffer = Buffer.from('col1,col2,col3\n1,2,3\n4,5,6');
+
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).post('/sensor-data').attach('file', fileBuffer, {
+        filename: 'test-upload.csv',
+        contentType: 'csv',
+      });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('[400] センサデータ名が空文字列', async () => {
+      const fileBuffer = Buffer.from('col1,col2,col3\n1,2,3\n4,5,6');
+      const body: UploadSensorDataRequest = {
+        dataName: '',
+      };
+
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer())
+        .post('/sensor-data')
+        .field('dataName', body.dataName)
+        .attach('file', fileBuffer, {
+          filename: 'test-upload.csv',
+          contentType: 'csv',
+        });
+
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('GET /sensor-data/:id', () => {
-    it('[200] 取得できる', async () => {
+    it('[200] 取得', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).get(`/sensor-data/${sensorDataId}`);
@@ -187,7 +219,7 @@ describe('SensorData', () => {
       expect(dto.id).toBe(sensorDataId);
     });
 
-    it('[404] 存在しないIDは取得できない', async () => {
+    it('[404] 存在しないID', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).get('/sensor-data/invalid-sensor-data-id');
@@ -197,7 +229,7 @@ describe('SensorData', () => {
   });
 
   describe('PATCH /sensor-data/:id', () => {
-    it('[200] 更新できる', async () => {
+    it('[200] 更新', async () => {
       const newDataName = 'updated-data-name';
 
       authGuard.setUser({ user: { id: userId } });
@@ -214,7 +246,7 @@ describe('SensorData', () => {
       expect(dto.dataName).toBe(newDataName);
     });
 
-    it('[404] 存在しないIDは更新できない', async () => {
+    it('[404] 存在しないID', async () => {
       const newDataName = 'updated-data-name';
 
       authGuard.setUser({ user: { id: userId } });
@@ -225,10 +257,22 @@ describe('SensorData', () => {
 
       expect(res.status).toBe(404);
     });
+
+    it('[400] センサデータ名が空文字列', async () => {
+      const newDataName = '';
+
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer())
+        .patch(`/sensor-data/${sensorDataId}`)
+        .send({ dataName: newDataName });
+
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('DELETE /sensor-data/:id', () => {
-    it('[204] 削除できる', async () => {
+    it('[204] 削除', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).delete(`/sensor-data/${sensorDataId}`);
@@ -236,7 +280,7 @@ describe('SensorData', () => {
       expect(res.status).toBe(200);
     });
 
-    it('[404] 存在しないIDは削除できない', async () => {
+    it('[404] 存在しないID', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).delete('/sensor-data/invalid-sensor-data-id');
@@ -246,7 +290,7 @@ describe('SensorData', () => {
   });
 
   describe('GET /sensor-data/:id/presigned-url', () => {
-    it('[200] presigned URL 付きで取得できる', async () => {
+    it('[200] 取得', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).get(`/sensor-data/${sensorDataId}/presigned-url`);
@@ -261,7 +305,7 @@ describe('SensorData', () => {
       expect(() => new URL(dto.presignedUrl)).not.toThrow(); // URL形式か
     });
 
-    it('[404] 存在しないIDは取得できない', async () => {
+    it('[404] 存在しないID', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).get('/sensor-data/invalid-sensor-data-id/presigned-url');

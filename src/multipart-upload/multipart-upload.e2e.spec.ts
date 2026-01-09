@@ -67,7 +67,7 @@ describe('MultipartUpload', () => {
   });
 
   describe('GET /multipart-upload', () => {
-    it('[200] 取得できる', async () => {
+    it('[200] 取得', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).get('/multipart-upload');
@@ -81,7 +81,7 @@ describe('MultipartUpload', () => {
   });
 
   describe('POST /multipart-upload', () => {
-    it('[201] 開始できる', async () => {
+    it('[201] 開始', async () => {
       const dataName = 'test-data';
       authGuard.setUser({ user: { id: userId } });
 
@@ -98,7 +98,7 @@ describe('MultipartUpload', () => {
       expect(instanceToPlain(dto)).toMatchObject({ dataName });
     });
 
-    it('[400] リクエストボディがない場合', async () => {
+    it('[400] リクエストボディがない', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).post('/multipart-upload');
@@ -106,7 +106,7 @@ describe('MultipartUpload', () => {
       expect(res.status).toBe(400);
     });
 
-    it('[400] リクエストボディが空の場合', async () => {
+    it('[400] リクエストボディが空', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).post('/multipart-upload').send({});
@@ -114,17 +114,25 @@ describe('MultipartUpload', () => {
       expect(res.status).toBe(400);
     });
 
-    it('[400] リクエストボディが誤りの場合', async () => {
+    it('[400] リクエストボディが誤り', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).post('/multipart-upload').send({ dataName: 123 });
 
       expect(res.status).toBe(400);
     });
+
+    it('[400] dataName が空文字列', async () => {
+      authGuard.setUser({ user: { id: userId } });
+
+      const res = await request(app.getHttpServer()).post('/multipart-upload').send({ dataName: '' });
+
+      expect(res.status).toBe(400);
+    });
   });
 
   describe('POST /multipart-upload/:uploadId', () => {
-    it('[200] アップロードできる', async () => {
+    it('[200] アップロード', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer())
@@ -143,7 +151,7 @@ describe('MultipartUpload', () => {
       });
     });
 
-    it('[400] Content-Type が CSV でない場合', async () => {
+    it('[400] Content-Type が CSV でない', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer())
@@ -154,7 +162,7 @@ describe('MultipartUpload', () => {
       expect(res.status).toBe(400);
     });
 
-    it('[400] リクエストボディが空の場合', async () => {
+    it('[400] リクエストボディが空', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer())
@@ -165,7 +173,7 @@ describe('MultipartUpload', () => {
       expect(res.status).toBe(400);
     });
 
-    it('[404] アップロードIDが存在しない場合', async () => {
+    it('[404] 存在しないID', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer())
@@ -178,7 +186,7 @@ describe('MultipartUpload', () => {
   });
 
   describe('PATCH /multipart-upload/:uploadId', () => {
-    it('[200] 完了できる', async () => {
+    it('[200] 完了', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).patch(`/multipart-upload/${startedUploadId}`);
@@ -194,7 +202,7 @@ describe('MultipartUpload', () => {
       });
     });
 
-    it('[404] アップロードIDが存在しない場合', async () => {
+    it('[404] 存在しないID', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).patch(`/multipart-upload/non-existent-upload-id`);
@@ -204,7 +212,7 @@ describe('MultipartUpload', () => {
   });
 
   describe('DELETE /multipart-upload/:uploadId', () => {
-    it('[200] 中止できる', async () => {
+    it('[200] 中止', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).delete(`/multipart-upload/${startedUploadId}`);
@@ -220,7 +228,7 @@ describe('MultipartUpload', () => {
       });
     });
 
-    it('[404] アップロードIDが存在しない場合', async () => {
+    it('[404] 存在しないID', async () => {
       authGuard.setUser({ user: { id: userId } });
 
       const res = await request(app.getHttpServer()).delete(`/multipart-upload/non-existent-upload-id`);
