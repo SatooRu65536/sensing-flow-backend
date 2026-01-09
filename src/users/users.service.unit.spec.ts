@@ -39,7 +39,7 @@ describe('UsersService', () => {
       vi.spyOn(dbMock, '$returningId').mockResolvedValue([{ id: response.id }]);
 
       const result = await usersService.createUser(userPayload, body);
-      expect(result).toEqual(response);
+      expect(result).toStrictEqual(response);
     });
 
     it('選択不可能なプランの場合、BadRequestExceptionを投げる', async () => {
@@ -79,14 +79,14 @@ describe('UsersService', () => {
         updatedAt: user.updatedAt,
       };
 
-      expect(usersService.getMe(user)).toEqual(response);
+      expect(usersService.getMe(user)).toStrictEqual(response);
     });
   });
 
   describe('getPlan', () => {
     it('プラン情報のみを返す', () => {
       const user = createUser({ plan: 'basic' });
-      expect(usersService.getPlan(user)).toEqual({ plan: 'basic' });
+      expect(usersService.getPlan(user)).toStrictEqual({ plan: 'basic' });
     });
   });
 
@@ -97,7 +97,7 @@ describe('UsersService', () => {
       vi.spyOn(dbMock.query.UserSchema, 'findFirst').mockResolvedValue(user);
 
       const result = await usersService.getUserBySub('sub_exist');
-      expect(result).toEqual(user);
+      expect(result).toStrictEqual(user);
     });
 
     it('ユーザーが見つからない場合、NotFoundExceptionを投げる', async () => {

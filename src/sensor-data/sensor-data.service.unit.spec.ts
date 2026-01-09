@@ -51,7 +51,7 @@ describe('SensorDataService', () => {
 
       const result = await sensorDataService.listSensorData(user, 1, 10);
       expect(result.sensorData).toHaveLength(sensorData.length);
-      expect(result.sensorData[0]).toEqual({
+      expect(result.sensorData[0]).toStrictEqual({
         id: sensorData[0].id,
         dataName: sensorData[0].dataName,
         createdAt: sensorData[0].createdAt,
@@ -78,7 +78,7 @@ describe('SensorDataService', () => {
       vi.spyOn(s3Service, 'getPresignedUrl').mockResolvedValue(presignedUrl);
 
       const result = await sensorDataService.getSensorDataPresignedUrl(user, sensorDataRecord.id);
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         id: sensorDataRecord.id,
         dataName: sensorDataRecord.dataName,
         createdAt: sensorDataRecord.createdAt,

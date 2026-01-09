@@ -59,7 +59,7 @@ describe('MultipartUploadService', () => {
 
       const result = await multipartUploadService.listSensorUploads(user);
       expect(result.sensorUploads).toHaveLength(sensorUploads.length);
-      expect(result.sensorUploads[0]).toEqual({
+      expect(result.sensorUploads[0]).toStrictEqual({
         uploadId: sensorUploads[0].id,
         dataName: sensorUploads[0].dataName,
         status: sensorUploads[0].status,
@@ -91,7 +91,7 @@ describe('MultipartUploadService', () => {
 
       const result = await multipartUploadService.startSensorUpload(user, { dataName });
 
-      expect(result).toEqual({ dataName, uploadId: uploadId });
+      expect(result).toStrictEqual({ dataName, uploadId: uploadId });
     });
 
     it('S3の uplloadId が取得できなかった場合、例外を投げる', async () => {
@@ -170,7 +170,7 @@ describe('MultipartUploadService', () => {
 
       const result = await multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example');
 
-      expect(result).toEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
+      expect(result).toStrictEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
     });
 
     it('マルチパートアップロードのパーツ情報を登録できる（複数回目）', async () => {
@@ -189,7 +189,7 @@ describe('MultipartUploadService', () => {
 
       const result = await multipartUploadService.postMultipartUpload(user, sensorUpload.id, 'csv,content,example');
 
-      expect(result).toEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
+      expect(result).toStrictEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
       expect(vi.spyOn(s3Service, 'postMultipartUpload').mock.calls[0][2]).toBe(4); // partNumber が 4 になっていることを確認
     });
 
@@ -288,7 +288,7 @@ describe('MultipartUploadService', () => {
 
       const result = await multipartUploadService.completeSensorUpload(user, sensorUpload.id);
 
-      expect(result).toEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
+      expect(result).toStrictEqual({ uploadId: sensorUpload.id, dataName: sensorUpload.dataName });
     });
 
     it('存在しないアップロードIDの場合、例外を投げる', async () => {
@@ -371,7 +371,7 @@ describe('MultipartUploadService', () => {
 
       const result = await multipartUploadService.abortSensorUpload(user, sensorUpload.id);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         uploadId: sensorUpload.id,
         dataName: sensorUpload.dataName,
       } satisfies AbortMultipartUploadResponse);

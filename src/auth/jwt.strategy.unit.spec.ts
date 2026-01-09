@@ -22,7 +22,7 @@ describe('JWTStrategy', () => {
     });
 
     const result = strategy.validate(validPayload);
-    expect(result).toEqual(validPayload);
+    expect(result).toStrictEqual(validPayload);
   });
 
   it('スキーマ検証に失敗した場合、BadRequestException を投げる', () => {
