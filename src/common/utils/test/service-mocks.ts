@@ -35,6 +35,8 @@ export type DbMock = ReturnType<typeof createDbServiceMock>;
 
 export function createS3ServiceMock(overrides: Record<string, any> = {}) {
   return {
+    putObject: vi.fn(),
+    deleteObject: vi.fn(),
     createMultipartUpload: vi.fn(),
     postMultipartUpload: vi.fn(),
     completeMultipartUpload: vi.fn(),

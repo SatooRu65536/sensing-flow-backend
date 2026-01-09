@@ -51,13 +51,18 @@ export class SensorDataService {
 
     try {
       await this.db.transaction(async (tx) => {
-        await this.s3Service.putObject(s3key, file.buffer);
         await tx.insert(SensorDataSchema).values({
           id: uploadId,
           userId: user.id,
           dataName: body.dataName,
           s3key,
         });
+        try {
+          await this.s3Service.putObject(s3key, file.buffer);
+        } catch (e) {
+          tx.rollback();
+          throw e;
+        }
       });
     } catch (e) {
       console.error(e);
