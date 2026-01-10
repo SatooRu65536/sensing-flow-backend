@@ -1,6 +1,6 @@
 import serverlessExpress from '@codegenie/serverless-express';
 import type { Callback, Context, Handler } from 'aws-lambda';
-import { bootstrap } from './bootstrap';
+import { bootstrap } from '../bootstrap';
 
 async function bootstrapServer(): Promise<Handler> {
   const app = await bootstrap();

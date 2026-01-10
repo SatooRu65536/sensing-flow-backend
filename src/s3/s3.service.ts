@@ -5,14 +5,18 @@ import {
   CreateMultipartUploadCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  ListMultipartUploadsCommand,
   PutObjectCommand,
   S3Client,
   UploadPartCommand,
 } from '@aws-sdk/client-s3';
-import { S3Key } from './s3.types';
+import { MultipartUploadIdentifier, S3Key } from './s3.types';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { MultipartUploadParts } from '@/multipart-upload/multipart-upload.model';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import pLimit from 'p-limit';
+
+const limit = pLimit(5);
 
 @Injectable()
 export class S3Service {
@@ -66,6 +70,14 @@ export class S3Service {
     );
   }
 
+  async listMultipartUpload() {
+    return await this.s3Client.send(
+      new ListMultipartUploadsCommand({
+        Bucket: this.bucketName,
+      }),
+    );
+  }
+
   async createMultipartUpload(key: S3Key) {
     return await this.s3Client.send(
       new CreateMultipartUploadCommand({
@@ -107,6 +119,33 @@ export class S3Service {
         UploadId: uploadId,
       }),
     );
+  }
+
+  async abortMultipartUploads(uploads: MultipartUploadIdentifier[]) {
+    const succeeded: MultipartUploadIdentifier[] = [];
+    const failed: MultipartUploadIdentifier[] = [];
+
+    const tasks = uploads.map((u) =>
+      limit(async () => {
+        try {
+          await this.s3Client.send(
+            new AbortMultipartUploadCommand({
+              Bucket: this.bucketName,
+              Key: u.key,
+              UploadId: u.uploadId,
+            }),
+          );
+          succeeded.push(u);
+        } catch (e) {
+          console.error('abort failed', u.key, e);
+          failed.push(u);
+        }
+      }),
+    );
+
+    await Promise.all(tasks);
+
+    return { succeeded, failed };
   }
 
   async getPresignedUrl(key: string, filename: string): Promise<string> {

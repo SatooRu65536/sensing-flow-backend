@@ -1,11 +1,14 @@
 import { esbuildDecorators } from '@anatine/esbuild-decorators';
 import { build, BuildOptions, SameShape } from 'esbuild';
 import { resolve } from 'path';
+import { globSync } from 'glob';
 
 async function main() {
+  const entryPoints = globSync(resolve(__dirname, 'src/handlers/*.ts'));
+
   const plugins = [esbuildDecorators({})];
   const options: SameShape<BuildOptions, BuildOptions> = {
-    entryPoints: [resolve(__dirname, 'src/handler.ts')],
+    entryPoints,
     bundle: true,
 
     outdir: resolve(__dirname, 'dist'),

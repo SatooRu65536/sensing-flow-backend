@@ -3,6 +3,8 @@
     "src",
     "scripts",
     "vite.config.ts",
+    "cdk",
+    "build.ts"
   ],
   "exclude": [
     "node_modules",

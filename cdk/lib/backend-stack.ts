@@ -38,25 +38,37 @@ export class BackendStack extends cdk.Stack {
     this.stage = stage;
     const vpc = this.createVpc();
 
-    const lambdaSecurityGroup = this.createSecurityGroup(vpc, 'lambda');
+    const nestFunctionSecurityGroup = this.createSecurityGroup(vpc, 'nest-function');
+    const s3CleanupFunctionSecurityGroup = this.createSecurityGroup(vpc, 's3-cleanup-function');
     const rdsSecurityGroup = this.createSecurityGroup(vpc, 'rds');
     const credentials = this.createRdsCredentials();
+
     const { bastiInstance, bastiAccessSecurityGroup } = this.createBastionInstance(vpc);
     const databaseInstance = this.createRdsInstance(vpc, [rdsSecurityGroup, bastiAccessSecurityGroup], credentials);
     const databaseUrl = this.createDatabaseUrl(credentials, databaseInstance);
-    const nestFunction = this.createNestFunction(vpc, lambdaSecurityGroup, databaseUrl);
+    const nestFunction = this.createNestFunction(vpc, nestFunctionSecurityGroup, databaseUrl);
+    const s3Bucket = this.createS3Bucket();
+    const s3CleanupFunction = this.createS3CleanupFunction(vpc, s3CleanupFunctionSecurityGroup, databaseUrl);
     const restApi = this.createRestApi(nestFunction);
     const userPool = this.createCognitoUserPool();
 
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
-    this.createS3Bucket();
+    this.cleanup(s3CleanupFunction);
 
     rdsSecurityGroup.addIngressRule(
-      lambdaSecurityGroup,
+      nestFunctionSecurityGroup,
       Port.tcp(3306),
       'Allow Lambda functions to access RDS instance on port 3306',
     );
+    rdsSecurityGroup.addIngressRule(
+      s3CleanupFunctionSecurityGroup,
+      Port.tcp(3306),
+      'Allow Lambda functions to access RDS instance on port 3306',
+    );
+
+    s3Bucket.grantReadWrite(nestFunction);
+    s3Bucket.grantReadWrite(s3CleanupFunction);
 
     bastiAccessSecurityGroup.allowBastiInstanceConnection(bastiInstance, Port.tcp(3306));
 
@@ -95,7 +107,7 @@ export class BackendStack extends cdk.Stack {
 
   private createNestFunction(vpc: Vpc, securityGroup: SecurityGroup, databaseUrl: string) {
     return new NodejsFunction(this, 'NestFunction', {
-      entry: path.join(__dirname, '../../dist/handler.mjs'), // Lambda関数のエントリーポイント
+      entry: path.join(__dirname, '../../dist/nest.handler.mjs'),
       handler: 'handler',
       runtime: Runtime.NODEJS_22_X,
       memorySize: 256,
@@ -109,6 +121,22 @@ export class BackendStack extends cdk.Stack {
         JWT_SECRET: process.env.JWT_SECRET!,
         JWT_ISSUER: process.env.JWT_ISSUER!,
         JWT_AUDIENCE: process.env.JWT_AUDIENCE!,
+      },
+    });
+  }
+
+  private createS3CleanupFunction(vpc: Vpc, securityGroup: SecurityGroup, databaseUrl: string) {
+    return new NodejsFunction(this, 'S3CleanupFunction', {
+      entry: path.join(__dirname, '../../dist/s3-cleanup.handler.mjs'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_22_X,
+      memorySize: 256,
+      timeout: Duration.minutes(2),
+      vpc: vpc,
+      securityGroups: [securityGroup],
+      environment: {
+        DATABASE_URL: databaseUrl,
+        S3_BUCKET_NAME: process.env.S3_BUCKET_NAME!,
       },
     });
   }
@@ -137,6 +165,18 @@ export class BackendStack extends cdk.Stack {
     rule.addTarget(
       new LambdaFunction(handler, {
         event: RuleTargetInput.fromObject({ source: 'warmer' }),
+      }),
+    );
+  }
+
+  private cleanup(handler: IFunction) {
+    const rule = new Rule(this, 'S3CleanupRule', {
+      schedule: Schedule.rate(Duration.hours(1)),
+    });
+
+    rule.addTarget(
+      new LambdaFunction(handler, {
+        event: RuleTargetInput.fromObject({ source: 's3-cleanup' }),
       }),
     );
   }
@@ -194,18 +234,13 @@ export class BackendStack extends cdk.Stack {
   }
 
   private createS3Bucket() {
-    new Bucket(this, 'SensingFlowBucket', {
+    return new Bucket(this, 'SensingFlowBucket', {
       bucketName: `sensing-flow-${this.stage}-${this.account}`,
       removalPolicy: this.stage !== 'prod' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
       autoDeleteObjects: this.stage !== 'prod',
       versioned: this.stage === 'prod',
       encryption: BucketEncryption.S3_MANAGED,
       enforceSSL: true,
-      lifecycleRules: [
-        {
-          abortIncompleteMultipartUploadAfter: Duration.days(1),
-        },
-      ],
     });
   }
 
