@@ -131,7 +131,7 @@ export class BackendStack extends cdk.Stack {
       handler: 'handler',
       runtime: Runtime.NODEJS_22_X,
       memorySize: 256,
-      timeout: Duration.minutes(2),
+      timeout: Duration.minutes(5),
       vpc: vpc,
       securityGroups: [securityGroup],
       environment: {
@@ -171,7 +171,7 @@ export class BackendStack extends cdk.Stack {
 
   private cleanup(handler: IFunction) {
     const rule = new Rule(this, 'S3CleanupRule', {
-      schedule: Schedule.rate(Duration.hours(1)),
+      schedule: Schedule.rate(Duration.days(1)),
     });
 
     rule.addTarget(
