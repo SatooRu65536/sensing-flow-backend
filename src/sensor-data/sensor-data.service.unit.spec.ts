@@ -11,7 +11,7 @@ import {
 import { S3Service } from '@/s3/s3.service';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DeleteObjectCommandOutput, PutObjectCommandOutput } from '@aws-sdk/client-s3';
-import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
+import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.error';
 
 describe('SensorDataService', () => {
   let sensorDataService: SensorDataService;

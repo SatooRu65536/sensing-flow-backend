@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserRequest, CreateUserResponse, GetUserResponse } from './users.dto';
-import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
+import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.error';
 import { createDbServiceMock, DbMock } from '@/common/utils/test/service-mocks';
 import { createUser, createUserPayload } from '@/common/utils/test/test-factories';
 

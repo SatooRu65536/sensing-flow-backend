@@ -9,7 +9,7 @@ import {
   UploadPartCommandOutput,
 } from '@aws-sdk/client-s3';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.srror';
+import { DrizzleDuplicateError } from '@/common/errors/drizzle-duplicate.error';
 import { DbMock, createDbServiceMock, createS3ServiceMock } from '@/common/utils/test/service-mocks';
 import { createMultipartUpload, createUser } from '@/common/utils/test/test-factories';
 

@@ -2,6 +2,7 @@ export const ErrorCodeEnum = {
   DUPLICATE_ENTRY: 'ER_DUP_ENTRY',
   ER_DBACCESS_DENIED_ERROR: 'ER_DBACCESS_DENIED_ERROR',
   UNKNOWN: 'UNKNOWN',
+  ER_DUP_ENTRY: 'ER_DUP_ENTRY',
 };
 export type ErrorCode = keyof typeof ErrorCodeEnum;
 export type ErrorCodeValue = (typeof ErrorCodeEnum)[ErrorCode];
