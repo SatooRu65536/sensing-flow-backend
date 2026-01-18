@@ -334,12 +334,12 @@
         ]
       },
       "post": {
-        "operationId": "SensorDataController_uploadSensorDataFile",
+        "operationId": "SensorDataController_uploadSensorDataFiles",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/UploadSensorDataRequest"
               }
@@ -347,15 +347,8 @@
           }
         },
         "responses": {
-          "default": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadSensorDataResponse"
-                }
-              }
-            }
+          "201": {
+            "description": ""
           }
         },
         "security": [
@@ -855,39 +848,16 @@
           "dataName": {
             "type": "string",
             "description": "センサデータ名"
-          }
-        },
-        "required": [
-          "dataName"
-        ]
-      },
-      "UploadSensorDataResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "センサデータID"
-          },
-          "dataName": {
-            "type": "string",
-            "description": "センサデータ名"
           },
           "createdAt": {
             "format": "date-time",
             "type": "string",
             "description": "作成日時"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "description": "更新日時"
           }
         },
         "required": [
-          "id",
           "dataName",
-          "createdAt",
-          "updatedAt"
+          "createdAt"
         ]
       },
       "GetSensorDataResponse": {

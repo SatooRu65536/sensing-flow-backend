@@ -14,8 +14,6 @@ import { SensorDataSchema } from '@/_schema';
 import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
 import { v4 } from 'uuid';
-import { handleDrizzleError } from '@/common/utils/drizzle-error';
-import { ErrorCodeEnum } from '@/common/errors/custom-drizzle.error';
 
 @Injectable()
 export class SensorDataService {
@@ -42,54 +40,43 @@ export class SensorDataService {
     return { sensorData };
   }
 
-  async uploadSensorDataFile(
+  async uploadSensorDataFiles(
     user: User,
     body: UploadSensorDataRequest,
-    file: Express.Multer.File,
-  ): Promise<UploadSensorDataResponse> {
-    const uploadId = v4();
-    const s3key = this.s3Service.getUploadS3Key(user.id, uploadId);
+    files: Array<Express.Multer.File>,
+  ): Promise<UploadSensorDataResponse[]> {
+    const results: UploadSensorDataResponse[] = [];
 
-    try {
-      await this.db.transaction(async (tx) => {
-        await tx.insert(SensorDataSchema).values({
-          id: uploadId,
-          userId: user.id,
-          dataName: body.dataName,
-          s3key,
-        });
+    await this.db.transaction(async (tx) => {
+      for (const file of files) {
+        const uploadId = v4();
+        const s3key = this.s3Service.getUploadS3Key(user.id, uploadId, file.originalname);
+
         try {
-          await this.s3Service.putObject(s3key, file.buffer);
-        } catch (e) {
-          tx.rollback();
-          throw e;
-        }
-      });
-    } catch (e) {
-      console.error(e);
-      const error = handleDrizzleError(e);
-      switch (error.code) {
-        case ErrorCodeEnum.DUPLICATE_ENTRY:
-          throw new InternalServerErrorException('Already existing upload ID');
-        default:
-          throw new InternalServerErrorException('Failed to save sensor data metadata');
-      }
-    }
+          await tx.insert(SensorDataSchema).values({
+            id: uploadId,
+            userId: user.id,
+            dataName: `${body.dataName}_${file.originalname}`,
+            s3key,
+          });
 
-    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
-      where: eq(SensorDataSchema.id, uploadId),
+          await this.s3Service.putObject(s3key, file.buffer);
+
+          results.push({
+            id: uploadId,
+            dataName: `${body.dataName}_${file.originalname}`,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+        } catch (e) {
+          console.error(`Failed to upload ${file.originalname}:`, e);
+          tx.rollback();
+          throw new InternalServerErrorException(`Failed to process file: ${file.originalname}`);
+        }
+      }
     });
 
-    if (sensorDataRecord == undefined) {
-      throw new InternalServerErrorException('Failed to retrieve saved sensor data');
-    }
-
-    return {
-      id: sensorDataRecord.id,
-      dataName: sensorDataRecord.dataName,
-      createdAt: sensorDataRecord.createdAt,
-      updatedAt: sensorDataRecord.updatedAt,
-    };
+    return results;
   }
 
   async getSensorData(user: User, id: string): Promise<GetSensorDataResponse> {

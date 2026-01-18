@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -21,11 +21,10 @@ import {
   UploadSensorDataResponse,
 } from './sensor-data.dto';
 import { SensorDataService } from './sensor-data.service';
-import { ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiConsumes, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { FilePipe } from '@/common/pipes/sensor-file.pipe';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('sensor-data')
 export class SensorDataController {
@@ -45,15 +44,15 @@ export class SensorDataController {
   }
 
   @Post()
-  @ApiResponse({ type: UploadSensorDataResponse })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
   @Permission('upload:sensor_data')
-  async uploadSensorDataFile(
+  async uploadSensorDataFiles(
     @Authed() user: User,
     @Body() body: UploadSensorDataRequest,
-    @UploadedFile(FilePipe(5, 'MB')) file: Express.Multer.File,
-  ): Promise<UploadSensorDataResponse> {
-    return this.sensorDataService.uploadSensorDataFile(user, body, file);
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ): Promise<UploadSensorDataResponse[]> {
+    return this.sensorDataService.uploadSensorDataFiles(user, body, files);
   }
 
   @Get(':id')

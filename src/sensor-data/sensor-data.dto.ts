@@ -36,6 +36,11 @@ export class UploadSensorDataRequest {
   @IsString()
   @IsNotEmpty()
   readonly dataName: string;
+
+  @ApiProperty({ description: '作成日時' })
+  @IsDate()
+  @Type(() => Date)
+  readonly createdAt: Date;
 }
 
 export class UploadSensorDataResponse extends SensorData {}

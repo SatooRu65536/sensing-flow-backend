@@ -165,11 +165,14 @@ export class S3Service {
    * Generate S3 key for multipart upload
    * @example sensor-data/{userId}/{YYYY-MM}/{uploadId}
    */
-  getUploadS3Key(userId: string, uploadId: string): S3Key {
+  getUploadS3Key(userId: string, uploadId: string, originalname?: string): S3Key {
     const now = new Date();
     const year = now.getUTCFullYear();
     const month = String(now.getUTCMonth() + 1).padStart(2, '0');
     const yearMonth = `${year}-${month}`;
+    if (originalname) {
+      return `sensor-data/${userId}/${yearMonth}/${uploadId}/${originalname}` as S3Key;
+    }
     return `sensor-data/${userId}/${yearMonth}/${uploadId}` as S3Key;
   }
 }
