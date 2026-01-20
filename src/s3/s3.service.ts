@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { FileName, FileS3Key, FolderS3Key, SensorDataId, UserId } from '@/types/brand';
+import { FileS3Key, FolderS3Key, SensorDataId, UserId } from '@/types/brand';
+import { SensorsEnum } from '@/sensor-data/sensor-data.schema';
 
 @Injectable()
 export class S3Service {
@@ -85,12 +86,12 @@ export class S3Service {
    * 個々のファイルを指すS3キーを生成する(S3操作用)
    * @example sensor-data/{userId}/{YYYY-MM}/{sensorDataId}/{filename}
    */
-  generateFileS3Key(userId: UserId, sensorDataId: SensorDataId, filename: FileName): FileS3Key {
+  generateFileS3Key(userId: UserId, sensorDataId: SensorDataId, filename: SensorsEnum): FileS3Key {
     const folderKey = this.generateFolderS3Key(userId, sensorDataId);
     return `${folderKey}${filename}` as FileS3Key;
   }
 
-  folderToFileS3Key(folderKey: FolderS3Key, filename: FileName): FileS3Key {
+  folderToFileS3Key(folderKey: FolderS3Key, filename: SensorsEnum): FileS3Key {
     return `${folderKey}${filename}` as FileS3Key;
   }
 

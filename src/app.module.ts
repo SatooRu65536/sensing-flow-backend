@@ -9,9 +9,10 @@ import { PermissionGuard } from './auth/permission.guard';
 import { S3Module } from './s3/s3.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
+import { SensorDataModule } from './sensor-data/sensor-data.module';
 
 @Module({
-  imports: [AuthModule, S3Module, DatabaseModule, UsersModule, RateLimitModule],
+  imports: [AuthModule, S3Module, DatabaseModule, UsersModule, RateLimitModule, SensorDataModule],
   controllers: [AppController],
   providers: [
     AppService,

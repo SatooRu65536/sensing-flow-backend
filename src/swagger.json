@@ -142,6 +142,35 @@
           "RateLimit"
         ]
       }
+    },
+    "/sensor-data": {
+      "post": {
+        "operationId": "SensorDataController_uploadSensorDataFiles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadSensorDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "207": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      }
     }
   },
   "info": {
@@ -279,6 +308,43 @@
         },
         "required": [
           "plan"
+        ]
+      },
+      "UploadSensorDataRequest": {
+        "type": "object",
+        "properties": {
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "activeSensors": {
+            "type": "string",
+            "description": "有効なセンサ",
+            "enum": [
+              "accelerometer",
+              "linear_acceleration",
+              "gyroscope",
+              "barometer",
+              "magnetometer",
+              "location",
+              "light"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          }
+        },
+        "required": [
+          "dataName",
+          "activeSensors",
+          "createdAt",
+          "id"
         ]
       }
     }

@@ -1,3 +1,4 @@
+import { SensorsEnum } from '@/sensor-data/sensor-data.schema';
 import {
   FolderS3Key,
   Permission,
@@ -8,9 +9,7 @@ import {
   UserName,
   UserSub,
 } from '@/types/brand';
-import { mysqlTable } from 'drizzle-orm/mysql-core';
-import { datetime } from 'drizzle-orm/mysql-core';
-import { varchar } from 'drizzle-orm/mysql-core';
+import { json, mysqlTable, varchar, datetime } from 'drizzle-orm/mysql-core';
 import { v4 } from 'uuid';
 
 const uuid = (key: string) =>
@@ -44,6 +43,7 @@ export const SensorDataSchema = mysqlTable('sensor_data', {
     .$type<UserId>(),
   dataName: varchar('data_name', { length: 255 }).notNull().$type<SensorDataName>(),
   folderS3Key: varchar('folder_s3_key', { length: 255 }).notNull().$type<FolderS3Key>(),
+  activeSensors: json('active_sensors').notNull().$type<SensorsEnum[]>(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });

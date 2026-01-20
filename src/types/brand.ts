@@ -26,6 +26,3 @@ export type RateLimitLogId = string & z.BRAND<'RateLimitLogId'>;
 
 export const permissionSchema = z.string().brand<'Permission'>();
 export type Permission = string & z.BRAND<'Permission'>;
-
-export const fileNameSchema = z.string().brand<'FileName'>();
-export type FileName = string & z.BRAND<'FileName'>;
