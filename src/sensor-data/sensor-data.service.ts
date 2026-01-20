@@ -2,12 +2,17 @@ import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { UploadSensorDataRequest, UploadSensorDataResponse } from './sensor-data.dto';
+import {
+  ListSensorDataResponse,
+  SensorData,
+  UploadSensorDataRequest,
+  UploadSensorDataResponse,
+} from './sensor-data.dto';
 import { v4 } from 'uuid';
 import pLimit from 'p-limit';
 import { sensorDataIdSchema } from '@/types/brand';
 import { SensorsEnum, sensorsEnumSchema } from './sensor-data.schema';
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { SensorDataSchema } from '@/_schema';
 import {
   UploadStatus,
@@ -24,6 +29,25 @@ export class SensorDataService {
     @Inject('DRIZZLE_DB') private db: DbType,
     private readonly s3Service: S3Service,
   ) {}
+
+  async listSensorData(user: User, page: number, perPage: number): Promise<ListSensorDataResponse> {
+    const sensorDataRecords = await this.db.query.SensorDataSchema.findMany({
+      where: eq(SensorDataSchema.userId, user.id),
+      limit: perPage,
+      offset: (page - 1) * perPage,
+      orderBy: desc(SensorDataSchema.createdAt),
+    });
+
+    const sensorData: SensorData[] = sensorDataRecords.map((r) => ({
+      id: r.id,
+      dataName: r.dataName,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      activeSensors: r.activeSensors,
+    }));
+
+    return { sensorData };
+  }
 
   async uploadSensorDataFiles(
     user: User,

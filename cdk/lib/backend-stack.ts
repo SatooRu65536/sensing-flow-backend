@@ -249,7 +249,7 @@ export class BackendStack extends cdk.Stack {
       selfSignUpEnabled: true,
       autoVerify: { email: true },
       standardAttributes: {
-        email: { required: true, mutable: false },
+        email: { required: true, mutable: true },
       },
       passwordPolicy: {
         minLength: 8,

@@ -1,7 +1,7 @@
 import type { SensorDataId, SensorDataName } from '@/types/brand';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { SensorsEnum, sensorsEnumSchema } from './sensor-data.schema';
 import { OmitType } from '@nestjs/swagger';
 
@@ -28,6 +28,14 @@ export class SensorData {
   @IsDate()
   @Type(() => Date)
   readonly updatedAt: Date;
+}
+
+export class ListSensorDataResponse {
+  @ApiProperty({ description: 'センサデータ一覧', type: SensorData, isArray: true })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SensorData)
+  readonly sensorData: SensorData[];
 }
 
 // createdAt はアプリ側での作成日時とするため必要
