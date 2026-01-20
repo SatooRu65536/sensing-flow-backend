@@ -21,11 +21,11 @@ import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema } from '@/_schema';
 import {
   UploadStatus,
-  UploadStatusAlreadyUploaded,
   UploadStatusInvalidType,
   UploadStatusSuccess,
   UploadStatusUploadFailed,
 } from './sensor-data.type';
+import path from 'path';
 
 const limit = pLimit(5);
 
@@ -75,7 +75,7 @@ export class SensorDataService {
     const results: UploadStatus[] = await Promise.all(
       files.map((file) =>
         limit(async () => {
-          const sensorResult = sensorsEnumSchema.safeParse(file.originalname);
+          const sensorResult = sensorsEnumSchema.safeParse(path.parse(file.originalname).name);
           if (!sensorResult.success) {
             return {
               success: false,
@@ -105,24 +105,17 @@ export class SensorDataService {
                 createdAt: body.createdAt,
               });
             } else {
-              // 既にアップロード済みのセンサーデータ
-              if (sensorDataRecord.activeSensors.includes(sensorData)) {
-                tx.rollback();
-                return {
-                  success: false,
-                  sensor: sensorData,
-                  fileS3Key: fileS3key,
-                  reason: 'Sensor data already uploaded',
-                } satisfies UploadStatusAlreadyUploaded;
+              // 既にアップロード済みのセンサーデータの場合はスキップ
+              if (!sensorDataRecord.activeSensors.includes(sensorData)) {
+                await tx
+                  .update(SensorDataSchema)
+                  .set({ activeSensors: [...sensorDataRecord.activeSensors, sensorData], dataName: body.dataName })
+                  .where(eq(SensorDataSchema.id, sensorDataId));
               }
-              // アクティブセンサを追加
-              await tx
-                .update(SensorDataSchema)
-                .set({ activeSensors: [...sensorDataRecord.activeSensors, sensorData], dataName: body.dataName })
-                .where(eq(SensorDataSchema.id, sensorDataId));
             }
 
             try {
+              // S3にアップロード(作成・上書き)
               await this.s3Service.putObject(fileS3key, file.buffer);
             } catch (e) {
               console.error(e);
