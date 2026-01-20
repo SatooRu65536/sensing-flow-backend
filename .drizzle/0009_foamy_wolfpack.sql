@@ -1,0 +1,1 @@
+DROP TABLE `multipart_uploads`;

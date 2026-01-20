@@ -10,9 +10,8 @@ import {
   S3Client,
   UploadPartCommand,
 } from '@aws-sdk/client-s3';
-import { MultipartUploadIdentifier, S3Key } from './s3.types';
+import { MultipartUploadIdentifier, MultipartUploadParts, S3Key } from './s3.types';
 import { fromIni } from '@aws-sdk/credential-providers';
-import { MultipartUploadParts } from '@/multipart-upload/multipart-upload.model';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import pLimit from 'p-limit';
 
@@ -106,7 +105,7 @@ export class S3Service {
         Bucket: this.bucketName,
         Key: key,
         UploadId: uploadId,
-        MultipartUpload: { Parts: parts.map(({ etag, partNumber }) => ({ PartNumber: partNumber, ETag: etag })) },
+        MultipartUpload: { Parts: parts },
       }),
     );
   }

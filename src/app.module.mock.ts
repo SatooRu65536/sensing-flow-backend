@@ -4,21 +4,11 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { MultipartUploadModule } from './multipart-upload/multipart-upload.module';
-import { SensorDataModule } from './sensor-data/sensor-data.module';
 import { RateLimitModule } from './rate-limit/rate-limit.module';
 import { S3Module } from './s3/s3.module';
 
 @Module({
-  imports: [
-    AuthModule,
-    S3Module,
-    DatabaseModule,
-    UsersModule,
-    MultipartUploadModule,
-    SensorDataModule,
-    RateLimitModule,
-  ],
+  imports: [AuthModule, S3Module, DatabaseModule, UsersModule, RateLimitModule],
   controllers: [AppController],
   providers: [AppService],
 })

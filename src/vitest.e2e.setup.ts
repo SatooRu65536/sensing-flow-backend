@@ -7,7 +7,6 @@ global.request = typedRequest;
 
 async function resetDb() {
   await db.delete(schema.SensorDataSchema);
-  await db.delete(schema.MultipartUploadSchema);
   await db.delete(schema.RateLimitLogSchema);
   await db.delete(schema.UserSchema);
 }

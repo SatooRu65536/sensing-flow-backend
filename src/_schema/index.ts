@@ -1,4 +1,4 @@
-import { json, mysqlTable } from 'drizzle-orm/mysql-core';
+import { mysqlTable } from 'drizzle-orm/mysql-core';
 import { datetime } from 'drizzle-orm/mysql-core';
 import { varchar } from 'drizzle-orm/mysql-core';
 import { v4 } from 'uuid';
@@ -22,19 +22,6 @@ export const UserSchema = mysqlTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   sub: varchar('sub', { length: 255 }).notNull().unique(),
   plan: varchar('plan', { enum: ['guest', 'trial', 'basic', 'pro', 'admin', 'developer'], length: 16 }).notNull(),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-});
-
-export const MultipartUploadSchema = mysqlTable('multipart_uploads', {
-  id: uuid('id').primaryKey(),
-  s3uploadId: varchar('s3_upload_id', { length: 255 }).notNull().unique(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => UserSchema.id),
-  dataName: varchar('data_name', { length: 255 }).notNull(),
-  parts: json('parts').$type<{ partNumber: number; etag: string }[]>().notNull().default([]),
-  status: varchar('status', { enum: ['in_progress', 'completed', 'aborted'], length: 16 }).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });

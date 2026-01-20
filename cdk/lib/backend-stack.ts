@@ -48,13 +48,11 @@ export class BackendStack extends cdk.Stack {
     const databaseUrl = this.createDatabaseUrl(credentials, databaseInstance);
     const nestFunction = this.createNestFunction(vpc, nestFunctionSecurityGroup, databaseUrl);
     const s3Bucket = this.createS3Bucket();
-    const s3CleanupFunction = this.createS3CleanupFunction(vpc, s3CleanupFunctionSecurityGroup, databaseUrl);
     const restApi = this.createRestApi(nestFunction);
     const userPool = this.createCognitoUserPool();
 
     this.addCustomDomain(restApi);
     this.warmer(nestFunction);
-    this.cleanup(s3CleanupFunction);
 
     rdsSecurityGroup.addIngressRule(
       nestFunctionSecurityGroup,
@@ -68,7 +66,6 @@ export class BackendStack extends cdk.Stack {
     );
 
     s3Bucket.grantReadWrite(nestFunction);
-    s3Bucket.grantReadWrite(s3CleanupFunction);
 
     bastiAccessSecurityGroup.allowBastiInstanceConnection(bastiInstance, Port.tcp(3306));
 
@@ -120,22 +117,6 @@ export class BackendStack extends cdk.Stack {
         S3_BUCKET_NAME: process.env.S3_BUCKET_NAME!,
         JWT_SECRET: process.env.JWT_SECRET!,
         JWT_ISSUER: process.env.JWT_ISSUER!,
-      },
-    });
-  }
-
-  private createS3CleanupFunction(vpc: Vpc, securityGroup: SecurityGroup, databaseUrl: string) {
-    return new NodejsFunction(this, 'S3CleanupFunction', {
-      entry: path.join(__dirname, '../../dist/s3-cleanup.handler.mjs'),
-      handler: 'handler',
-      runtime: Runtime.NODEJS_22_X,
-      memorySize: 256,
-      timeout: Duration.minutes(5),
-      vpc: vpc,
-      securityGroups: [securityGroup],
-      environment: {
-        DATABASE_URL: databaseUrl,
-        S3_BUCKET_NAME: process.env.S3_BUCKET_NAME!,
       },
     });
   }

@@ -5,3 +5,9 @@ export type MultipartUploadIdentifier = {
   key: S3Key;
   uploadId: string;
 };
+
+export interface MultipartUploadPart {
+  PartNumber: number;
+  ETag: string;
+}
+export type MultipartUploadParts = MultipartUploadPart[];
