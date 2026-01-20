@@ -2,7 +2,7 @@ import type { SensorDataId, SensorDataName } from '@/types/brand';
 import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { SensorsEnum, sensorsEnumSchema } from './sensor-data.schema';
+import { type SensorsEnum, sensorsEnumSchema } from './sensor-data.schema';
 import { OmitType } from '@nestjs/swagger';
 
 export class SensorData {
@@ -60,3 +60,21 @@ export class GetSensorDataResponse extends SensorData {}
 export class UpdateSensorDataResponse extends SensorData {}
 
 export class UpdateSensorDataRequest extends PickType(SensorData, ['dataName']) {}
+
+export class PresignedUrl {
+  @ApiProperty({ description: 'センサ名' })
+  @IsEnum(sensorsEnumSchema.options)
+  readonly sensor: SensorsEnum;
+
+  @ApiProperty({ description: 'presigned URL' })
+  @IsString()
+  readonly presignedUrl: string;
+}
+
+export class GetSensorDataPresignedUrlResponse extends SensorData {
+  @ApiProperty({ description: 'presigned URLs' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PresignedUrl)
+  readonly presignedUrls: PresignedUrl[];
+}

@@ -3,8 +3,10 @@ import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
 import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import {
+  GetSensorDataPresignedUrlResponse,
   GetSensorDataResponse,
   ListSensorDataResponse,
+  PresignedUrl,
   SensorData,
   UpdateSensorDataRequest,
   UpdateSensorDataResponse,
@@ -222,6 +224,41 @@ export class SensorDataService {
     } catch (e) {
       console.error(e);
       throw new InternalServerErrorException('Failed to delete sensor data');
+    }
+  }
+
+  async getSensorDataPresignedUrl(user: User, id: SensorDataId): Promise<GetSensorDataPresignedUrlResponse> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
+    }
+
+    try {
+      const presignedUrls: PresignedUrl[] = await Promise.all(
+        sensorDataRecord.activeSensors.map(async (sensor) => {
+          const fileS3Key = this.s3Service.folderToFileS3Key(sensorDataRecord.folderS3Key, sensor);
+          const url = await this.s3Service.getPresignedUrl(fileS3Key, sensor);
+          return {
+            sensor,
+            presignedUrl: url,
+          };
+        }),
+      );
+
+      return {
+        id: sensorDataRecord.id,
+        dataName: sensorDataRecord.dataName,
+        activeSensors: sensorDataRecord.activeSensors,
+        createdAt: sensorDataRecord.createdAt,
+        updatedAt: sensorDataRecord.updatedAt,
+        presignedUrls,
+      };
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException('Failed to get presigned URL');
     }
   }
 }

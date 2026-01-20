@@ -19,6 +19,7 @@ import { Authed } from '@/common/decorators/auth.decorator';
 import { User } from '@/users/users.dto';
 import { Permission } from '@/common/decorators/permission.decorator';
 import {
+  GetSensorDataPresignedUrlResponse,
   GetSensorDataResponse,
   ListSensorDataResponse,
   UpdateSensorDataRequest,
@@ -80,5 +81,15 @@ export class SensorDataController {
   @Permission('delete:sensor_data')
   async deleteSensorData(@Authed() user: User, @Param('id') id: SensorDataId): Promise<void> {
     return this.sensorDataService.deleteSensorData(user, id);
+  }
+
+  @Get(':id/presigned-url')
+  @ApiOkResponse({ type: GetSensorDataPresignedUrlResponse })
+  @Permission('read:sensor_data')
+  async getSensorDataPresignedUrl(
+    @Authed() user: User,
+    @Param('id') id: SensorDataId,
+  ): Promise<GetSensorDataPresignedUrlResponse> {
+    return this.sensorDataService.getSensorDataPresignedUrl(user, id);
   }
 }
