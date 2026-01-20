@@ -291,6 +291,32 @@
         "tags": [
           "SensorData"
         ]
+      },
+      "delete": {
+        "operationId": "SensorDataController_deleteSensorData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
       }
     }
   },

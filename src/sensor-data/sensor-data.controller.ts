@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -73,5 +74,11 @@ export class SensorDataController {
     @Body() body: UpdateSensorDataRequest,
   ): Promise<UpdateSensorDataResponse> {
     return this.sensorDataService.updateSensorData(user, id, body);
+  }
+
+  @Delete(':id')
+  @Permission('delete:sensor_data')
+  async deleteSensorData(@Authed() user: User, @Param('id') id: SensorDataId): Promise<void> {
+    return this.sensorDataService.deleteSensorData(user, id);
   }
 }

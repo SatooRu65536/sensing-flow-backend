@@ -198,4 +198,30 @@ export class SensorDataService {
       updatedAt: updatedRecord.updatedAt,
     };
   }
+
+  async deleteSensorData(user: User, id: SensorDataId): Promise<void> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
+    }
+
+    try {
+      await this.db
+        .delete(SensorDataSchema)
+        .where(and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)));
+
+      await Promise.all(
+        sensorDataRecord.activeSensors.map((sensor) => {
+          const fileS3Key = this.s3Service.folderToFileS3Key(sensorDataRecord.folderS3Key, sensor);
+          return this.s3Service.deleteObject(fileS3Key);
+        }),
+      );
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException('Failed to delete sensor data');
+    }
+  }
 }
