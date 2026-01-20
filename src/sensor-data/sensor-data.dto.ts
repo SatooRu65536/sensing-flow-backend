@@ -16,7 +16,7 @@ export class SensorData {
   readonly dataName: SensorDataName;
 
   @ApiProperty({ description: '有効なセンサ', enum: sensorsEnumSchema.options })
-  @IsEnum(sensorsEnumSchema.options)
+  @IsEnum(sensorsEnumSchema.options, { each: true })
   readonly activeSensors: SensorsEnum[];
 
   @ApiProperty({ description: '作成日時' })
@@ -39,7 +39,7 @@ export class ListSensorDataResponse {
 }
 
 // createdAt はアプリ側での作成日時とするため必要
-export class UploadSensorDataRequest extends OmitType(SensorData, ['id', 'activeSensors', 'updatedAt']) {
+export class UploadSensorDataRequest extends PickType(SensorData, ['dataName', 'createdAt']) {
   @ApiProperty({ description: 'センサデータID' })
   @IsString()
   @IsOptional()
@@ -48,7 +48,7 @@ export class UploadSensorDataRequest extends OmitType(SensorData, ['id', 'active
 
 export class UploadSensorDataResponse extends OmitType(SensorData, ['activeSensors']) {
   @ApiProperty({ description: 'アップロード成功したセンサ', enum: sensorsEnumSchema.options })
-  @IsEnum(sensorsEnumSchema.options)
+  @IsEnum(sensorsEnumSchema.options, { each: true })
   readonly uploadedSensors: SensorsEnum[];
 
   @ApiProperty({ description: 'アップロード失敗したセンサ' })
@@ -76,5 +76,5 @@ export class GetSensorDataPresignedUrlResponse extends SensorData {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PresignedUrl)
-  readonly presignedUrls: PresignedUrl[];
+  readonly urls: PresignedUrl[];
 }

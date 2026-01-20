@@ -245,7 +245,7 @@ export class SensorDataService {
     }
 
     try {
-      const presignedUrls: PresignedUrl[] = await Promise.all(
+      const urls: PresignedUrl[] = await Promise.all(
         sensorDataRecord.activeSensors.map(async (sensor) => {
           const fileS3Key = this.s3Service.folderToFileS3Key(sensorDataRecord.folderS3Key, sensor);
           const url = await this.s3Service.getPresignedUrl(fileS3Key, sensor);
@@ -262,7 +262,7 @@ export class SensorDataService {
         activeSensors: sensorDataRecord.activeSensors,
         createdAt: sensorDataRecord.createdAt,
         updatedAt: sensorDataRecord.updatedAt,
-        presignedUrls,
+        urls,
       };
     } catch (e) {
       console.error(e);

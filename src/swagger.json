@@ -705,7 +705,7 @@
             "type": "string",
             "description": "更新日時"
           },
-          "presignedUrls": {
+          "urls": {
             "description": "presigned URLs",
             "type": "array",
             "items": {
@@ -719,7 +719,7 @@
           "activeSensors",
           "createdAt",
           "updatedAt",
-          "presignedUrls"
+          "urls"
         ]
       }
     }

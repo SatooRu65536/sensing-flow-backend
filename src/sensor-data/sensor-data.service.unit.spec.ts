@@ -405,7 +405,7 @@ describe('SensorDataService', () => {
         createdAt: sensorDataRecord.createdAt,
         updatedAt: sensorDataRecord.updatedAt,
         activeSensors: sensorDataRecord.activeSensors,
-        presignedUrls: sensorDataRecord.activeSensors.map((sensor) => ({
+        urls: sensorDataRecord.activeSensors.map((sensor) => ({
           sensor,
           presignedUrl,
         })),
