@@ -1,11 +1,13 @@
 import type { DbType } from '@/database/database.module';
 import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import {
   GetSensorDataResponse,
   ListSensorDataResponse,
   SensorData,
+  UpdateSensorDataRequest,
+  UpdateSensorDataResponse,
   UploadSensorDataRequest,
   UploadSensorDataResponse,
 } from './sensor-data.dto';
@@ -159,6 +161,41 @@ export class SensorDataService {
       activeSensors: sensorDataRecord.activeSensors,
       createdAt: sensorDataRecord.createdAt,
       updatedAt: sensorDataRecord.updatedAt,
+    };
+  }
+
+  async updateSensorData(
+    user: User,
+    id: SensorDataId,
+    body: UpdateSensorDataRequest,
+  ): Promise<UpdateSensorDataResponse> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
+    }
+
+    await this.db
+      .update(SensorDataSchema)
+      .set(body)
+      .where(and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)));
+
+    const updatedRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (updatedRecord == undefined) {
+      throw new InternalServerErrorException('Failed to retrieve updated sensor data');
+    }
+
+    return {
+      id: updatedRecord.id,
+      dataName: updatedRecord.dataName,
+      activeSensors: updatedRecord.activeSensors,
+      createdAt: updatedRecord.createdAt,
+      updatedAt: updatedRecord.updatedAt,
     };
   }
 }

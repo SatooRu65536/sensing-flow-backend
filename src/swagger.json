@@ -248,6 +248,49 @@
         "tags": [
           "SensorData"
         ]
+      },
+      "patch": {
+        "operationId": "SensorDataController_updateSensorData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSensorDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSensorDataResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
       }
     }
   },
@@ -484,6 +527,61 @@
         ]
       },
       "GetSensorDataResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "activeSensors": {
+            "type": "string",
+            "description": "有効なセンサ",
+            "enum": [
+              "accelerometer",
+              "linear_acceleration",
+              "gyroscope",
+              "barometer",
+              "magnetometer",
+              "location",
+              "light"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "activeSensors",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateSensorDataRequest": {
+        "type": "object",
+        "properties": {
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          }
+        },
+        "required": [
+          "dataName"
+        ]
+      },
+      "UpdateSensorDataResponse": {
         "type": "object",
         "properties": {
           "id": {

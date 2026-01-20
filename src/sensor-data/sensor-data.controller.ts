@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   UploadedFiles,
@@ -19,6 +20,8 @@ import { Permission } from '@/common/decorators/permission.decorator';
 import {
   GetSensorDataResponse,
   ListSensorDataResponse,
+  UpdateSensorDataRequest,
+  UpdateSensorDataResponse,
   UploadSensorDataRequest,
   UploadSensorDataResponse,
 } from './sensor-data.dto';
@@ -59,5 +62,16 @@ export class SensorDataController {
   @Permission('read:sensor_data')
   async getSensorData(@Authed() user: User, @Param('id') id: SensorDataId): Promise<GetSensorDataResponse> {
     return this.sensorDataService.getSensorData(user, id);
+  }
+
+  @Patch(':id')
+  @ApiOkResponse({ type: UpdateSensorDataResponse })
+  @Permission('update:sensor_data')
+  async updateSensorData(
+    @Authed() user: User,
+    @Param('id') id: SensorDataId,
+    @Body() body: UpdateSensorDataRequest,
+  ): Promise<UpdateSensorDataResponse> {
+    return this.sensorDataService.updateSensorData(user, id, body);
   }
 }

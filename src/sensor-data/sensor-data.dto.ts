@@ -1,5 +1,5 @@
 import type { SensorDataId, SensorDataName } from '@/types/brand';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { SensorsEnum, sensorsEnumSchema } from './sensor-data.schema';
@@ -56,3 +56,7 @@ export class UploadSensorDataResponse extends OmitType(SensorData, ['activeSenso
 }
 
 export class GetSensorDataResponse extends SensorData {}
+
+export class UpdateSensorDataResponse extends SensorData {}
+
+export class UpdateSensorDataRequest extends PickType(SensorData, ['dataName']) {}
