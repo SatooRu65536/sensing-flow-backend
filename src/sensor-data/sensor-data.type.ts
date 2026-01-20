@@ -12,10 +12,20 @@ export interface UploadStatusAlreadyUploaded {
   fileS3Key: string;
   reason: 'Sensor data already uploaded';
 }
+export interface UploadStatusUploadFailed {
+  success: false;
+  sensor: string;
+  fileS3Key: string;
+  reason: 'Upload failed';
+}
 export interface UploadStatusSuccess {
   success: true;
   sensor: SensorsEnum;
   fileS3Key: string;
 }
 
-export type UploadStatus = UploadStatusInvalidType | UploadStatusAlreadyUploaded | UploadStatusSuccess;
+export type UploadStatus =
+  | UploadStatusInvalidType
+  | UploadStatusAlreadyUploaded
+  | UploadStatusUploadFailed
+  | UploadStatusSuccess;

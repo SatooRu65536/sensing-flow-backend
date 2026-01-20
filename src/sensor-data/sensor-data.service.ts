@@ -24,6 +24,7 @@ import {
   UploadStatusAlreadyUploaded,
   UploadStatusInvalidType,
   UploadStatusSuccess,
+  UploadStatusUploadFailed,
 } from './sensor-data.type';
 
 const limit = pLimit(5);
@@ -59,6 +60,15 @@ export class SensorDataService {
     body: UploadSensorDataRequest,
     files: Express.Multer.File[],
   ): Promise<UploadSensorDataResponse> {
+    if (body.id) {
+      const existingRecord = await this.db.query.SensorDataSchema.findFirst({
+        where: eq(SensorDataSchema.id, body.id),
+      });
+      if (existingRecord == undefined) {
+        throw new NotFoundException('Sensor data record not found');
+      }
+    }
+
     const sensorDataId = body.id ?? sensorDataIdSchema.parse(v4());
     const folderS3key = this.s3Service.generateFolderS3Key(user.id, sensorDataId);
 
@@ -114,9 +124,15 @@ export class SensorDataService {
 
             try {
               await this.s3Service.putObject(fileS3key, file.buffer);
-            } catch (error) {
+            } catch (e) {
+              console.error(e);
               tx.rollback();
-              throw error;
+              return {
+                success: false,
+                sensor: sensorData,
+                fileS3Key: fileS3key,
+                reason: 'Upload failed',
+              } satisfies UploadStatusUploadFailed;
             }
 
             return {
@@ -129,13 +145,12 @@ export class SensorDataService {
       ),
     );
 
-    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
-      where: eq(SensorDataSchema.id, sensorDataId),
-    });
-
     const uploadedSensors: SensorsEnum[] = results.filter((r) => r.success).map((r) => r.sensor);
     const failedSensors: string[] = results.filter((r) => !r.success).map((r) => r.sensor);
 
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: eq(SensorDataSchema.id, sensorDataId),
+    });
     if (sensorDataRecord == undefined) throw new NotFoundException('Sensor data record not found after upload');
 
     return {

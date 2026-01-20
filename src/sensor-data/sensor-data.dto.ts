@@ -39,7 +39,7 @@ export class ListSensorDataResponse {
 }
 
 // createdAt はアプリ側での作成日時とするため必要
-export class UploadSensorDataRequest extends OmitType(SensorData, ['id', 'updatedAt']) {
+export class UploadSensorDataRequest extends OmitType(SensorData, ['id', 'activeSensors', 'updatedAt']) {
   @ApiProperty({ description: 'センサデータID' })
   @IsString()
   @IsOptional()

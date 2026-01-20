@@ -557,19 +557,6 @@
             "type": "string",
             "description": "センサデータ名"
           },
-          "activeSensors": {
-            "type": "string",
-            "description": "有効なセンサ",
-            "enum": [
-              "accelerometer",
-              "linear_acceleration",
-              "gyroscope",
-              "barometer",
-              "magnetometer",
-              "location",
-              "light"
-            ]
-          },
           "createdAt": {
             "format": "date-time",
             "type": "string",
@@ -582,7 +569,6 @@
         },
         "required": [
           "dataName",
-          "activeSensors",
           "createdAt",
           "id"
         ]
