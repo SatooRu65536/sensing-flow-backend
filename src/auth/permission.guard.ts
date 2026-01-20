@@ -6,6 +6,7 @@ import { rateLimitStringSchema } from '@/plans-config/plans-config.schema';
 import { RateLimitService } from '@/rate-limit/rate-limit.service';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-request.exception';
 import { User } from '@/users/users.dto';
+import { Permission } from '@/types/brand';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
@@ -15,7 +16,7 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermission = this.reflector.get<string>(PERMISSION_KEY, context.getHandler());
+    const requiredPermission = this.reflector.get<Permission>(PERMISSION_KEY, context.getHandler());
     if (!requiredPermission) return true;
 
     const request = context.switchToHttp().getRequest<Request & { user: User }>();

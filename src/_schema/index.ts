@@ -1,3 +1,13 @@
+import {
+  FolderS3Key,
+  Permission,
+  RateLimitLogId,
+  SensorDataId,
+  SensorDataName,
+  UserId,
+  UserName,
+  UserSub,
+} from '@/types/brand';
 import { mysqlTable } from 'drizzle-orm/mysql-core';
 import { datetime } from 'drizzle-orm/mysql-core';
 import { varchar } from 'drizzle-orm/mysql-core';
@@ -18,30 +28,32 @@ const updatedAt = (key: string = 'updated_at') =>
     .$onUpdateFn(() => new Date());
 
 export const UserSchema = mysqlTable('users', {
-  id: uuid('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  sub: varchar('sub', { length: 255 }).notNull().unique(),
+  id: uuid('id').primaryKey().$type<UserId>(),
+  name: varchar('name', { length: 255 }).notNull().$type<UserName>(),
+  sub: varchar('sub', { length: 255 }).notNull().unique().$type<UserSub>(),
   plan: varchar('plan', { enum: ['guest', 'trial', 'basic', 'pro', 'admin', 'developer'], length: 16 }).notNull(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
 
 export const SensorDataSchema = mysqlTable('sensor_data', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().$type<SensorDataId>(),
   userId: uuid('user_id')
     .notNull()
-    .references(() => UserSchema.id),
-  dataName: varchar('data_name', { length: 255 }).notNull(),
-  s3key: varchar('s3_key', { length: 255 }).notNull(),
+    .references(() => UserSchema.id)
+    .$type<UserId>(),
+  dataName: varchar('data_name', { length: 255 }).notNull().$type<SensorDataName>(),
+  folderS3Key: varchar('folder_s3_key', { length: 255 }).notNull().$type<FolderS3Key>(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
 
 export const RateLimitLogSchema = mysqlTable('rate_limit_logs', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().$type<RateLimitLogId>(),
   userId: uuid('user_id')
     .notNull()
-    .references(() => UserSchema.id),
-  permission: varchar('permission', { length: 255 }).notNull(),
+    .references(() => UserSchema.id)
+    .$type<UserId>(),
+  permission: varchar('permission', { length: 255 }).notNull().$type<Permission>(),
   timestamp: datetime('timestamp', { mode: 'date' }).notNull(),
 });

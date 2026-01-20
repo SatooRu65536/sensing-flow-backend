@@ -1,4 +1,4 @@
-import { S3Key } from '@/s3/s3.types';
+import { FileS3Key, FolderS3Key } from '@/types/brand';
 
 export function createDbServiceMock(overrides: Record<string, any> = {}) {
   const dbMock = {
@@ -39,7 +39,10 @@ export function createS3ServiceMock(overrides: Record<string, any> = {}) {
     completeMultipartUpload: vi.fn(),
     abortMultipartUpload: vi.fn(),
     getPresignedUrl: vi.fn(),
-    getUploadS3Key: vi.fn().mockReturnValue('multipart/upload/key' as S3Key),
+    generateFolderS3Key: vi.fn().mockReturnValue('sensor-data/upload/key' as FolderS3Key),
+    generateFileS3Key: vi.fn().mockReturnValue('sensor-data/upload/key/file.csv' as FileS3Key),
+    folderToFileS3Key: vi.fn().mockReturnValue('sensor-data/upload/key/file.csv' as FileS3Key),
+    fileToFolderS3Key: vi.fn().mockReturnValue('sensor-data/upload/key' as FolderS3Key),
     ...overrides,
   };
 }

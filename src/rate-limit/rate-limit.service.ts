@@ -1,6 +1,7 @@
 import { RateLimitLogSchema } from '@/_schema';
 import type { DbType } from '@/database/database.module';
 import { RateLimit } from '@/plans-config/plans-config.schema';
+import { Permission } from '@/types/brand';
 import { User } from '@/users/users.dto';
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { and, count, eq, gte } from 'drizzle-orm';
@@ -13,7 +14,7 @@ export class RateLimitService {
     return 'Rate limit service is working';
   }
 
-  async checkRateLimit(user: User, permission: string, rateLimit: RateLimit): Promise<boolean> {
+  async checkRateLimit(user: User, permission: Permission, rateLimit: RateLimit): Promise<boolean> {
     if (rateLimit == undefined) return true;
 
     const limitTime = new Date(Date.now() - rateLimit.limitSec * 1000);
@@ -39,7 +40,7 @@ export class RateLimitService {
     return logCountRecord.count < rateLimit.count;
   }
 
-  async logRateLimit(user: User, permission: string): Promise<void> {
+  async logRateLimit(user: User, permission: Permission): Promise<void> {
     try {
       await this.db.insert(RateLimitLogSchema).values({
         userId: user.id,

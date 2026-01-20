@@ -1,0 +1,1 @@
+ALTER TABLE `sensor_data` RENAME COLUMN `s3_key` TO `folder_s3_key`;

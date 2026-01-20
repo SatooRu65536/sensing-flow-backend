@@ -1,4 +1,5 @@
 import { planEnumSchema, type PlanEnum } from '@/plans-config/plans-config.schema';
+import type { UserId, UserName, UserSub } from '@/types/brand';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsEnum, IsString } from 'class-validator';
@@ -6,7 +7,7 @@ import { IsDate, IsEnum, IsString } from 'class-validator';
 export class CreateUserRequest {
   @ApiProperty({ description: 'ユーザー名' })
   @IsString()
-  readonly name: string;
+  readonly name: UserName;
 
   @ApiProperty({ enum: planEnumSchema.options, description: 'プラン' })
   @IsEnum(planEnumSchema.options)
@@ -16,15 +17,15 @@ export class CreateUserRequest {
 export class User {
   @ApiProperty({ description: 'ユーザーID' })
   @IsString()
-  readonly id: string;
+  readonly id: UserId;
 
   @ApiProperty({ description: 'ユーザー名' })
   @IsString()
-  readonly name: string;
+  readonly name: UserName;
 
   @ApiProperty({ description: 'ユーザー識別子' })
   @IsString()
-  readonly sub: string;
+  readonly sub: UserSub;
 
   @ApiProperty({ enum: planEnumSchema.options, description: 'プラン' })
   @IsEnum(planEnumSchema.options)
@@ -44,11 +45,11 @@ export class User {
 export class CreateUserResponse {
   @ApiProperty({ description: 'ユーザーID' })
   @IsString()
-  readonly id: string;
+  readonly id: UserId;
 
   @ApiProperty({ description: 'ユーザー名' })
   @IsString()
-  readonly name: string;
+  readonly name: UserName;
 
   @ApiProperty({ enum: planEnumSchema.options, description: 'プラン' })
   @IsEnum(planEnumSchema.options)
@@ -58,11 +59,11 @@ export class CreateUserResponse {
 export class GetUserResponse {
   @ApiProperty({ description: 'ユーザーID' })
   @IsString()
-  readonly id: string;
+  readonly id: UserId;
 
   @ApiProperty({ description: 'ユーザー名' })
   @IsString()
-  readonly name: string;
+  readonly name: UserName;
 
   @ApiProperty({ enum: planEnumSchema.options, description: 'プラン' })
   @IsEnum(planEnumSchema.options)

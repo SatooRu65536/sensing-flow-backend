@@ -1,5 +1,6 @@
 import { UserSchema } from '@/_schema';
 import { db } from '@/database/database.module';
+import { userIdSchema, userNameSchema, userSubSchema } from '@/types/brand';
 
 interface Options {
   userIds: string[];
@@ -10,10 +11,10 @@ export async function seedUsers(options?: Options): Promise<string[]> {
       .insert(UserSchema)
       .values(
         options.userIds.map((userId, index) => ({
-          id: userId,
-          name: `user${index + 1}`,
+          id: userIdSchema.parse(userId),
+          name: userNameSchema.parse(`user${index + 1}`),
           plan: 'trial' as const,
-          sub: `test|${userId}`,
+          sub: userSubSchema.parse(`test|${userId}`),
         })),
       )
       .$returningId();
@@ -23,46 +24,46 @@ export async function seedUsers(options?: Options): Promise<string[]> {
       .insert(UserSchema)
       .values([
         {
-          id: 'user-guest',
-          name: 'taro',
+          id: userIdSchema.parse('user-guest'),
+          name: userNameSchema.parse('taro'),
           plan: 'guest',
-          sub: 'test|user-guest',
+          sub: userSubSchema.parse('test|user-guest'),
         },
         {
-          id: 'user-trial',
-          name: 'jiro',
+          id: userIdSchema.parse('user-trial'),
+          name: userNameSchema.parse('jiro'),
           plan: 'trial',
-          sub: 'test|user-trial',
+          sub: userSubSchema.parse('test|user-trial'),
         },
         {
-          id: 'user-basic',
-          name: 'saburo',
+          id: userIdSchema.parse('user-basic'),
+          name: userNameSchema.parse('saburo'),
           plan: 'basic',
-          sub: 'test|user-basic',
+          sub: userSubSchema.parse('test|user-basic'),
         },
         {
-          id: 'user-pro',
-          name: 'saburo',
+          id: userIdSchema.parse('user-pro'),
+          name: userNameSchema.parse('saburo'),
           plan: 'pro',
-          sub: 'test|user-pro',
+          sub: userSubSchema.parse('test|user-pro'),
         },
         {
-          id: 'user-pro',
-          name: 'saburo',
+          id: userIdSchema.parse('user-pro'),
+          name: userNameSchema.parse('saburo'),
           plan: 'pro',
-          sub: 'test|user-pro',
+          sub: userSubSchema.parse('test|user-pro'),
         },
         {
-          id: 'user-admin',
-          name: 'saburo',
+          id: userIdSchema.parse('user-admin'),
+          name: userNameSchema.parse('saburo'),
           plan: 'admin',
-          sub: 'test|user-admin',
+          sub: userSubSchema.parse('test|user-admin'),
         },
         {
-          id: 'user-developer',
-          name: 'admin',
+          id: userIdSchema.parse('user-developer'),
+          name: userNameSchema.parse('admin'),
           plan: 'developer',
-          sub: 'test|user-developer',
+          sub: userSubSchema.parse('test|user-developer'),
         },
       ])
       .$returningId();

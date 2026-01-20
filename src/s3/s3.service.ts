@@ -1,21 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AbortMultipartUploadCommand,
-  CompleteMultipartUploadCommand,
-  CreateMultipartUploadCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-  ListMultipartUploadsCommand,
-  PutObjectCommand,
-  S3Client,
-  UploadPartCommand,
-} from '@aws-sdk/client-s3';
-import { MultipartUploadIdentifier, MultipartUploadParts, S3Key } from './s3.types';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { fromIni } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import pLimit from 'p-limit';
-
-const limit = pLimit(5);
+import { FileName, FileS3Key, FolderS3Key, SensorDataId, UserId } from '@/types/brand';
 
 @Injectable()
 export class S3Service {
@@ -49,7 +36,7 @@ export class S3Service {
     this.bucketName = process.env.S3_BUCKET_NAME!;
   }
 
-  async putObject(key: S3Key, body: Buffer) {
+  async putObject(key: FileS3Key, body: Buffer) {
     return await this.s3Client.send(
       new PutObjectCommand({
         Bucket: this.bucketName,
@@ -69,84 +56,6 @@ export class S3Service {
     );
   }
 
-  async listMultipartUpload() {
-    return await this.s3Client.send(
-      new ListMultipartUploadsCommand({
-        Bucket: this.bucketName,
-      }),
-    );
-  }
-
-  async createMultipartUpload(key: S3Key) {
-    return await this.s3Client.send(
-      new CreateMultipartUploadCommand({
-        Bucket: this.bucketName,
-        Key: key,
-        ContentType: 'text/csv',
-      }),
-    );
-  }
-
-  async postMultipartUpload(key: S3Key, uploadId: string, partNumber: number, chunkBase64: string) {
-    return await this.s3Client.send(
-      new UploadPartCommand({
-        Bucket: this.bucketName,
-        Key: key,
-        UploadId: uploadId,
-        PartNumber: partNumber,
-        Body: Buffer.from(chunkBase64, 'base64'),
-      }),
-    );
-  }
-
-  async completeMultipartUpload(key: S3Key, uploadId: string, parts: MultipartUploadParts) {
-    return this.s3Client.send(
-      new CompleteMultipartUploadCommand({
-        Bucket: this.bucketName,
-        Key: key,
-        UploadId: uploadId,
-        MultipartUpload: { Parts: parts },
-      }),
-    );
-  }
-
-  async abortMultipartUpload(key: S3Key, uploadId: string) {
-    return await this.s3Client.send(
-      new AbortMultipartUploadCommand({
-        Bucket: this.bucketName,
-        Key: key,
-        UploadId: uploadId,
-      }),
-    );
-  }
-
-  async abortMultipartUploads(uploads: MultipartUploadIdentifier[]) {
-    const succeeded: MultipartUploadIdentifier[] = [];
-    const failed: MultipartUploadIdentifier[] = [];
-
-    const tasks = uploads.map((u) =>
-      limit(async () => {
-        try {
-          await this.s3Client.send(
-            new AbortMultipartUploadCommand({
-              Bucket: this.bucketName,
-              Key: u.key,
-              UploadId: u.uploadId,
-            }),
-          );
-          succeeded.push(u);
-        } catch (e) {
-          console.error('abort failed', u.key, e);
-          failed.push(u);
-        }
-      }),
-    );
-
-    await Promise.all(tasks);
-
-    return { succeeded, failed };
-  }
-
   async getPresignedUrl(key: string, filename: string): Promise<string> {
     return getSignedUrl(
       this.s3Client,
@@ -161,17 +70,33 @@ export class S3Service {
   }
 
   /**
-   * Generate S3 key for multipart upload
-   * @example sensor-data/{userId}/{YYYY-MM}/{uploadId}
+   * フォルダを指すS3キーを生成する(DB保存用)
+   * @example sensor-data/{userId}/{YYYY-MM}/{sensorDataId}/
    */
-  getUploadS3Key(userId: string, uploadId: string, originalname?: string): S3Key {
+  generateFolderS3Key(userId: UserId, sensorDataId: SensorDataId): FolderS3Key {
     const now = new Date();
     const year = now.getUTCFullYear();
     const month = String(now.getUTCMonth() + 1).padStart(2, '0');
     const yearMonth = `${year}-${month}`;
-    if (originalname) {
-      return `sensor-data/${userId}/${yearMonth}/${uploadId}/${originalname}` as S3Key;
-    }
-    return `sensor-data/${userId}/${yearMonth}/${uploadId}` as S3Key;
+    return `sensor-data/${userId}/${yearMonth}/${sensorDataId}/` as FolderS3Key;
+  }
+
+  /**
+   * 個々のファイルを指すS3キーを生成する(S3操作用)
+   * @example sensor-data/{userId}/{YYYY-MM}/{sensorDataId}/{filename}
+   */
+  generateFileS3Key(userId: UserId, sensorDataId: SensorDataId, filename: FileName): FileS3Key {
+    const folderKey = this.generateFolderS3Key(userId, sensorDataId);
+    return `${folderKey}${filename}` as FileS3Key;
+  }
+
+  folderToFileS3Key(folderKey: FolderS3Key, filename: FileName): FileS3Key {
+    return `${folderKey}${filename}` as FileS3Key;
+  }
+
+  fileToFolderS3Key(fileKey: FileS3Key): FolderS3Key {
+    const parts = fileKey.split('/');
+    parts.pop();
+    return (parts.join('/') + '/') as FolderS3Key;
   }
 }

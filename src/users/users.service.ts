@@ -13,6 +13,7 @@ import { handleDrizzleError } from '@/common/utils/drizzle-error';
 import { ErrorCodeEnum } from '@/common/errors/custom-drizzle.error';
 import plansConfig from '@/plans.json';
 import { UserPayload } from '@/auth/jwt.schema';
+import { UserSub } from '@/types/brand';
 
 @Injectable()
 export class UsersService {
@@ -71,7 +72,7 @@ export class UsersService {
     return { plan: user.plan };
   }
 
-  async getUserBySub(sub: string): Promise<User> {
+  async getUserBySub(sub: UserSub): Promise<User> {
     const userRecord = await this.db.query.UserSchema.findFirst({ where: eq(UserSchema.sub, sub) });
 
     if (userRecord == null) {

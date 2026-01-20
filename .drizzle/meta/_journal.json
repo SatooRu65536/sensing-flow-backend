@@ -71,6 +71,13 @@
       "when": 1768898384372,
       "tag": "0009_foamy_wolfpack",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1768899495206,
+      "tag": "0010_far_zombie",
+      "breakpoints": true
     }
   ]
 }
