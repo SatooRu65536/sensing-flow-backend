@@ -6,9 +6,7 @@ import { User } from '@/users/users.dto';
 export function createUserPayload(overrides?: Partial<UserPayload>): UserPayload {
   return {
     sub: 'sub_example',
-    aud: 'sensing-flow',
     iss: 'sensing-flow',
-    email: 'taro@example.com',
     ...overrides,
   };
 }

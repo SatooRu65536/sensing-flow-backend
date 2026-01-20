@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { RateLimitService } from './rate-limit.service';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 
 @Controller('rate-limit')
@@ -9,7 +9,7 @@ export class RateLimitController {
 
   @Get('/test')
   @Permission('test:rate_limit')
-  @ApiResponse({ type: String })
+  @ApiOkResponse({ type: String })
   testRateLimit(): string {
     return this.rateLimitService.testRateLimit();
   }

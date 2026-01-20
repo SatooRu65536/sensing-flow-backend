@@ -23,13 +23,8 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     }
 
     const expectedIssuer = process.env.JWT_ISSUER;
-    const expectedAudience = process.env.JWT_AUDIENCE;
 
     if (userPayload.data.iss !== expectedIssuer) {
-      throw new BadRequestException('Invalid JWT payload.');
-    }
-
-    if (userPayload.data.aud !== expectedAudience) {
       throw new BadRequestException('Invalid JWT payload.');
     }
 

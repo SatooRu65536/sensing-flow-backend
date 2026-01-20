@@ -9,7 +9,7 @@ import {
   StartMultipartUploadRequest,
   StartMultipartUploadResponse,
 } from './multipart-upload.dto';
-import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
 import { CsvValidationPipe } from '@/common/pipes/csv-validation.pipe';
@@ -19,7 +19,7 @@ export class MultipartUploadController {
   constructor(private readonly multipartUploadService: MultipartUploadService) {}
 
   @Get()
-  @ApiResponse({ type: ListMultipartUploadResponse })
+  @ApiOkResponse({ type: ListMultipartUploadResponse })
   @Permission('list:multipart_upload')
   async listMultipartUploads(@Authed() user: User): Promise<ListMultipartUploadResponse> {
     return this.multipartUploadService.listMultipartUploads(user);
@@ -27,7 +27,7 @@ export class MultipartUploadController {
 
   @Post()
   @ApiBody({ type: StartMultipartUploadRequest })
-  @ApiResponse({ type: StartMultipartUploadResponse })
+  @ApiOkResponse({ type: StartMultipartUploadResponse })
   @Permission('start:multipart_upload')
   async startMultipartUpload(
     @Authed() user: User,
@@ -39,7 +39,7 @@ export class MultipartUploadController {
   @Put(':uploadId')
   @ApiConsumes('text/csv')
   @ApiBody({ description: 'CSVデータ', type: String })
-  @ApiResponse({ type: PostMultipartUploadResponse })
+  @ApiOkResponse({ type: PostMultipartUploadResponse })
   @Permission('upload:multipart_upload')
   async uploadMultipartUpload(
     @Body(new CsvValidationPipe()) body: string,
@@ -50,7 +50,7 @@ export class MultipartUploadController {
   }
 
   @Patch(':uploadId')
-  @ApiResponse({ type: CompleteMultipartUploadResponse })
+  @ApiOkResponse({ type: CompleteMultipartUploadResponse })
   @Permission('complete:multipart_upload')
   async completeMultipartUpload(
     @Authed() user: User,
@@ -60,7 +60,7 @@ export class MultipartUploadController {
   }
 
   @Delete(':uploadId')
-  @ApiResponse({ type: AbortMultipartUploadResponse })
+  @ApiOkResponse({ type: AbortMultipartUploadResponse })
   @Permission('abort:multipart_upload')
   async abortMultipartUpload(
     @Authed() user: User,

@@ -21,7 +21,7 @@ import {
   UploadSensorDataResponse,
 } from './sensor-data.dto';
 import { SensorDataService } from './sensor-data.service';
-import { ApiConsumes, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiConsumes, ApiParam, ApiOkResponse } from '@nestjs/swagger';
 import { Permission } from '@/common/decorators/permission.decorator';
 import { User } from '@/users/users.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -31,7 +31,7 @@ export class SensorDataController {
   constructor(private readonly sensorDataService: SensorDataService) {}
 
   @Get()
-  @ApiResponse({ type: ListSensorDataResponse })
+  @ApiOkResponse({ type: ListSensorDataResponse })
   @ApiParam({ name: 'page', required: false, description: 'ページ番号' })
   @ApiParam({ name: 'perPage', required: false, description: '1ページあたりの件数' })
   @Permission('list:sensor_data')
@@ -56,14 +56,14 @@ export class SensorDataController {
   }
 
   @Get(':id')
-  @ApiResponse({ type: GetSensorDataResponse })
+  @ApiOkResponse({ type: GetSensorDataResponse })
   @Permission('read:sensor_data')
   async getSensorData(@Authed() user: User, @Param('id') id: string): Promise<GetSensorDataResponse> {
     return this.sensorDataService.getSensorData(user, id);
   }
 
   @Patch(':id')
-  @ApiResponse({ type: UpdateSensorDataResponse })
+  @ApiOkResponse({ type: UpdateSensorDataResponse })
   @Permission('update:sensor_data')
   async updateSensorData(
     @Authed() user: User,
@@ -80,7 +80,7 @@ export class SensorDataController {
   }
 
   @Get(':id/presigned-url')
-  @ApiResponse({ type: GetSensorDataPresignedUrlResponse })
+  @ApiOkResponse({ type: GetSensorDataPresignedUrlResponse })
   @Permission('read:sensor_data')
   async getSensorDataPresignedUrl(
     @Authed() user: User,

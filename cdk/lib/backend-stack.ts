@@ -120,7 +120,6 @@ export class BackendStack extends cdk.Stack {
         S3_BUCKET_NAME: process.env.S3_BUCKET_NAME!,
         JWT_SECRET: process.env.JWT_SECRET!,
         JWT_ISSUER: process.env.JWT_ISSUER!,
-        JWT_AUDIENCE: process.env.JWT_AUDIENCE!,
       },
     });
   }
