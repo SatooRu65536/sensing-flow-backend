@@ -78,6 +78,13 @@
       "when": 1768899495206,
       "tag": "0010_far_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1768937077440,
+      "tag": "0011_short_tinkerer",
+      "breakpoints": true
     }
   ]
 }

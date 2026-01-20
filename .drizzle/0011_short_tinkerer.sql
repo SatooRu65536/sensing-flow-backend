@@ -1,0 +1,1 @@
+ALTER TABLE `sensor_data` ADD `active_sensors` json NOT NULL;
