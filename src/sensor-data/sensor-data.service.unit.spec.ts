@@ -114,8 +114,10 @@ describe('SensorDataService', () => {
       vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst')
         .mockResolvedValueOnce(sensorDataRecord)
         .mockResolvedValueOnce(sensorDataRecord)
-        .mockResolvedValue({ activeSensors: [...sensorDataRecord.activeSensors, files[0].originalname] })
-        .mockResolvedValue(sensorDataRecord);
+        .mockResolvedValue({
+          ...sensorDataRecord,
+          activeSensors: [...sensorDataRecord.activeSensors, files[0].originalname],
+        });
 
       const result = await sensorDataService.uploadSensorDataFiles(user, body, files);
       expect(result).toStrictEqual({
@@ -166,20 +168,21 @@ describe('SensorDataService', () => {
       } satisfies UploadSensorDataResponse);
     });
 
-    it('同じファイル名が複数含まれている場合、failedSensorsに含まれる', async () => {
+    it('アップロード済みのセンサファイルが含まれている場合，上書きする', async () => {
       const user = createUser();
       const sensorDataRecord = createSensorData({
         userId: user.id,
       });
       const body: UploadSensorDataRequest = {
+        id: sensorDataIdSchema.parse(sensorDataRecord.id),
         dataName: sensorDataNameSchema.parse('Uploaded Sensor Data'),
         createdAt: new Date(),
       };
-      const files = [makeFile('accelerometer'), makeFile('accelerometer')];
+      const files = [makeFile('accelerometer')];
 
       vi.spyOn(dbMock.query.SensorDataSchema, 'findFirst')
-        .mockResolvedValueOnce(undefined)
-        .mockResolvedValue({ activeSensors: [files[0].originalname] })
+        .mockResolvedValueOnce(sensorDataRecord)
+        .mockResolvedValueOnce({ activeSensors: [files[0].originalname] })
         .mockResolvedValue({
           ...sensorDataRecord,
           activeSensors: [files[0].originalname],
@@ -192,7 +195,7 @@ describe('SensorDataService', () => {
         createdAt: sensorDataRecord.createdAt,
         updatedAt: sensorDataRecord.updatedAt,
         uploadedSensors: [files[0].originalname as SensorsEnum],
-        failedSensors: [files[1].originalname],
+        failedSensors: [],
       } satisfies UploadSensorDataResponse);
     });
 
