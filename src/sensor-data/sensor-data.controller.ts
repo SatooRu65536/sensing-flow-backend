@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   UploadedFiles,
@@ -15,7 +16,13 @@ import { ApiConsumes, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import { Authed } from '@/common/decorators/auth.decorator';
 import { User } from '@/users/users.dto';
 import { Permission } from '@/common/decorators/permission.decorator';
-import { ListSensorDataResponse, UploadSensorDataRequest, UploadSensorDataResponse } from './sensor-data.dto';
+import {
+  GetSensorDataResponse,
+  ListSensorDataResponse,
+  UploadSensorDataRequest,
+  UploadSensorDataResponse,
+} from './sensor-data.dto';
+import type { SensorDataId } from '@/types/brand';
 
 @Controller('sensor-data')
 export class SensorDataController {
@@ -45,5 +52,12 @@ export class SensorDataController {
     @UploadedFiles() files: Array<Express.Multer.File>,
   ): Promise<UploadSensorDataResponse> {
     return this.sensorDataService.uploadSensorDataFiles(user, body, files);
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ type: GetSensorDataResponse })
+  @Permission('read:sensor_data')
+  async getSensorData(@Authed() user: User, @Param('id') id: SensorDataId): Promise<GetSensorDataResponse> {
+    return this.sensorDataService.getSensorData(user, id);
   }
 }

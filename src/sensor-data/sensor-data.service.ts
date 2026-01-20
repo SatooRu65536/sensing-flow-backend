@@ -3,6 +3,7 @@ import { S3Service } from '@/s3/s3.service';
 import { User } from '@/users/users.dto';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  GetSensorDataResponse,
   ListSensorDataResponse,
   SensorData,
   UploadSensorDataRequest,
@@ -10,9 +11,9 @@ import {
 } from './sensor-data.dto';
 import { v4 } from 'uuid';
 import pLimit from 'p-limit';
-import { sensorDataIdSchema } from '@/types/brand';
+import { SensorDataId, sensorDataIdSchema } from '@/types/brand';
 import { SensorsEnum, sensorsEnumSchema } from './sensor-data.schema';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { SensorDataSchema } from '@/_schema';
 import {
   UploadStatus,
@@ -138,6 +139,24 @@ export class SensorDataService {
       dataName: sensorDataRecord.dataName,
       uploadedSensors,
       failedSensors,
+      createdAt: sensorDataRecord.createdAt,
+      updatedAt: sensorDataRecord.updatedAt,
+    };
+  }
+
+  async getSensorData(user: User, id: SensorDataId): Promise<GetSensorDataResponse> {
+    const sensorDataRecord = await this.db.query.SensorDataSchema.findFirst({
+      where: and(eq(SensorDataSchema.id, id), eq(SensorDataSchema.userId, user.id)),
+    });
+
+    if (sensorDataRecord == undefined) {
+      throw new NotFoundException('Sensor data not found');
+    }
+
+    return {
+      id: sensorDataRecord.id,
+      dataName: sensorDataRecord.dataName,
+      activeSensors: sensorDataRecord.activeSensors,
       createdAt: sensorDataRecord.createdAt,
       updatedAt: sensorDataRecord.updatedAt,
     };

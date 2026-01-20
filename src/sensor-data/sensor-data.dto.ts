@@ -54,3 +54,5 @@ export class UploadSensorDataResponse extends OmitType(SensorData, ['activeSenso
   @ApiProperty({ description: 'アップロード失敗したセンサ' })
   readonly failedSensors: string[];
 }
+
+export class GetSensorDataResponse extends SensorData {}

@@ -214,6 +214,41 @@
           "SensorData"
         ]
       }
+    },
+    "/sensor-data/{id}": {
+      "get": {
+        "operationId": "SensorDataController_getSensorData",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSensorDataResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": [
+          "SensorData"
+        ]
+      }
     }
   },
   "info": {
@@ -446,6 +481,49 @@
           "activeSensors",
           "createdAt",
           "id"
+        ]
+      },
+      "GetSensorDataResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "センサデータID"
+          },
+          "dataName": {
+            "type": "string",
+            "description": "センサデータ名"
+          },
+          "activeSensors": {
+            "type": "string",
+            "description": "有効なセンサ",
+            "enum": [
+              "accelerometer",
+              "linear_acceleration",
+              "gyroscope",
+              "barometer",
+              "magnetometer",
+              "location",
+              "light"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "作成日時"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "更新日時"
+          }
+        },
+        "required": [
+          "id",
+          "dataName",
+          "activeSensors",
+          "createdAt",
+          "updatedAt"
         ]
       }
     }
