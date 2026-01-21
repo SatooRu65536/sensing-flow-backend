@@ -48,7 +48,7 @@ export class S3Service {
     );
   }
 
-  async deleteObject(key: string) {
+  async deleteObject(key: FileS3Key) {
     return await this.s3Client.send(
       new DeleteObjectCommand({
         Bucket: this.bucketName,
@@ -57,7 +57,7 @@ export class S3Service {
     );
   }
 
-  async getPresignedUrl(key: string, filename: string): Promise<string> {
+  async getPresignedUrl(key: FileS3Key, filename: SensorsEnum): Promise<string> {
     return getSignedUrl(
       this.s3Client,
       new GetObjectCommand({
